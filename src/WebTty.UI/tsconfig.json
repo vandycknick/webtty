@@ -1,0 +1,12 @@
+{
+    "extends": "@nvd/tsconfig",
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "declaration": false,
+        "jsx": "react",
+        "jsxFactory": "h",
+        "outDir": "./dist/",
+        "module": "commonjs",
+        "target": "es5"
+    }
+}

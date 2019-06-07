@@ -1,0 +1,38 @@
+<Project>
+
+  <Import Project="Version.props" />
+
+  <PropertyGroup>
+    <Authors>Nick Van Dyck</Authors>
+    <Product>webtty</Product>
+    <Description>TODO add something here</Description>
+    <Copyright>Copyright © Nick Van Dyck</Copyright>
+    <NeutralLanguage>en-UK</NeutralLanguage>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/nickvdyck/git-browse</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nickvdyck/git-browse.git</RepositoryUrl>
+    <PackageReleaseNotes>See $(PackageProjectUrl)/blob/master/CHANGELOG.md for release notes.</PackageReleaseNotes>
+    <RepositoryType>git</RepositoryType>
+    <IsPackable>false</IsPackable>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <LangVersion>Latest</LangVersion>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateFullPaths Condition="'$(VSCODE_CWD)' != ''">true</GenerateFullPaths>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory).build\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory).build\bin\$(MSBuildProjectName)\</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+    <OSDescription>$([System.Runtime.InteropServices.RuntimeInformation]::OSDescription)</OSDescription>
+    <IsWSL Condition="'$(IsLinux)' == 'true' and $(OSDescription.Contains('Microsoft'))">true</IsWSL>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsWSL)' == 'true'">
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory).build/obj/unix/$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory).build/bin/unix/$(MSBuildProjectName)</BaseOutputPath>
+  </PropertyGroup>
+
+</Project>

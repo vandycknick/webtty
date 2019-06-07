@@ -1,0 +1,34 @@
+{
+  "name": "WebTty.UI",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "clean": "del-cli dist",
+    "build": "webpack --mode=production",
+    "watch": "webpack-dev-server"
+  },
+  "dependencies": {
+    "buffer": "^5.2.1",
+    "msgpack5": "^4.2.1",
+    "preact": "10.0.0-beta.2",
+    "xterm": "3.14.2",
+    "xterm-addon-fit": "^0.1.0-beta2"
+  },
+  "devDependencies": {
+    "@nvd/tsconfig": "^1.0.0",
+    "@types/msgpack5": "^3.4.1",
+    "css-loader": "^2.1.1",
+    "del-cli": "^2.0.0",
+    "html-webpack-inline-source-plugin": "^0.0.10",
+    "html-webpack-plugin": "^3.2.0",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^6.0.2",
+    "typescript": "^3.5.1",
+    "webpack": "^4.33.0",
+    "webpack-bundle-analyzer": "^3.3.2",
+    "webpack-cli": "^3.3.2",
+    "webpack-dev-server": "^3.7.0",
+    "webpack-modules": "^1.0.0"
+  }
+}
