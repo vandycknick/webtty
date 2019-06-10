@@ -27,8 +27,6 @@ namespace WebTty
             _options = options.Value;
         }
 
-        private Terminal terminal;
-
         public async Task Invoke(HttpContext context)
         {
             if (context.Request.Path != _options.Path)
@@ -39,26 +37,22 @@ namespace WebTty
 
             if (context.WebSockets.IsWebSocketRequest)
             {
-                if (terminal == null)
-                {
-                    terminal = new Terminal();
-                    terminal.Start();
-                    terminal.StandardIn.AutoFlush = true;
-                }
-                else
-                {
-                    await terminal.StandardIn.WriteLineAsync();
-                }
-
                 var duplex = DuplexPipe.CreateConnectionPair(PipeOptions.Default, PipeOptions.Default);
-                var webSocketHandler = new WebSocketHandler(duplex.Application);
+                var webSocketHandler = new WebSocketHandler(duplex.Transport);
 
                 using (var tokenSource = new CancellationTokenSource())
                 {
                     try
                     {
-                        ProcessTerminalAsync(terminal, duplex.Transport, tokenSource.Token).Forget();
+                        var terminal = new Terminal();
+                        terminal.Start();
+                        terminal.StandardIn.AutoFlush = true;
+
+                        ProcessTerminalAsync(terminal, duplex.Application, tokenSource.Token).Forget();
                         await webSocketHandler.ProcessRequestAsync(context, tokenSource.Token);
+
+                        terminal.Kill();
+                        terminal.WaitForExit();
                     }
                     catch(Exception ex)
                     {
@@ -147,8 +141,6 @@ namespace WebTty
                         break;
                     }
                 }
-
-                Console.WriteLine("Output Writer complete");
 
                 transport.Output.Complete();
             }, token);

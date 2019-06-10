@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
-using Mono.Unix;
-using Mono.Unix.Native;
+using WebTty.Native;
+using WebTty.Native.Syscall;
 
 namespace WebTty
 {
@@ -16,10 +17,10 @@ namespace WebTty
 
         public void Start()
         {
-            var size = new UnixWindowSize()
+            var size = new winsize()
             {
-                col = (short)155,
-                row = (short)43,
+                ws_col = (ushort)155,
+                ws_row = (ushort)43,
             };
 
             var pid = Pty.ForkAndExec(
@@ -30,17 +31,9 @@ namespace WebTty
                 size
             );
 
-            // var pid = Pty.ForkAndExec(
-            //     "/Users/nickvd/.pyenv/shims/ipython",
-            //     new string[] { "/Users/nickvd/.pyenv/shims/ipython" },
-            //     GetEnvironmentVariables(),
-            //     out pty,
-            //     size
-            // );
-
             childpid = pid;
 
-            var ret = Syscall.waitpid(childpid, out var status, WaitOptions.WNOHANG);
+            var ret = Libc.waitpid(childpid, out var status, WaitPidOptions.WNOHANG);
 
             if (ret == 0)
             {
@@ -49,7 +42,7 @@ namespace WebTty
 
             Console.WriteLine(pid);
 
-            var stream = new UnixStream(pty);
+            var stream = new FdStream(pty);
 
             StandardIn = new StreamWriter(stream);
             StandardOut = new StreamReader(stream);
@@ -58,17 +51,25 @@ namespace WebTty
         public bool IsRunning { get; private set; }
         public int ExitCode { get; private set; } = 0;
 
+        public void Kill()
+        {
+            if (Libc.kill(childpid, Libc.SIGKILL) != 0)
+            {
+                throw new Win32Exception();
+            }
+        }
+
         public void WaitForExit()
         {
             int ret;
 
-            ret = Syscall.waitpid(childpid, out var status, 0);
+            ret = Libc.waitpid(childpid, out var status, WaitPidOptions.None);
 
             IsRunning = false;
 
             if (ret == childpid)
             {
-                ExitCode = Syscall.WEXITSTATUS(status);
+                ExitCode = Libc.WEXITSTATUS(status);
             }
             else
             {
@@ -91,10 +92,12 @@ namespace WebTty
 
             // Without this, tools like "vi" produce sequences that are not UTF-8 friendly
             l.Add("LANG=en_US.UTF-8");
+
             var env = Environment.GetEnvironmentVariables();
             foreach (var x in new[] { "LOGNAME", "USER", "DISPLAY", "LC_TYPE", "USER", "HOME", "PATH" })
-                if (env.Contains(x))
-                    l.Add($"{x}={env[x]}");
+            {
+                if (env.Contains(x)) l.Add($"{x}={env[x]}");
+            }
             return l.ToArray();
         }
     }

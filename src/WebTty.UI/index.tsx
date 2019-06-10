@@ -20,7 +20,6 @@ async function* decodeMessages(source: AsyncIterable<MessageEvent | typeof $term
         if (message === $terminated) break
 
         const properties = msgpack.decode(Buffer.from(message.data))
-        console.log(properties)
         const body = decoder.decode(properties[1])
         yield body;
     }

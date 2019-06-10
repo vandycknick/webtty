@@ -75,8 +75,6 @@ function Terminal({ dataSource, onInput, onResize, onTitle, onAddonsLoaded, addo
     const wrapper = useRef<HTMLDivElement>()
     const terminalRef = useRef<Xterm | null>(null)
 
-    console.log(autoBuffer);
-
     useEffect(() => {
         if (!terminalRef.current) {
             terminalRef.current = new Xterm()
