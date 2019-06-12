@@ -9,14 +9,14 @@ type TerminalProps = {
     dataSource: AsyncIterable<string>
     addons?: ITerminalAddon[]
     onInput?: (data: string) => void
-    onResize?: () => void
+    onResize?: (data: { cols: number; rows: number; }) => void
     onTitle?: (title: string) => void
     onAddonsLoaded?: () => void
     autoBuffer?: boolean
 }
 
 const consumeDataSource = async (dataSource: AsyncIterable<string>, terminal: Xterm, autoBuffer: boolean = true) => {
-    let buffer = '';
+    let buffer = "";
 
     const flushBuffer = () => {
         terminal.write(buffer)
@@ -24,7 +24,7 @@ const consumeDataSource = async (dataSource: AsyncIterable<string>, terminal: Xt
     }
 
     const pushToBuffer = (msg: string) => {
-        if (buffer !== '') {
+        if (buffer !== "") {
             buffer += msg
         } else {
             buffer = msg

@@ -125,8 +125,6 @@ namespace WebTty
                     {
                         try
                         {
-                            // Log.SendPayload(_logger, buffer.Length);
-
                             var webSocketMessageType = WebSocketMessageType.Binary;
 
                             if (WebSocketIsOpen(socket))
