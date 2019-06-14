@@ -66,7 +66,7 @@ namespace WebTty
 
         public Task ProcessSocketAsync(WebSocket socket, CancellationToken token)
         {
-            var tokenSource = new CancellationTokenSource();
+            var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
             // Begin sending and receiving. Receiving must be started first because ExecuteAsync enables SendAsync.
             var receiving = StartReceiving(socket, token);
             var sending = StartSending(socket, token);
@@ -87,6 +87,7 @@ namespace WebTty
 
                 // Exceptions are handled above where the send and receive tasks are being run.
                 var receiveResult = await socket.ReceiveAsync(memory, token);
+                Console.WriteLine("READ FROM SOCKET");
 
                 // Need to check again for NetCoreApp2.2 because a close can happen between a 0-byte read and the actual read
                 if (receiveResult.MessageType == WebSocketMessageType.Close)
@@ -132,7 +133,8 @@ namespace WebTty
                                 var position = buffer.Start;
                                 while (buffer.TryGet(ref position, out var segment))
                                 {
-                                    var message = new WebTerminalMessage { Body = segment.ToArray() };
+                                    // await socket.SendAsync(segment, webSocketMessageType, true, token);
+                                    var message = new WebTerminalMessage { Type = 2, Body = segment.ToArray() };
                                     var data = MessagePack.MessagePackSerializer.SerializeUnsafe(message);
                                     await socket.SendAsync(data, webSocketMessageType, true, CancellationToken.None);
                                 }

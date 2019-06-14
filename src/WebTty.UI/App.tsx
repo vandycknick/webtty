@@ -5,7 +5,11 @@ import msgpack5 from "msgpack5"
 import "./index.css"
 import Terminal from "./components/Terminal"
 import ResizeObserver from "./components/ResizeObserver"
-import fromEmitter, { $terminated } from "./lib/fromEmitter"
+import fromEmitter, { $terminated } from "./utils/fromEmitter"
+import debounce from "./utils/debounce";
+import TerminalResizeMessage from "./models/TerminalResizeMessage";
+import TerminalInputMessage from "./models/TerminalInputMessage";
+import TerminalOutputMessage from "./models/TerminalOutputMessage";
 
 const socket = new WebSocket("ws://localhost:5000/ws")
 socket.binaryType = "arraybuffer"
@@ -38,44 +42,37 @@ async function* decodeMessages(source: AsyncIterable<MessageEvent | typeof $term
 
         const properties = msgpack.decode(Buffer.from(message.data))
         const body = decoder.decode(properties[1])
-        yield body
+        const msg = new TerminalOutputMessage(body);
+        yield msg.payload
     }
 }
 
-async function writeToSocket(data: string) {
+async function writeToSocket(msg: TerminalResizeMessage | TerminalInputMessage) {
+    const msgpack = msgpack5()
     if (socket.readyState === socket.CONNECTING) {
         await socketReady();
     }
 
     if (socket.readyState === socket.OPEN) {
-        socket.send(data);
+        console.log(msg);
+        const payload = msgpack.encode(msg.serialize())
+        socket.send(payload.slice())
     }
 }
 
-const debounce = (callback: any, time: number) => {
-    let interval: any;
-    return (...args: any[]) => {
-        clearTimeout(interval);
-        interval = setTimeout(() => {
-            interval = null;
-            callback(...args);
-        }, time);
-    };
-};
-
 const fit = new FitAddon()
-const debouncedFit = debounce(() => fit.fit(), 250)
+const debounceFit = debounce(() => fit.fit(), 200)
 
 const App = () => (
     <Fragment>
-        <ResizeObserver onChange={debouncedFit}>
+        <ResizeObserver onChange={debounceFit}>
             <Terminal
                 dataSource={decodeMessages(dataSource)}
                 addons={[fit]}
-                onResize={(data) => console.log(data)}
-                onInput={writeToSocket}
+                onResize={(data) => writeToSocket(new TerminalResizeMessage(data.cols, data.rows))}
+                onInput={input => writeToSocket(new TerminalInputMessage(input))}
                 onTitle={title => document.title = title}
-                onAddonsLoaded={debouncedFit}
+                onAddonsLoaded={debounceFit}
             />
         </ResizeObserver>
     </Fragment>

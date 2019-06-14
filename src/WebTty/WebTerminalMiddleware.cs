@@ -54,7 +54,7 @@ namespace WebTty
                         terminal.Kill();
                         terminal.WaitForExit();
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Console.WriteLine(ex);
                     }
@@ -77,25 +77,55 @@ namespace WebTty
                 while (!token.IsCancellationRequested)
                 {
                     ReadResult result = await transport.Input.ReadAsync();
+                    Console.WriteLine($"ProcessTerminalAsync READ");
 
                     ReadOnlySequence<byte> buffer = result.Buffer;
+                    Console.WriteLine($"ProcessTerminalAsync buffer length {buffer.Length}");
 
-                    foreach (var item in buffer)
+                    try
                     {
-                        var charsCnt = Encoding.UTF8.GetCharCount(item.Span);
-                        var array = charPool.Rent(charsCnt);
-                        try
-                        {
-                            Memory<char> chars = array;
-                            var written = Encoding.UTF8.GetChars(item.Span, chars.Span);
+                        var h = MessagePack.MessagePackBinary.ReadArrayHeader(buffer.ToArray(), 0, out var read);
+                        Console.WriteLine($"ProcessTerminalAsync header {h}, read {read}");
+                        var type = MessagePack.MessagePackBinary.ReadInt32(buffer.ToArray(), read, out read);
+                        Console.WriteLine($"ProcessTerminalAsync type {type}, read {read}");
 
-                            await terminal.StandardIn.WriteAsync(chars.Slice(0, written), CancellationToken.None);
-                        }
-                        finally
+                        if (type != 3)
                         {
-                            charPool.Return(array);
+                            var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalInputMessage>(buffer.ToArray());
+                            await terminal.StandardIn.WriteAsync(msg.Body.AsMemory(), token);
+
+                            Console.WriteLine(msg.Body);
+                        }
+                        else
+                        {
+                            var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalResizeMessage>(buffer.ToArray());
+                            terminal.SetWindowSize(msg.Cols, msg.Rows);
+                            Console.WriteLine($"TerminalResize cols {msg.Cols}, rows {msg.Rows}");
                         }
                     }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        continue;
+                    }
+
+
+                    // foreach (var item in buffer)
+                    // {
+                    //     var charsCnt = Encoding.UTF8.GetCharCount(item.Span);
+                    //     var array = charPool.Rent(charsCnt);
+                    //     try
+                    //     {
+                    //         Memory<char> chars = array;
+                    //         var written = Encoding.UTF8.GetChars(item.Span, chars.Span);
+
+                    //         // await terminal.StandardIn.WriteAsync(chars.Slice(0, written), CancellationToken.None);
+                    //     }
+                    //     finally
+                    //     {
+                    //         charPool.Return(array);
+                    //     }
+                    // }
 
                     transport.Input.AdvanceTo(buffer.End);
 

@@ -59,6 +59,17 @@ namespace WebTty
             }
         }
 
+        public void SetWindowSize(int col, int rows)
+        {
+            var size = new winsize
+            {
+                ws_col = (ushort)col,
+                ws_row = (ushort)rows,
+            };
+
+            Pty.SetWinSize(pty, ref size);
+        }
+
         public void WaitForExit()
         {
             int ret;

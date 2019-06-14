@@ -1,5 +1,5 @@
 {
-  "name": "WebTty.UI",
+  "name": "webtty-ui",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -9,25 +9,27 @@
     "watch": "webpack-dev-server"
   },
   "dependencies": {
-    "msgpack5": "^4.2.1",
+    "@nvd/use-redux": "0.1.0",
+    "msgpack5": "4.2.1",
     "preact": "10.0.0-beta.2",
-    "resize-observer-polyfill": "^1.5.1",
+    "redux": "4.0.1",
+    "resize-observer-polyfill": "1.5.1",
     "xterm": "3.14.2",
-    "xterm-addon-fit": "^0.1.0-beta2"
+    "xterm-addon-fit": "0.1.0-beta2"
   },
   "devDependencies": {
     "@nvd/tsconfig": "^1.0.0",
     "@types/msgpack5": "^3.4.1",
-    "css-loader": "^2.1.1",
+    "css-loader": "^3.0.0",
     "del-cli": "^2.0.0",
     "html-webpack-inline-source-plugin": "^0.0.10",
     "html-webpack-plugin": "^3.2.0",
     "style-loader": "^0.23.1",
     "ts-loader": "^6.0.2",
-    "typescript": "^3.5.1",
-    "webpack": "^4.33.0",
+    "typescript": "^3.5.2",
+    "webpack": "^4.34.0",
     "webpack-bundle-analyzer": "^3.3.2",
-    "webpack-cli": "^3.3.3",
+    "webpack-cli": "^3.3.4",
     "webpack-dev-server": "^3.7.1",
     "webpack-modules": "^1.0.0"
   }
