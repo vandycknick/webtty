@@ -20,7 +20,7 @@ const consumeDataSource = async (dataSource: AsyncIterable<string>, terminal: Xt
 
     const flushBuffer = () => {
         terminal.write(buffer)
-        buffer = ''
+        buffer = ""
     }
 
     const pushToBuffer = (msg: string) => {

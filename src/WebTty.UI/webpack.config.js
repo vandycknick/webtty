@@ -12,7 +12,11 @@ module.exports = (env, argv) => {
         devtool: argv.mode == "production" ? "source-map" : "inline-source-map",
 
         resolve: {
-            extensions: [".ts", ".tsx", ".js"]
+            extensions: [".ts", ".tsx", ".js"],
+            alias: {
+                react: 'preact/compat',
+                'react-dom': 'preact/compat'
+            },
         },
 
         module: {

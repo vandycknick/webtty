@@ -19,8 +19,8 @@ namespace WebTty
         {
             var size = new winsize()
             {
-                ws_col = (ushort)155,
-                ws_row = (ushort)43,
+                ws_col = 80,
+                ws_row = 24,
             };
 
             var pid = Pty.ForkAndExec(
