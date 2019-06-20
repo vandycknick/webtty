@@ -3,6 +3,27 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>true</IsPackable>
+
+    <BuildOutputTargetFolder>ref</BuildOutputTargetFolder>
+    <Architecture>x64</Architecture>
+    <Os>linux</Os>
   </PropertyGroup>
+
+  <Import Project="./Sources/Sources.targets" />
+
+  <ItemGroup>
+    <None Include="$(BuildDirectory)bin\WebTty.Native.linux-x64\$(Configuration)\$(TargetFramework)\*.dll" Pack="true">
+      <PackagePath>runtimes/linux-x64/lib/netstandard2.0</PackagePath>
+    </None>
+    <None Include="$(BuildDirectory)bin\WebTty.Native.macos-x64\$(Configuration)\$(TargetFramework)\*.dll" Pack="true">
+      <PackagePath>runtimes/osx/lib/netstandard2.0</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <Target Name="BuildPlatform" BeforeTargets="Restore">
+    <Exec Command="dotnet build -c $(Configuration) ./WebTty.Native.linux-x64.csproj" />
+    <Exec Command="dotnet build -c $(Configuration) ./WebTty.Native.macos-x64.csproj" />
+  </Target>
 
 </Project>

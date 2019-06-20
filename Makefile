@@ -1,7 +1,9 @@
 .PHONY: clean build dev watch watch-client watch-server
 
-SRC_UI=src/WebTty.UI
-SRC_CMD=src/WebTty
+CONFIGURATION	:= Debug
+
+SRC_UI			= src/WebTty.UI
+SRC_CMD			= src/WebTty
 
 setup:
 	yarn --cwd ${SRC_UI} install
@@ -14,7 +16,7 @@ build: clean
 	yarn --cwd ${SRC_UI} run build
 
 dev:
-	make watch -j2
+	$(MAKE) watch
 
 watch-client:
 	direnv allow && \
@@ -24,4 +26,11 @@ watch-server:
 	direnv allow && \
 	dotnet watch -p ${SRC_CMD} run
 
-watch: watch-client watch-server
+pack-native:
+	dotnet pack src/WebTty.Native/WebTty.Native.csproj \
+		-c $(CONFIGURATION) \
+		--output ../../artifacts \
+		-property:BuildNumber=1
+
+watch: pack-native
+	$(MAKE) -j2 watch-client watch-server

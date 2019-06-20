@@ -1,0 +1,13 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>WebTty.Native</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AssemblyName>WebTty.Native</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../Directory.Build.props" />
+  <Import Project="Version.props" />
+
+</Project>

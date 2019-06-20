@@ -2,8 +2,6 @@ import { h, ComponentChildren } from "preact"
 import { useRef, useEffect } from "preact/hooks"
 import SizeObserver from 'resize-observer-polyfill'
 
-console.log(SizeObserver);
-
 type ResizeObserverProps = {
     onChange: (entries?: ResizeObserverEntry[]) => void
     children: ComponentChildren

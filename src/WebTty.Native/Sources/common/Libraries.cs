@@ -1,4 +1,4 @@
-namespace WebTty.Native.Syscall
+namespace WebTty.Native
 {
     internal static class Libraries
     {

@@ -10,9 +10,9 @@ const middleware = thunk.withExtraArgument({
 } as AppConfig)
 
 const storeBuilder = () =>
-createStore(
-    reducers,
-    applyMiddleware(middleware)
+    createStore(
+        reducers,
+        applyMiddleware(middleware)
     );
 
 export { startTerminal, getTabStdoutStream, writeStdin, resizeTerminal } from "./actions"

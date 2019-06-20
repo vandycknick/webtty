@@ -9,11 +9,20 @@ namespace WebTty
 {
     public class Terminal
     {
+        private static int iid = 0;
+
         public StreamWriter StandardIn { get; private set; }
         public StreamReader StandardOut { get; private set; }
 
         private int childpid;
         private int pty;
+
+        public int Id { get; private set; }
+
+        public Terminal()
+        {
+            Id = ++iid;
+        }
 
         public void Start()
         {

@@ -1,7 +1,9 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Pipelines;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -18,14 +20,12 @@ namespace WebTty
 
         public WebTerminalMiddleware(RequestDelegate next, IOptions<WebTerminalOptions> options)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
+            if (options == null) throw new ArgumentNullException(nameof(options));
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _options = options.Value;
         }
+
+        private readonly List<Terminal> _terminals = new List<Terminal>();
 
         public async Task Invoke(HttpContext context)
         {
@@ -44,15 +44,17 @@ namespace WebTty
                 {
                     try
                     {
-                        var terminal = new Terminal();
-                        terminal.Start();
-                        terminal.StandardIn.AutoFlush = true;
+                        await Task.WhenAll(
+                            ProcessTerminalAsync(duplex.Application, tokenSource.Token),
+                            webSocketHandler.ProcessRequestAsync(context, tokenSource.Token)
+                        );
 
-                        ProcessTerminalAsync(terminal, duplex.Application, tokenSource.Token).Forget();
-                        await webSocketHandler.ProcessRequestAsync(context, tokenSource.Token);
+                        foreach (var terminal in _terminals)
+                        {
+                            terminal.Kill();
+                            terminal.WaitForExit();
+                        }
 
-                        terminal.Kill();
-                        terminal.WaitForExit();
                     }
                     catch (Exception ex)
                     {
@@ -70,114 +72,102 @@ namespace WebTty
             }
         }
 
-        private Task ProcessTerminalAsync(Terminal terminal, IDuplexPipe transport, CancellationToken token)
+        private async Task ProcessTerminalAsync(IDuplexPipe transport, CancellationToken token)
         {
-            var reader = Task.Factory.StartNew(async () =>
+            while (!token.IsCancellationRequested)
             {
-                while (!token.IsCancellationRequested)
+                var result = await transport.Input.ReadAsync();
+                var buffer = result.Buffer;
+
+                try
                 {
-                    ReadResult result = await transport.Input.ReadAsync();
-                    Console.WriteLine($"ProcessTerminalAsync READ");
+                    var h = MessagePack.MessagePackBinary.ReadArrayHeader(buffer.ToArray(), 0, out var read);
+                    var type = MessagePack.MessagePackBinary.ReadInt32(buffer.ToArray(), read, out read);
 
-                    ReadOnlySequence<byte> buffer = result.Buffer;
-                    Console.WriteLine($"ProcessTerminalAsync buffer length {buffer.Length}");
-
-                    try
+                    if (type == TerminalMessageTypes.TERMINAL_INPUT)
                     {
-                        var h = MessagePack.MessagePackBinary.ReadArrayHeader(buffer.ToArray(), 0, out var read);
-                        Console.WriteLine($"ProcessTerminalAsync header {h}, read {read}");
-                        var type = MessagePack.MessagePackBinary.ReadInt32(buffer.ToArray(), read, out read);
-                        Console.WriteLine($"ProcessTerminalAsync type {type}, read {read}");
+                        var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalInputMessage>(buffer.ToArray());
+                        var terminal = _terminals.FirstOrDefault(term => term.Id == msg.Id);
 
-                        if (type != 3)
-                        {
-                            var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalInputMessage>(buffer.ToArray());
-                            await terminal.StandardIn.WriteAsync(msg.Body.AsMemory(), token);
-
-                            Console.WriteLine(msg.Body);
-                        }
-                        else
-                        {
-                            var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalResizeMessage>(buffer.ToArray());
-                            terminal.SetWindowSize(msg.Cols, msg.Rows);
-                            Console.WriteLine($"TerminalResize cols {msg.Cols}, rows {msg.Rows}");
-                        }
+                        await terminal?.StandardIn.WriteAsync(msg.Body.AsMemory(), token);
                     }
-                    catch (Exception e)
+                    else if (type == TerminalMessageTypes.TERMINAL_NEW_TAB)
                     {
-                        Console.WriteLine(e);
-                        continue;
+                        var terminal = new Terminal();
+                        terminal.Start();
+                        terminal.StandardIn.AutoFlush = true;
+
+                        _terminals.Add(terminal);
+
+                        var msg = new TerminalNewTabCreatedMessage { Id = terminal.Id };
+                        var data = MessagePack.MessagePackSerializer.SerializeUnsafe(msg);
+
+                        await transport.Output.WriteAsync(data.AsMemory());
+
+                        var backend = Task.Factory.StartNew(() => TerminalStdoutWriter(terminal, transport.Output, token));
                     }
-
-
-                    // foreach (var item in buffer)
-                    // {
-                    //     var charsCnt = Encoding.UTF8.GetCharCount(item.Span);
-                    //     var array = charPool.Rent(charsCnt);
-                    //     try
-                    //     {
-                    //         Memory<char> chars = array;
-                    //         var written = Encoding.UTF8.GetChars(item.Span, chars.Span);
-
-                    //         // await terminal.StandardIn.WriteAsync(chars.Slice(0, written), CancellationToken.None);
-                    //     }
-                    //     finally
-                    //     {
-                    //         charPool.Return(array);
-                    //     }
-                    // }
-
-                    transport.Input.AdvanceTo(buffer.End);
-
-                    if (result.IsCompleted)
+                    else if (type == TerminalMessageTypes.TERMINAL_RESIZE)
                     {
-                        break;
+                        var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalResizeMessage>(buffer.ToArray());
+                        var terminal = _terminals.FirstOrDefault(term => term.Id == msg.Id);
+                        terminal?.SetWindowSize(msg.Cols, msg.Rows);
                     }
                 }
-
-                transport.Input.Complete();
-
-            }, token);
-
-            var writer = Task.Factory.StartNew(async () =>
-            {
-                const int minimumBufferSize = 1024 * sizeof(char);
-                var buffer = new char[1024];
-                while (!terminal.StandardOut.EndOfStream && !token.IsCancellationRequested)
+                catch (Exception e)
                 {
-                    Memory<byte> memory = transport.Output.GetMemory(minimumBufferSize);
-                    try
-                    {
-                        var read = await terminal.StandardOut.ReadAsync(buffer, 0, 1024);
-                        var bytesWritten = Encoding.UTF8.GetBytes(buffer.AsSpan(0, read), memory.Span);
-
-                        if (bytesWritten == 0)
-                        {
-                            continue;
-                        }
-                        transport.Output.Advance(bytesWritten);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex);
-                        break;
-                    }
-
-                    // Make the data available to the PipeReader
-                    FlushResult result = await transport.Output.FlushAsync();
-
-                    if (result.IsCompleted)
-                    {
-                        break;
-                    }
+                    Console.WriteLine(e);
+                    continue;
                 }
 
-                transport.Output.Complete();
-            }, token);
+                transport.Input.AdvanceTo(buffer.End);
 
-            return Task.WhenAll(reader, writer);
+                if (result.IsCompleted)
+                {
+                    break;
+                }
+            }
+
+            transport.Input.Complete();
+            transport.Output.Complete();
         }
 
-        private static ArrayPool<char> charPool = ArrayPool<char>.Shared;
+        private async Task TerminalStdoutWriter(Terminal terminal, PipeWriter output, CancellationToken token)
+        {
+            const int maxReadSize = 1024;
+            const int maxBufferSize = maxReadSize * sizeof(char);
+            var buffer = new char[maxReadSize];
+            var byteBuffer = new byte[maxBufferSize];
+
+            while (!terminal.StandardOut.EndOfStream && !token.IsCancellationRequested)
+            {
+                try
+                {
+                    var memory = output.GetMemory(maxBufferSize);
+                    var read = await terminal.StandardOut.ReadAsync(buffer, 0, maxReadSize);
+                    var bytesWritten = Encoding.UTF8.GetBytes(buffer.AsSpan(0, read), byteBuffer);
+
+                    var message = new WebTerminalOutputMessage { Type = 2, Id = terminal.Id, Body = byteBuffer.AsSpan(0, bytesWritten).ToArray() };
+                    var data = MessagePack.MessagePackSerializer.SerializeUnsafe(message);
+
+                    var dataMemory = data.AsMemory();
+                    dataMemory.CopyTo(memory);
+                    output.Advance(dataMemory.Length);
+
+                    var result = await output.FlushAsync();
+
+                    if (result.IsCompleted)
+                    {
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    break;
+                }
+            }
+
+            output.Complete();
+        }
     }
 }

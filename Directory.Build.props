@@ -20,19 +20,9 @@
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateFullPaths Condition="'$(VSCODE_CWD)' != ''">true</GenerateFullPaths>
-    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory).build\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath>$(MSBuildThisFileDirectory).build\bin\$(MSBuildProjectName)\</BaseOutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
-    <OSDescription>$([System.Runtime.InteropServices.RuntimeInformation]::OSDescription)</OSDescription>
-    <IsWSL Condition="'$(IsLinux)' == 'true' and $(OSDescription.Contains('Microsoft'))">true</IsWSL>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(IsWSL)' == 'true'">
-    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory).build/obj/unix/$(MSBuildProjectName)</BaseIntermediateOutputPath>
-    <BaseOutputPath>$(MSBuildThisFileDirectory).build/bin/unix/$(MSBuildProjectName)</BaseOutputPath>
+    <BuildDirectory>$(MSBuildThisFileDirectory).build/</BuildDirectory>
+    <BaseIntermediateOutputPath>$(BuildDirectory)obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(BuildDirectory)bin/$(MSBuildProjectName)/</BaseOutputPath>
   </PropertyGroup>
 
 </Project>

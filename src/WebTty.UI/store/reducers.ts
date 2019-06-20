@@ -1,11 +1,13 @@
-import { AnyAction } from "redux"
 import { produce } from "immer"
 
-import { TerminalState } from "./types"
+import { TerminalState, TerminalActions, TERMINAL_NEW_TAB_CREATED } from "./types"
 
-const terminal = (state: TerminalState = {}, _: AnyAction) =>
-    produce(state, (_) => {
-
+const terminal = (state: TerminalState = { tabId: undefined}, action: TerminalActions) =>
+    produce(state, (draft) => {
+        switch (action.type) {
+            case TERMINAL_NEW_TAB_CREATED:
+                draft.tabId = action.payload.id;
+        }
     })
 
 export { terminal }

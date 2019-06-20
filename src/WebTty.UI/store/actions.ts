@@ -2,9 +2,9 @@ import msgpack5 from "msgpack5"
 import { ThunkAction } from "redux-thunk"
 import { AnyAction } from "redux";
 
-import { TERMINAL_SESSION, TERMINAL_SESSION_DISCONNECTED, TERMINAL_NEW_TAB, AppState, AppConfig, TerminalActions } from "./types"
+import { TERMINAL_SESSION, TERMINAL_SESSION_DISCONNECTED, TERMINAL_NEW_TAB, AppState, AppConfig, TerminalActions, TERMINAL_NEW_TAB_CREATED } from "./types"
 import fromEmitter, { $terminated } from "../utils/fromEmitter";
-import { TerminalNewTabMessage, TerminalOutputMessage, TerminalInputMessage, TerminalResizeMessage } from "./models";
+import { TerminalNewTabMessage, TerminalOutputMessage, TerminalInputMessage, TerminalResizeMessage, TerminalNewTabCreatedMessage } from "./models";
 import MicroEmitter from "../utils/MicroEmitter";
 
 let terminal: WebSocket | undefined;
@@ -18,8 +18,12 @@ const terminalSessionDisconnected = (): TerminalActions => ({
     type: TERMINAL_SESSION_DISCONNECTED
 })
 
-const terminalNewTab = (msg: TerminalNewTabMessage): TerminalActions => ({
+const terminalNewTab = (): TerminalActions => ({
     type: TERMINAL_NEW_TAB,
+})
+
+const terminalNewTabCreated = (msg: TerminalNewTabCreatedMessage): TerminalActions => ({
+    type: TERMINAL_NEW_TAB_CREATED,
     payload: { id: msg.id },
 })
 
@@ -30,6 +34,8 @@ const startTerminal = (): ThunkAction<Promise<void>, AppState, AppConfig, AnyAct
         terminal = await dispatch(connectToRemoteTerminal())
 
         const dataSource = fromEmitter<MessageEvent>(terminal)
+
+        dispatch(createNewTab())
 
         const msgpack = msgpack5()
         const decoder = new TextDecoder()
@@ -47,14 +53,15 @@ const startTerminal = (): ThunkAction<Promise<void>, AppState, AppConfig, AnyAct
                     break
 
                 case 2:
-                    const body = decoder.decode(properties[1])
-                    const msg = new TerminalOutputMessage(body)
+                    const id = properties[1]
+                    const body = decoder.decode(properties[2])
+                    const msg = new TerminalOutputMessage(id, body)
                     terminalEvenTarget.emit("message", msg)
                     break
 
-                case 4:
-                    const newTabMsg = new TerminalNewTabMessage(properties[1])
-                    dispatch(terminalNewTab(newTabMsg))
+                case 5:
+                    const newTabMsg = new TerminalNewTabCreatedMessage(properties[1])
+                    dispatch(terminalNewTabCreated(newTabMsg))
                     break
 
                 default:
@@ -78,7 +85,15 @@ const connectToRemoteTerminal = (): ThunkAction<Promise<WebSocket>, AppState, Ap
         return socket;
     }
 
-async function writeToTerminal(msg: TerminalResizeMessage | TerminalInputMessage) {
+const createNewTab = (): ThunkAction<void, AppState, AppConfig, AnyAction> =>
+    (dispatch) => {
+        const msg = new TerminalNewTabMessage()
+        writeToTerminal(msg)
+        dispatch(terminalNewTab())
+    }
+
+
+async function writeToTerminal(msg: TerminalResizeMessage | TerminalInputMessage | TerminalNewTabMessage) {
     const msgpack = msgpack5()
     if (!terminal) return
 
@@ -103,28 +118,30 @@ const isSocketReady = (socket: WebSocket) =>
         socket.addEventListener("error", hasError)
     })
 
-const getTabStdoutStream = (_: number) =>
+const getTabStdoutStream = (id: number) =>
     (async function* () {
         const source = fromEmitter<TerminalOutputMessage>(terminalEvenTarget)
         for await (let message of source) {
             if (message === $terminated) break
-            yield message.payload
+
+            if (message.id == id) yield message.payload
         }
     })()
 
-const writeStdin = (input: string) => {
-    const msg = new TerminalInputMessage(input)
+const writeStdin = (id: number, input: string) => {
+    const msg = new TerminalInputMessage(id, input)
     writeToTerminal(msg)
 }
 
-const resizeTerminal = (cols: number, rows: number) => {
-    const msg = new TerminalResizeMessage(cols, rows)
+const resizeTerminal = (id: number, cols: number, rows: number) => {
+    const msg = new TerminalResizeMessage(id, cols, rows)
     writeToTerminal(msg)
 }
 
 export {
     startTerminal,
     getTabStdoutStream,
+    createNewTab,
     writeStdin,
     resizeTerminal,
 }

@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-using static WebTty.Native.Syscall.Libraries;
+using static WebTty.Native.Libraries;
 
 using pid_t = System.Int32;
 

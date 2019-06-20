@@ -46,8 +46,7 @@ namespace WebTty.Native
         /// <returns></returns>
         public static int SetWinSize(int fd, ref winsize winSize)
         {
-            const long MAC_TIOCSWINSZ = 0x80087467;
-            var r = Libc.ioctl(fd, MAC_TIOCSWINSZ, ref winSize);
+            var r = Libc.ioctl(fd, Libc.TIOCSWINSZ, ref winSize);
             if (r == -1)
             {
                 var lastErr = Marshal.GetLastWin32Error();

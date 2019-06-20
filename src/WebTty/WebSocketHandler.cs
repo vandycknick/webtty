@@ -51,7 +51,6 @@ namespace WebTty
                 }
                 finally
                 {
-                    Console.WriteLine("Closing Websocket");
                     if (WebSocketIsOpen(socket))
                     {
                         // We're done sending, send the close frame to the client if the websocket is still open
@@ -87,7 +86,6 @@ namespace WebTty
 
                 // Exceptions are handled above where the send and receive tasks are being run.
                 var receiveResult = await socket.ReceiveAsync(memory, token);
-                Console.WriteLine("READ FROM SOCKET");
 
                 // Need to check again for NetCoreApp2.2 because a close can happen between a 0-byte read and the actual read
                 if (receiveResult.MessageType == WebSocketMessageType.Close)
@@ -130,18 +128,33 @@ namespace WebTty
 
                             if (WebSocketIsOpen(socket))
                             {
+
                                 var position = buffer.Start;
                                 while (buffer.TryGet(ref position, out var segment))
                                 {
-                                    // await socket.SendAsync(segment, webSocketMessageType, true, token);
-                                    var message = new WebTerminalMessage { Type = 2, Body = segment.ToArray() };
-                                    var data = MessagePack.MessagePackSerializer.SerializeUnsafe(message);
-                                    await socket.SendAsync(data, webSocketMessageType, true, CancellationToken.None);
+                                    await socket.SendAsync(segment, webSocketMessageType, true, token);
                                 }
-                            }
-                            else
-                            {
-                                break;
+
+
+                                // Console.WriteLine("datachunk after pipe");
+                                // foreach (var b in buffer.First.ToArray())
+                                // {
+                                //     Console.Write($"{b} ");
+                                // }
+                                // Console.WriteLine();
+                                // Console.WriteLine("datachunk after pipe");
+
+                                // try
+                                // {
+                                //     var m = MessagePack.MessagePackSerializer.Deserialize<WebTerminalOutputMessage>(buffer.First.ToArray());
+                                //     Console.WriteLine("OUTPUT MESSAGE");
+                                //     Console.WriteLine(System.Text.Encoding.UTF8.GetString(m.Body));
+                                //     Console.WriteLine("OUTPUT MESSAGE");
+                                // }
+                                // catch
+                                // {
+                                //     Console.WriteLine("Not an output message");
+                                // }
                             }
                         }
                         catch (Exception ex)

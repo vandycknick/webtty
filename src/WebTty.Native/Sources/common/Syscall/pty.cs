@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
-using static WebTty.Native.Syscall.Libraries;
+using static WebTty.Native.Libraries;
 
 namespace WebTty.Native.Syscall
 {

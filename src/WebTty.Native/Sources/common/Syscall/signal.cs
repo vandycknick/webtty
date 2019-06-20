@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-using static WebTty.Native.Syscall.Libraries;
+using static WebTty.Native.Libraries;
 
 namespace WebTty.Native.Syscall
 {
@@ -38,7 +38,6 @@ namespace WebTty.Native.Syscall
         public static int SIGPOLL => 29;
         public static int SIGPWR => 30;
         public static int SIGSYS => 31;
-
 
         [DllImport(libc, SetLastError = true)]
         public static extern int kill(pid_t pid, int signum);
