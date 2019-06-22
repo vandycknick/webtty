@@ -25,8 +25,6 @@ namespace WebTty
             _options = options.Value;
         }
 
-        private readonly List<Terminal> _terminals = new List<Terminal>();
-
         public async Task Invoke(HttpContext context)
         {
             if (context.Request.Path != _options.Path)
@@ -37,6 +35,7 @@ namespace WebTty
 
             if (context.WebSockets.IsWebSocketRequest)
             {
+                var terminals = new List<Terminal>();
                 var duplex = DuplexPipe.CreateConnectionPair(PipeOptions.Default, PipeOptions.Default);
                 var webSocketHandler = new WebSocketHandler(duplex.Transport);
 
@@ -44,12 +43,12 @@ namespace WebTty
                 {
                     try
                     {
-                        await Task.WhenAll(
-                            ProcessTerminalAsync(duplex.Application, tokenSource.Token),
+                        await Task.WhenAny(
+                            ProcessTerminalAsync(duplex.Application, terminals, tokenSource.Token),
                             webSocketHandler.ProcessRequestAsync(context, tokenSource.Token)
                         );
 
-                        foreach (var terminal in _terminals)
+                        foreach (var terminal in terminals)
                         {
                             terminal.Kill();
                             terminal.WaitForExit();
@@ -72,12 +71,17 @@ namespace WebTty
             }
         }
 
-        private async Task ProcessTerminalAsync(IDuplexPipe transport, CancellationToken token)
+        private async Task ProcessTerminalAsync(IDuplexPipe transport, List<Terminal> terminals, CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
                 var result = await transport.Input.ReadAsync();
                 var buffer = result.Buffer;
+
+                if (result.IsCompleted && buffer.Length <= 0)
+                {
+                    break;
+                }
 
                 try
                 {
@@ -87,7 +91,7 @@ namespace WebTty
                     if (type == TerminalMessageTypes.TERMINAL_INPUT)
                     {
                         var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalInputMessage>(buffer.ToArray());
-                        var terminal = _terminals.FirstOrDefault(term => term.Id == msg.Id);
+                        var terminal = terminals.FirstOrDefault(term => term.Id == msg.Id);
 
                         await terminal?.StandardIn.WriteAsync(msg.Body.AsMemory(), token);
                     }
@@ -97,7 +101,7 @@ namespace WebTty
                         terminal.Start();
                         terminal.StandardIn.AutoFlush = true;
 
-                        _terminals.Add(terminal);
+                        terminals.Add(terminal);
 
                         var msg = new TerminalNewTabCreatedMessage { Id = terminal.Id };
                         var data = MessagePack.MessagePackSerializer.SerializeUnsafe(msg);
@@ -109,7 +113,7 @@ namespace WebTty
                     else if (type == TerminalMessageTypes.TERMINAL_RESIZE)
                     {
                         var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalResizeMessage>(buffer.ToArray());
-                        var terminal = _terminals.FirstOrDefault(term => term.Id == msg.Id);
+                        var terminal = terminals.FirstOrDefault(term => term.Id == msg.Id);
                         terminal?.SetWindowSize(msg.Cols, msg.Rows);
                     }
                 }

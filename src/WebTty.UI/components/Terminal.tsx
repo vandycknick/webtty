@@ -83,7 +83,6 @@ function Terminal({ dataSource, onInput, onResize, onTitle, onAddonsLoaded, addo
         const terminal = terminalRef.current
         if (wrapper.current) {
             terminal.open(wrapper.current)
-            console.log(terminal, wrapper.current);
 
             consumeDataSource(dataSource, terminal, autoBuffer);
 
