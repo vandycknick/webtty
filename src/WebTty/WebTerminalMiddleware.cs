@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using WebTty.Extensions;
 
 namespace WebTty
 {
@@ -33,42 +34,57 @@ namespace WebTty
                 return;
             }
 
-            if (context.WebSockets.IsWebSocketRequest)
+            if (!context.WebSockets.IsWebSocketRequest)
             {
-                var terminals = new List<Terminal>();
-                var duplex = DuplexPipe.CreateConnectionPair(PipeOptions.Default, PipeOptions.Default);
-                var webSocketHandler = new WebSocketHandler(duplex.Transport);
+                await _next(context);
+                return;
+            }
 
-                using (var tokenSource = new CancellationTokenSource())
+            var terminals = new List<Terminal>();
+
+            using (var socket = await context.WebSockets.AcceptWebSocketAsync())
+            using (var tokenSource = new CancellationTokenSource())
+            {
+                Exception error = null;
+
+                try
                 {
-                    try
-                    {
-                        await Task.WhenAny(
-                            ProcessTerminalAsync(duplex.Application, terminals, tokenSource.Token),
-                            webSocketHandler.ProcessRequestAsync(context, tokenSource.Token)
-                        );
+                    var pipe = socket.UsePipe();
+                    await ProcessTerminalAsync(pipe, terminals, tokenSource.Token);
+                }
+                catch (WebSocketException ex) when (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+                {
+                    // Client has closed the WebSocket connection without completing the close handshake
+                    // Log.ClosedPrematurely(_logger, ex);
+                    Console.WriteLine(ex);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Ignore aborts, don't treat them like transport errors
+                    Console.WriteLine("OperationCanceledException");
+                }
+                catch (Exception ex)
+                {
+                    error = ex;
+                }
+                finally
+                {
+                    tokenSource.Cancel();
 
-                        foreach (var terminal in terminals)
-                        {
-                            terminal.Kill();
-                            terminal.WaitForExit();
-                        }
+                    if (socket.IsOpen())
+                    {
+                        // We're done sending, send the close frame to the client if the websocket is still open
+                        await socket.CloseOutputAsync(error != null ? WebSocketCloseStatus.InternalServerError : WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                    }
 
-                    }
-                    catch (Exception ex)
+                    foreach (var terminal in terminals)
                     {
-                        Console.WriteLine(ex);
-                    }
-                    finally
-                    {
-                        tokenSource.Cancel();
+                        terminal.Kill();
+                        terminal.WaitForExit();
                     }
                 }
             }
-            else
-            {
-                context.Response.StatusCode = 400;
-            }
+
         }
 
         private async Task ProcessTerminalAsync(IDuplexPipe transport, List<Terminal> terminals, CancellationToken token)
