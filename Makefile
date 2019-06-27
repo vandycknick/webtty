@@ -1,4 +1,4 @@
-.PHONY: clean build dev watch watch-client watch-server
+.PHONY: clean watch watch-client watch-server
 .DEFAULT_GOAL := default
 
 CONFIGURATION	:= Debug
@@ -26,12 +26,6 @@ clean:
 	rm -rf $(ARTIFACTS)
 	yarn --cwd $(SRC_UI) run clean
 
-build: clean
-	yarn --cwd $(SRC_UI) run build
-
-dev:
-	$(MAKE) watch
-
 watch: pack-native
 	$(MAKE) -j2 watch-client watch-server
 
@@ -43,13 +37,16 @@ watch-server:
 	direnv allow && \
 	dotnet watch -p $(SRC_CMD) run
 
+build-ui:
+	yarn --cwd $(SRC_UI) run build
+
 pack-native:
 	dotnet pack $(SRC_NATIVE) \
 		--configuration $(CONFIGURATION) \
 		--output $(ARTIFACTS) \
 		-property:VersionSuffix=beta.1
 
-package: pack-native
+package: build-ui pack-native
 	dotnet pack $(SRC_CMD) \
 		--configuration $(CONFIGURATION) \
 		--output $(ARTIFACTS)

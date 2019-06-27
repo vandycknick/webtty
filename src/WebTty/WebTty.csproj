@@ -14,7 +14,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="MessagePack" Version="1.7.3.7" />
-    <PackageReference Include="WebTty.Native" Version="0.1.0-beta.*" />
+    <PackageReference Include="WebTty.Native" Version="0.1.0-beta.*" Pack="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WebTty.UI\WebTty.UI.csproj" />
   </ItemGroup>
 
 </Project>
