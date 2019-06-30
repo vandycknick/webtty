@@ -7,6 +7,7 @@
     <ToolCommandName>webtty</ToolCommandName>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
+    <IsPackaging>false</IsPackaging>
 
     <RestoreSources>$(RestoreSources);../../artifacts;https://api.nuget.org/v3/index.json</RestoreSources>
   </PropertyGroup>
@@ -14,7 +15,14 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="MessagePack" Version="1.7.3.7" />
-    <PackageReference Include="WebTty.Native" Version="0.1.0-beta.*" Pack="true" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsPackaging)' == 'true'">
+    <PackageReference Include="WebTty.Native" Version="0.1.0-build.*" Pack="true" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsPackaging)' == 'false'">
+    <ProjectReference Include="..\WebTty.Native\WebTty.Native.csproj" />
   </ItemGroup>
 
   <ItemGroup>

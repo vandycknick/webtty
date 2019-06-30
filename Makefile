@@ -8,6 +8,7 @@ SRC_CMD			= src/WebTty/WebTty.csproj
 SRC_NATIVE		= src/WebTty.Native/WebTty.Native.csproj
 ARTIFACTS		= $(shell pwd)/artifacts
 CLI_TOOL		= webtty
+NATIVE_SUFFIX	:=build.$(shell date "+%Y%m%d%H%M%S")
 
 default: setup clean
 	$(MAKE) package CONFIGURATION=Release
@@ -26,7 +27,7 @@ clean:
 	rm -rf $(ARTIFACTS)
 	yarn --cwd $(SRC_UI) run clean
 
-watch: pack-native
+watch:
 	$(MAKE) -j2 watch-client watch-server
 
 watch-client:
@@ -44,9 +45,12 @@ pack-native:
 	dotnet pack $(SRC_NATIVE) \
 		--configuration $(CONFIGURATION) \
 		--output $(ARTIFACTS) \
-		-property:VersionSuffix=beta.1
+		--version-suffix $(NATIVE_SUFFIX)
 
 package: build-ui pack-native
-	dotnet pack $(SRC_CMD) \
-		--configuration $(CONFIGURATION) \
-		--output $(ARTIFACTS)
+	dotnet restore --force-evaluate
+	dotnet build $(SRC_CMD) --configuration $(CONFIGURATION) -p:IsPackaging=true
+	dotnet pack $(SRC_CMD) --configuration $(CONFIGURATION) --no-build --output $(ARTIFACTS)
+
+package-release:
+	$(MAKE) package CONFIGURATION=Release

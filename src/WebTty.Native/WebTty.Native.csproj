@@ -7,17 +7,18 @@
 
     <BuildOutputTargetFolder>ref</BuildOutputTargetFolder>
     <Architecture>x64</Architecture>
-    <Os>linux</Os>
+    <Os Condition="$([MSBuild]::IsOsPlatform(Linux))">linux</Os>
+    <Os Condition="$([MSBuild]::IsOsPlatform(OSX))">macos</Os>
   </PropertyGroup>
 
   <Import Project="./Sources/Sources.targets" />
 
   <ItemGroup>
     <None Include="$(BuildDirectory)bin\WebTty.Native.linux-x64\$(Configuration)\$(TargetFramework)\*.dll" Pack="true">
-      <PackagePath>runtimes/linux-x64/lib/netstandard2.0</PackagePath>
+      <PackagePath>runtimes/linux-x64/lib/$(TargetFramework)</PackagePath>
     </None>
     <None Include="$(BuildDirectory)bin\WebTty.Native.macos-x64\$(Configuration)\$(TargetFramework)\*.dll" Pack="true">
-      <PackagePath>runtimes/osx/lib/netstandard2.0</PackagePath>
+      <PackagePath>runtimes/osx/lib/$(TargetFramework)</PackagePath>
     </None>
   </ItemGroup>
 

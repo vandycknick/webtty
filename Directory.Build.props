@@ -10,11 +10,10 @@
     <NeutralLanguage>en-UK</NeutralLanguage>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/nickvdyck/git-browse</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/nickvdyck/git-browse.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/nickvdyck/webtty</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nickvdyck/webtty.git</RepositoryUrl>
     <PackageReleaseNotes>See $(PackageProjectUrl)/blob/master/CHANGELOG.md for release notes.</PackageReleaseNotes>
     <RepositoryType>git</RepositoryType>
-    <IsPackable>false</IsPackable>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <LangVersion>Latest</LangVersion>
 
