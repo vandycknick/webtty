@@ -1,3 +1,6 @@
+import { AnyAction, Store } from "redux";
+import { ThunkDispatch } from "redux-thunk";
+
 const TERMINAL_SESSION = "@@webtty/TERMINAL_SESSION"
 const TERMINAL_SESSION_DISCONNECTED = "@@webtty/TERMINAL_SESSION_DISCONNECTED"
 
@@ -35,6 +38,8 @@ type AppConfig = {
     socketUrl: string
 }
 
+type AppStore = Store<AppState, AnyAction> & { dispatch: ThunkDispatch<{}, AppConfig, AnyAction> }
+
 export {
     TERMINAL_SESSION,
     TERMINAL_SESSION_DISCONNECTED,
@@ -44,6 +49,8 @@ export {
     TerminalActions,
 
     TerminalState,
+
+    AppStore,
     AppState,
     AppConfig,
 }

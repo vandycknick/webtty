@@ -2,18 +2,23 @@ import { createStore, combineReducers, applyMiddleware } from "redux"
 import thunk from "redux-thunk"
 
 import { terminal } from "./reducers"
-import { AppState, AppConfig } from "./types"
+import configBuilder from "./config"
+import composeEnhancers from "../utils/composeEnhancers"
 
-const reducers = combineReducers<AppState>({ terminal })
-const middleware = thunk.withExtraArgument({
-    socketUrl: "ws://localhost:5000/ws"
-} as AppConfig)
+import { AppStore, AppState, AppConfig } from "./types"
 
-const storeBuilder = () =>
-    createStore(
+const storeBuilder = (): AppStore => {
+    const config = configBuilder()
+    const reducers = combineReducers<AppState>({ terminal })
+    const middleware = thunk.withExtraArgument<AppConfig>(config)
+
+    const store = createStore(
         reducers,
-        applyMiddleware(middleware)
+        composeEnhancers(applyMiddleware(middleware))
     );
+
+    return store
+}
 
 export { startTerminal, getTabStdoutStream, writeStdin, resizeTerminal } from "./actions"
 export { AppState }
