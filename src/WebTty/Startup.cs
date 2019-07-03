@@ -21,9 +21,9 @@ namespace WebTty
             else
             {
                 app.UseExceptionHandler("/Error");
-                app.UseHttpsRedirection();
             }
 
+            app.UseStatusCodePages();
             app.UseResponseCompression();
             app.UseMiddleware<UiMiddleware>();
             app.UseWebSockets();
