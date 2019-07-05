@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using WebTty.Extensions;
+using WebTty.Messages;
 
 namespace WebTty
 {
@@ -120,33 +121,45 @@ namespace WebTty
                     var h = MessagePack.MessagePackBinary.ReadArrayHeader(segment.Array, segment.Offset, out var read);
                     var type = MessagePack.MessagePackBinary.ReadInt32(segment.Array, segment.Offset + read, out read);
 
-                    if (type == TerminalMessageTypes.TERMINAL_INPUT)
+                    var messageType = (TerminalMessageTypes)type;
+
+                    switch (messageType)
                     {
-                        var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalInputMessage>(segment);
-                        var terminal = terminals.FirstOrDefault(term => term.Id == msg.Id);
+                        case TerminalMessageTypes.TerminalInput:
+                            {
+                                var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalInput>(segment);
+                                var terminal = terminals.FirstOrDefault(term => term.Id == msg.Id);
 
-                        await terminal?.StandardIn.WriteAsync(msg.Body.AsMemory(), token);
-                    }
-                    else if (type == TerminalMessageTypes.TERMINAL_NEW_TAB)
-                    {
-                        var terminal = new Terminal();
-                        terminal.Start();
-                        terminal.StandardIn.AutoFlush = true;
+                                await terminal?.StandardIn.WriteAsync(msg.Body.AsMemory(), token);
+                            }
+                            break;
 
-                        terminals.Add(terminal);
+                        case TerminalMessageTypes.NewSessionRequest:
+                            {
+                                var terminal = new Terminal();
+                                terminal.Start();
+                                terminal.StandardIn.AutoFlush = true;
 
-                        var msg = new TerminalNewTabCreatedMessage { Id = terminal.Id };
-                        var data = MessagePack.MessagePackSerializer.SerializeUnsafe(msg);
+                                terminals.Add(terminal);
 
-                        await transport.Output.WriteAsync(data.AsMemory());
+                                var msg = new NewSessionResponse { Id = terminal.Id };
+                                var data = MessagePack.MessagePackSerializer.SerializeUnsafe(msg);
 
-                        var backend = Task.Factory.StartNew(() => TerminalStdoutWriter(terminal, transport.Output, token));
-                    }
-                    else if (type == TerminalMessageTypes.TERMINAL_RESIZE)
-                    {
-                        var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalResizeMessage>(segment);
-                        var terminal = terminals.FirstOrDefault(term => term.Id == msg.Id);
-                        terminal?.SetWindowSize(msg.Cols, msg.Rows);
+                                await transport.Output.WriteAsync(data.AsMemory());
+
+                                var backend = Task.Factory.StartNew(() => TerminalStdoutWriter(terminal, transport.Output, token));
+                            }
+
+                            break;
+
+                        case TerminalMessageTypes.TerminalResizeRequest:
+                            {
+                                var msg = MessagePack.MessagePackSerializer.Deserialize<TerminalResize>(segment);
+                                var terminal = terminals.FirstOrDefault(term => term.Id == msg.Id);
+                                terminal?.SetWindowSize(msg.Cols, msg.Rows);
+                            }
+                            break;
+
                     }
                 }
                 catch (Exception e)
@@ -183,7 +196,7 @@ namespace WebTty
                     var read = await terminal.StandardOut.ReadAsync(buffer, 0, maxReadSize);
                     var bytesWritten = Encoding.UTF8.GetBytes(buffer.AsSpan(0, read), byteBuffer);
 
-                    var message = new WebTerminalOutputMessage { Type = 2, Id = terminal.Id, Body = byteBuffer.AsSpan(0, bytesWritten).ToArray() };
+                    var message = new TerminalOutput { Id = terminal.Id, Body = byteBuffer.AsSpan(0, bytesWritten).ToArray() };
 
                     // https://github.com/dotnet/corefx/blob/edbee902747970e86dbcf19727e72b8216946bb8/src/Common/src/CoreLib/System/Runtime/InteropServices/MemoryMarshal.cs#L25
                     // https://github.com/dotnet/corefx/blob/edbee902747970e86dbcf19727e72b8216946bb8/src/Common/src/CoreLib/Internal/Runtime/CompilerServices/Unsafe.cs#L76

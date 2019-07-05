@@ -12,6 +12,12 @@ namespace WebTty
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost
                 .CreateDefaultBuilder(args)
+                .PreferHostingUrls(false)
+                .SuppressStatusMessages(true)
+                .UseKestrel(o =>
+                {
+                    o.ListenLocalhost(5000);
+                })
                 .UseStartup<Startup>();
 
         static int Main(string[] args)

@@ -6,12 +6,13 @@ using Mono.Options;
 
 namespace WebTty
 {
-    class CommandLineOptions
+    public class CommandLineOptions
     {
         public bool ShowHelp { get; private set; }
-        public List<string> Rest { get; private set; }
+        public int Port { get; private set; } = 5000;
         public string Version => GetVersion();
         public string Name => GetName();
+        public List<string> Rest { get; private set; }
 
         private readonly OptionSet _options;
 
@@ -19,11 +20,10 @@ namespace WebTty
         {
             _options = new OptionSet
             {
-                { "?|h|help", "Show help information", h => ShowHelp = h != null }
+                { "p|port=", "Port to use [5000]. Use 0 for a dynamic port.", (int? port) => Port = port ?? 5000 },
+                { "?|h|help", "Show help information", help => ShowHelp = help != null }
             };
         }
-
-        public bool ShouldShowHelp() => ShowHelp;
 
         public void WriteHelp()
         {

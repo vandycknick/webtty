@@ -1,4 +1,4 @@
-.PHONY: clean watch watch-client watch-server
+.PHONY: clean watch watch-client watch-server test
 .DEFAULT_GOAL := default
 
 CONFIGURATION	:= Debug
@@ -26,6 +26,10 @@ setup:
 clean:
 	rm -rf $(ARTIFACTS)
 	yarn --cwd $(SRC_UI) run clean
+
+test:
+	dotnet test test/WebTty.Test
+	dotnet test test/WebTty.Integration.Test
 
 watch:
 	$(MAKE) -j2 watch-client watch-server
