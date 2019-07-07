@@ -6,18 +6,18 @@
     <IsPackable>true</IsPackable>
 
     <BuildOutputTargetFolder>ref</BuildOutputTargetFolder>
+    <OsPlatform Condition="$([MSBuild]::IsOsPlatform(Linux))">linux</OsPlatform>
+    <OsPlatform Condition="$([MSBuild]::IsOsPlatform(OSX))">macos</OsPlatform>
     <Architecture>x64</Architecture>
-    <Os Condition="$([MSBuild]::IsOsPlatform(Linux))">linux</Os>
-    <Os Condition="$([MSBuild]::IsOsPlatform(OSX))">macos</Os>
   </PropertyGroup>
 
-  <Import Project="./Sources/Sources.targets" />
+  <Import Project="$(MSBuildProjectDirectory)/Sources/Sources.targets" />
 
   <ItemGroup>
-    <None Include="$(BuildDirectory)bin\WebTty.Native.linux-x64\$(Configuration)\$(TargetFramework)\*.dll" Pack="true">
+    <None Include="$(BuildDirectory)bin/WebTty.Native.linux-x64/$(Configuration)/$(TargetFramework)/*.dll" Pack="true">
       <PackagePath>runtimes/linux-x64/lib/$(TargetFramework)</PackagePath>
     </None>
-    <None Include="$(BuildDirectory)bin\WebTty.Native.macos-x64\$(Configuration)\$(TargetFramework)\*.dll" Pack="true">
+    <None Include="$(BuildDirectory)bin/WebTty.Native.macos-x64/$(Configuration)/$(TargetFramework)/*.dll" Pack="true">
       <PackagePath>runtimes/osx/lib/$(TargetFramework)</PackagePath>
     </None>
   </ItemGroup>

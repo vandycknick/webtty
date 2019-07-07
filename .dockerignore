@@ -1,0 +1,5 @@
+.git
+.build
+**/node_modules/**
+artifacts
+azure-pipelines.yml
