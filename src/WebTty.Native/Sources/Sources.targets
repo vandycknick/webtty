@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <Compile Include="$(SourcesDir)/common/**/*.cs" />
-    <Compile Include="$(SourcesDir)/$(Os)/**/*.cs" />
+    <Compile Include="$(SourcesDir)/$(OsPlatform)/**/*.cs" />
   </ItemGroup>
 
 </Project>

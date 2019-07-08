@@ -49,7 +49,7 @@ module.exports = (env, argv) => {
             }),
             new HtmlWebpackInlineSourcePlugin(),
 
-            ...(argv.mode == "production"
+            ...(argv.analyze
                 ? [new BundleAnalyzerPlugin({ analyzerMode: "static" })]
                 : [])
         ],

@@ -1,26 +1,12 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
 using Mono.Options;
 
 namespace WebTty
 {
     class Program
     {
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost
-                .CreateDefaultBuilder(args)
-                .PreferHostingUrls(false)
-                .SuppressStatusMessages(true)
-                .UseKestrel(o =>
-                {
-                    o.ListenLocalhost(5000);
-                })
-                .UseStartup<Startup>();
-
-        static int Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             try
             {
@@ -32,9 +18,7 @@ namespace WebTty
                     return 0;
                 }
 
-                CreateWebHostBuilder(args)
-                        .Build()
-                        .Run();
+                await new TtyServer(options).RunAsync();
                 return 0;
             }
             catch (OptionException e)

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <Os>macos</Os>
+    <OsPlatform>macos</OsPlatform>
     <Architecture>x64</Architecture>
   </PropertyGroup>
 

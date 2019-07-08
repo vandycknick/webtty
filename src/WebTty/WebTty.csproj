@@ -9,7 +9,9 @@
     <PackAsTool>true</PackAsTool>
     <IsPackaging>false</IsPackaging>
 
-    <RestoreSources>$(RestoreSources);../../artifacts;https://api.nuget.org/v3/index.json</RestoreSources>
+    <RestoreSources Condition="'$(IsPackaging)' == 'true'">
+      $(RestoreSources);../../artifacts;https://api.nuget.org/v3/index.json
+    </RestoreSources>
   </PropertyGroup>
 
   <ItemGroup>

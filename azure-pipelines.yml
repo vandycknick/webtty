@@ -1,0 +1,43 @@
+trigger:
+  branches:
+    include:
+    - master
+
+pr:
+  branches:
+    include:
+    - '*'
+
+variables:
+  configuration: Release
+
+jobs:
+  - job: Linux
+    pool:
+      vmImage: ubuntu-16.04
+    workspace:
+      clean: all
+
+    steps:
+      - bash: make setup
+        displayName: Install dependencies
+
+      - bash: make build
+        displayName: Initial build
+
+      - bash: make test-unit-ci
+        displayName: Unit tests
+
+      - task: PublishTestResults@2
+        displayName: Publish unit test results
+        condition: always()
+        inputs:
+          testRunTitle: Linux
+          testResultsFormat: VSTest
+          testResultsFiles: artifacts/TestResults/*.trx
+
+      - bash: make
+        displayName: Package cli application
+
+      - bash: make install
+        displayName: Install cli application

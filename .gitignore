@@ -1,6 +1,8 @@
 # Project specific
 .envrc_secrets
 dist
+.build
+artifacts
 
 # Created by https://www.gitignore.io/api/csharp,windows,visualstudiocode
 
