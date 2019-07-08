@@ -9,6 +9,7 @@ namespace WebTty
     public class CommandLineOptions
     {
         public bool ShowHelp { get; private set; }
+        public bool ShowVersion { get; private set; }
         public int Port { get; private set; } = 5000;
         public string Version => GetVersion();
         public string Name => GetName();
@@ -21,7 +22,8 @@ namespace WebTty
             _options = new OptionSet
             {
                 { "p|port=", "Port to use [5000]. Use 0 for a dynamic port.", (int? port) => Port = port ?? 5000 },
-                { "?|h|help", "Show help information", help => ShowHelp = help != null }
+                { "version", "Show current version", version => ShowVersion = version != null },
+                { "?|h|help", "Show help information", help => ShowHelp = help != null },
             };
         }
 
@@ -43,8 +45,7 @@ namespace WebTty
             Rest = _options.Parse(args);
             return this;
         }
-        public static CommandLineOptions Build(string[] args) =>
-            new CommandLineOptions().Parse(args);
+        public static CommandLineOptions Build(string[] args) => new CommandLineOptions().Parse(args);
 
         public static string GetVersion() =>
             typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
