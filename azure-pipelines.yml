@@ -12,13 +12,21 @@ variables:
   configuration: Release
 
 jobs:
-  - job: Linux
+  - job: linux
     pool:
       vmImage: ubuntu-16.04
     workspace:
       clean: all
 
     steps:
+      - task: NodeTool@0
+        displayName: Node install
+        inputs:
+          versionSpec: '10.16.0'
+
+      - bash: node --version && yarn --version && dotnet --info
+        displayName: Print versions
+
       - bash: make setup
         displayName: Install dependencies
 
@@ -32,7 +40,45 @@ jobs:
         displayName: Publish unit test results
         condition: always()
         inputs:
-          testRunTitle: Linux
+          testRunTitle: linux
+          testResultsFormat: VSTest
+          testResultsFiles: artifacts/TestResults/*.trx
+
+      - bash: make
+        displayName: Package cli application
+
+      - bash: make install
+        displayName: Install cli application
+
+  - job: macOS
+    pool:
+      vmImage: macOS-10.14
+    workspace:
+      clean: all
+
+    steps:
+      - task: NodeTool@0
+        displayName: Node install
+        inputs:
+          versionSpec: '10.16.0'
+
+      - bash: node --version && yarn --version && dotnet --info
+        displayName: Print versions
+
+      - bash: make setup
+        displayName: Install dependencies
+
+      - bash: make build
+        displayName: Initial build
+
+      - bash: make test-unit-ci
+        displayName: Unit tests
+
+      - task: PublishTestResults@2
+        displayName: Publish unit test results
+        condition: always()
+        inputs:
+          testRunTitle: macOS
           testResultsFormat: VSTest
           testResultsFiles: artifacts/TestResults/*.trx
 

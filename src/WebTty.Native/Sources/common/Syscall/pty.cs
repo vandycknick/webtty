@@ -6,7 +6,7 @@ namespace WebTty.Native.Syscall
 {
     public static partial class Libc
     {
-        [DllImport(libc, SetLastError = true)]
+        [DllImport(libutil, SetLastError = true)]
         public extern static int forkpty(out int master, IntPtr dataReturn, IntPtr termios, ref winsize winsz);
     }
 }

@@ -28,5 +28,12 @@ namespace WebTty.Native.Syscall
         public static extern long read(int fd, void* buf, uint count);
         [DllImport(libc, SetLastError = true)]
         public static extern long write(int fd, void* buf, uint count);
+
+        [DllImport(libc)]
+        public static extern uid_t getuid();
+        [DllImport(libc)]
+        public static extern uid_t geteuid();
+        [DllImport(libc)]
+        public static extern gid_t getgid();
     }
 }

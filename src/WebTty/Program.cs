@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Mono.Options;
 
@@ -8,6 +9,11 @@ namespace WebTty
     {
         static async Task<int> Main(string[] args)
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                throw new PlatformNotSupportedException("Windows is currently not supported. Support for windows is currently work in progress!");
+            }
+
             try
             {
                 var options = CommandLineOptions.Build(args);
@@ -15,6 +21,12 @@ namespace WebTty
                 if (options.ShowHelp)
                 {
                     options.WriteHelp();
+                    return 0;
+                }
+
+                if (options.ShowVersion)
+                {
+                    Console.WriteLine($"{CommandLineOptions.GetVersion()}");
                     return 0;
                 }
 

@@ -21,6 +21,19 @@ namespace WebTty.Test
         }
 
         [Fact]
+        public void CommnandLineOptions_Build_ShouldSetVersionToTrueWhenPassedVersionOption()
+        {
+            // Arrange
+            var args = new string[] { "--version" };
+
+            // Act
+            var options = CommandLineOptions.Build(args);
+
+            // Assert
+            Assert.True(options.ShowVersion);
+        }
+
+        [Fact]
         public void CommandLineOptions_Build_ShouldSetShowHelpToFalseWhenNoHelpArgumentsAreGiven()
         {
             // Arrange

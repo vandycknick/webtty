@@ -32,9 +32,12 @@ namespace WebTty
                 ws_row = 24,
             };
 
+            var shell = GetUserDefaultShell();
+            var filename = ResolvePath(shell);
+
             var pid = Pty.ForkAndExec(
-                "/usr/local/bin/bash",
-                new string[] { "/usr/local/bin/bash" },
+                filename,
+                new string[] { filename },
                 GetEnvironmentVariables(),
                 out pty,
                 size
@@ -97,11 +100,44 @@ namespace WebTty
             }
         }
 
-        /// <summary>
-        /// Provides a baseline set of environment variables that would be useful to run the terminal,
-        /// you can customzie these accordingly.
-        /// </summary>
-        /// <returns></returns>
+        private static string ResolvePath(string filename)
+        {
+            // If path rooted assume it is absolute path to executable
+            if (Path.IsPathRooted(filename)) return filename;
+
+            // Check if executable the current directory
+            string path = Path.Combine(Directory.GetCurrentDirectory(), filename);
+
+            if (File.Exists(path)) return path;
+
+            // Then check each directory listed in the PATH environment variables
+            return FindProgramInPath(filename);
+        }
+
+        private static string FindProgramInPath(string program)
+        {
+            string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
+            if (pathEnvVar != null)
+            {
+                foreach (var path in pathEnvVar.Split(Path.PathSeparator))
+                {
+                    var fulPath = Path.Combine(path, program);
+                    if (File.Exists(fulPath))
+                    {
+                        return fulPath;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static string GetUserDefaultShell()
+        {
+            var uid = Libc.getuid();
+            var pwd = Libc.getpwuid(uid);
+            return pwd.pw_shell;
+        }
+
         public static string[] GetEnvironmentVariables(string termName = null)
         {
             var l = new List<string>();
