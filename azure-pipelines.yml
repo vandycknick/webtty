@@ -19,6 +19,14 @@ jobs:
       clean: all
 
     steps:
+      - task: NodeTool@0
+        displayName: Node install
+        inputs:
+          versionSpec: '10.16.0'
+
+      - bash: node --version && yarn --version && dotnet --info
+        displayName: Print versions
+
       - bash: make setup
         displayName: Install dependencies
 
@@ -49,6 +57,14 @@ jobs:
       clean: all
 
     steps:
+      - task: NodeTool@0
+        displayName: Node install
+        inputs:
+          versionSpec: '10.16.0'
+
+      - bash: node --version && yarn --version && dotnet --info
+        displayName: Print versions
+
       - bash: make setup
         displayName: Install dependencies
 
