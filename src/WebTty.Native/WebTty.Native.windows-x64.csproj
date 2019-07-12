@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <OsPlatform>linux</OsPlatform>
+    <OsPlatform>windows</OsPlatform>
     <Architecture>x64</Architecture>
   </PropertyGroup>
 

@@ -8,6 +8,6 @@
     <Architecture>x64</Architecture>
   </PropertyGroup>
 
-  <Import Project="./Sources/Sources.targets" />
+  <Import Project="$(MSBuildProjectDirectory)/Sources/Sources.targets" />
 
 </Project>

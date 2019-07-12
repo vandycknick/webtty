@@ -8,6 +8,7 @@
     <BuildOutputTargetFolder>ref</BuildOutputTargetFolder>
     <OsPlatform Condition="$([MSBuild]::IsOsPlatform(Linux))">linux</OsPlatform>
     <OsPlatform Condition="$([MSBuild]::IsOsPlatform(OSX))">macos</OsPlatform>
+    <OsPlatform Condition="$([MSBuild]::IsOsPlatform(Windows))">windows</OsPlatform>
     <Architecture>x64</Architecture>
   </PropertyGroup>
 
