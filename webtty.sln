@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTty.Test", "test\WebTty.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTty.Integration.Test", "test\WebTty.Integration.Test\WebTty.Integration.Test.csproj", "{B82FC5A5-E020-444D-8711-7AD05F4114CA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "build", "tools\build\build.csproj", "{15A971F9-A50C-4A26-B3F0-B34440911549}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{15A971F9-A50C-4A26-B3F0-B34440911549}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15A971F9-A50C-4A26-B3F0-B34440911549}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{592E26E0-2750-44B5-89F1-DAD922F822AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{592E26E0-2750-44B5-89F1-DAD922F822AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{592E26E0-2750-44B5-89F1-DAD922F822AC}.Debug|x64.ActiveCfg = Debug|Any CPU
