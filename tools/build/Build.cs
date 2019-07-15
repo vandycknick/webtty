@@ -110,11 +110,12 @@ class Build : NukeBuild
                     .SetResultsDirectory(ArtifactsDirectory / "TestResults")
                     .SetLogger("trx"));
 
-                DotNetTest(s => s
-                    .SetProjectFile(Solution.GetProject("WebTty.Integration.Test"))
-                    .SetNoBuild(true)
-                    .SetResultsDirectory(ArtifactsDirectory / "TestResults")
-                    .SetLogger("trx"));
+                // Temporary remove until I have a better plan to run integration tests in ci
+                // DotNetTest(s => s
+                //     .SetProjectFile(Solution.GetProject("WebTty.Integration.Test"))
+                //     .SetNoBuild(true)
+                //     .SetResultsDirectory(ArtifactsDirectory / "TestResults")
+                //     .SetLogger("trx"));
             }
         });
 
