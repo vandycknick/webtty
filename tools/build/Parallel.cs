@@ -6,37 +6,61 @@ using System.Threading.Tasks;
 
 public class Parallel
 {
-    public static void Run(params string[] tasks)
+    public static void Run(params string[] targets)
     {
-        var taskList = new List<Task>();
+        var taskList = new List<RunningTask>();
 
-        foreach (var task in tasks)
+        void OnProcessExit(object sender, EventArgs e)
         {
-            var runner = Task.Run(() => StartProcess(task));
-            taskList.Add(runner);
+            foreach (var task in taskList)
+            {
+                Console.WriteLine($"Shutting down process with id {task.Process.Id}");
+                if (!task.Process.HasExited) task.Process.Kill();
+            }
         }
 
-        Task.WaitAny(taskList.ToArray());
+        AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+        Console.CancelKeyPress += OnProcessExit;
+
+        foreach (var target in targets)
+        {
+            var task = RunningTask.Start(target);
+            taskList.Add(task);
+        }
+
+        Task.WaitAny(taskList.Select(r => r.Task).ToArray());
     }
 
-    private static async Task StartProcess(string path)
+    private class RunningTask
     {
-        var procInfo = new ProcessStartInfo
+        public static RunningTask Start(string path)
         {
-            FileName = path.Split(' ').FirstOrDefault(),
-            Arguments = string.Join(' ', path.Split(' ').Skip(1)),
-            RedirectStandardOutput = true,
-        };
+            var procInfo = new ProcessStartInfo
+            {
+                FileName = path.Split(' ').FirstOrDefault(),
+                Arguments = string.Join(' ', path.Split(' ').Skip(1)),
+                RedirectStandardOutput = true,
+            };
 
-        var process = Process.Start(procInfo);
+            var process = Process.Start(procInfo);
+            var redirection = Task.Run(() =>
+            {
 
-        while (!process.StandardOutput.EndOfStream)
-        {
-            var line = await process.StandardOutput.ReadLineAsync();
-            Console.WriteLine(line);
+                while (!process.StandardOutput.EndOfStream)
+                {
+                    var line = process.StandardOutput.ReadLine();
+                    Console.WriteLine(line);
+                }
+            });
+
+            return new RunningTask
+            {
+                Process = process,
+                Task = redirection,
+            };
         }
+        public Process Process { get; set; }
+        public Task Task { get; set; }
 
-        process.Kill();
-        process.WaitForExit();
     }
 }

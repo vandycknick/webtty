@@ -120,12 +120,14 @@ class Build : NukeBuild
         });
 
     Target Watch => _ => _
+        .DependsOn(CompileUI)
         .Executes(() =>
         {
             var ext = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ps1" : "sh";
+            var usePwsh = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "pwsh " : "";
             Parallel.Run(
-                $"./build.{ext} {nameof(WatchUI)} --no-logo ",
-                $"./build.{ext} {nameof(WatchServer)} --no-logo"
+                $"{usePwsh}./build.{ext} {nameof(WatchUI)} --no-logo ",
+                $"{usePwsh}./build.{ext} {nameof(WatchServer)} --no-logo"
             );
         });
 
@@ -136,7 +138,6 @@ class Build : NukeBuild
         });
 
     Target WatchServer => _ => _
-        .DependsOn(CompileUI)
         .Executes(() =>
         {
             DotNet("watch run", workingDirectory: SourceDirectory / "WebTty");
