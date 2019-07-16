@@ -4,10 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <OsPlatform>linux</OsPlatform>
+    <OsPlatform>Linux</OsPlatform>
+    <UnixPlatform>$(OsPlatform)</UnixPlatform>
     <Architecture>x64</Architecture>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildProjectDirectory)/Sources/Sources.targets" />
+  <Import Project="$(MSBuildProjectDirectory)/Sources.targets" />
 
 </Project>

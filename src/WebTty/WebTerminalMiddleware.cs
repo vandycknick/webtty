@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using WebTty.Extensions;
 using WebTty.Messages;
+using WebTty.Native.Terminal;
 
 namespace WebTty
 {
