@@ -12,11 +12,11 @@
     "@nvd/use-redux": "1.0.0",
     "immer": "^3.1.3",
     "msgpack5": "4.2.1",
-    "preact": "10.0.0-beta.2",
-    "redux": "4.0.1",
+    "preact": "10.0.0-rc.0",
+    "redux": "4.0.4",
     "redux-thunk": "^2.3.0",
     "resize-observer-polyfill": "1.5.1",
-    "xterm": "3.14.2",
+    "xterm": "3.14.5",
     "xterm-addon-fit": "0.1.0-beta2"
   },
   "devDependencies": {
@@ -27,12 +27,12 @@
     "html-webpack-inline-source-plugin": "^0.0.10",
     "html-webpack-plugin": "^3.2.0",
     "style-loader": "^0.23.1",
-    "ts-loader": "^6.0.2",
-    "typescript": "^3.5.2",
-    "webpack": "^4.34.0",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "webpack": "^4.36.1",
     "webpack-bundle-analyzer": "^3.3.2",
-    "webpack-cli": "^3.3.4",
-    "webpack-dev-server": "^3.7.1",
+    "webpack-cli": "^3.3.6",
+    "webpack-dev-server": "^3.7.2",
     "webpack-modules": "^1.0.0"
   }
 }

@@ -106,7 +106,7 @@ function Terminal({ dataSource, onInput, onResize, onTitle, onAddonsLoaded, addo
     }, [wrapper.current])
 
     return (
-        <div class="terminal-wrapper" style={{ backgroundColor: solarized.background }} ref={wrapper}></div>
+        <div class="terminal-wrapper" style={{ backgroundColor: solarized.background || 'black' }} ref={wrapper}></div>
     )
 }
 
