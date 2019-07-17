@@ -1,22 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using WebTty.Native.Interop;
 
 namespace WebTty.Native.Terminal
 {
-    public sealed partial class Terminal
+    public sealed partial class Terminal : IDisposable
     {
+        public const int DEFAULT_WIDTH = 80;
+        public const int DEFAULT_HEIGHT = 24;
         private static int iid = 0;
 
         public StreamWriter StandardIn { get; private set; }
         public StreamReader StandardOut { get; private set; }
 
         private int childpid;
-        private int pty;
 
         public int Id { get; private set; }
+        public bool IsRunning { get; private set; }
+        public int ExitCode { get; private set; } = 0;
 
         public Terminal()
         {
@@ -25,79 +26,13 @@ namespace WebTty.Native.Terminal
 
         public void Start()
         {
-            var size = new winsize()
-            {
-                ws_col = 80,
-                ws_row = 24,
-            };
-
-            var shell = GetUserDefaultShell();
-            var filename = ResolvePath(shell);
-
-            var pid = Sys.ForkPtyAndExec(
-                filename,
-                new string[] { filename },
-                GetEnvironmentVariables(),
-                out pty,
-                size
-            );
-
-            childpid = pid;
-
-            var ret = Libc.waitpid(childpid, out var status, WaitPidOptions.WNOHANG);
-
-            if (ret == 0)
-            {
-                IsRunning = true;
-            }
-
-            Console.WriteLine(pid);
-
-            var stream = new UnixStream(pty);
-
-            StandardIn = new StreamWriter(stream);
-            StandardOut = new StreamReader(stream);
+            var shell = Shell.GetUserDefault();
+            StartCore(shell, DEFAULT_WIDTH, DEFAULT_HEIGHT);
         }
 
-        public bool IsRunning { get; private set; }
-        public int ExitCode { get; private set; } = 0;
+        public void Kill() => KillCore();
 
-        public void Kill()
-        {
-            if (Libc.kill(childpid, Libc.SIGKILL) != 0)
-            {
-                throw new Win32Exception();
-            }
-        }
-
-        public void SetWindowSize(int col, int rows)
-        {
-            var size = new winsize
-            {
-                ws_col = (ushort)col,
-                ws_row = (ushort)rows,
-            };
-
-            Sys.PtySetWinSize(pty, ref size);
-        }
-
-        public void WaitForExit()
-        {
-            int ret;
-
-            ret = Libc.waitpid(childpid, out var status, WaitPidOptions.None);
-
-            IsRunning = false;
-
-            if (ret == childpid)
-            {
-                ExitCode = Libc.WEXITSTATUS(status);
-            }
-            else
-            {
-                ExitCode = -1;
-            }
-        }
+        public void WaitForExit() => WaitForExitCore();
 
         private static string ResolvePath(string filename)
         {
@@ -130,13 +65,6 @@ namespace WebTty.Native.Terminal
             return null;
         }
 
-        public static string GetUserDefaultShell()
-        {
-            var uid = Libc.getuid();
-            var pwd = Libc.getpwuid(uid);
-            return pwd.pw_shell;
-        }
-
         public static string[] GetEnvironmentVariables(string termName = null)
         {
             var l = new List<string>();
@@ -155,5 +83,42 @@ namespace WebTty.Native.Terminal
             }
             return l.ToArray();
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    DisposeManagedState();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Terminal()
+        // {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

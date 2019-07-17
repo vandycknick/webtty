@@ -9,11 +9,6 @@ namespace WebTty
     {
         static async Task<int> Main(string[] args)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                throw new PlatformNotSupportedException("Windows is currently not supported. Support for windows is currently work in progress!");
-            }
-
             try
             {
                 var options = CommandLineOptions.Build(args);

@@ -16,12 +16,16 @@
     <Compile Include="$(SourcesDir)/Terminal/Terminal.$(OsPlatform).cs" />
     <Compile Condition="'$(UnixPlatform)' != 'Unsupported'" Include="$(SourcesDir)/Terminal/Terminal.Unix.cs" />
 
+    <Compile Include="$(SourcesDir)/Terminal/Shell.cs" />
+    <Compile Include="$(SourcesDir)/Terminal/Shell.$(OsPlatform).cs" />
+    <Compile Condition="'$(UnixPlatform)' != 'Unsupported'" Include="$(SourcesDir)/Terminal/Shell.Unix.cs" />
+
     <Compile Include="$(SourcesDir)/Utils/**/*.cs" />
 
     <Compile Include="$(SourcesDir)/Interop/Sys/**/*.cs" />
 
     <Compile Include="$(SourcesDir)/Interop/Libc/Common/**/*.cs" />
-    <Compile Include="$(SourcesDir)/Interop/Libc/$(OsPlatform)/**/*.cs" />
+    <Compile Include="$(SourcesDir)/Interop/Libc/$(UnixPlatform)/**/*.cs" />
 
     <Compile Include="$(SourcesDir)/Interop/Kernel32/**/*.cs" />
   </ItemGroup>
