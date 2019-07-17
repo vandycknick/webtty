@@ -4,8 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <OsPlatform>MacOS</OsPlatform>
-    <UnixPlatform>$(OsPlatform)</UnixPlatform>
+    <OsPlatform>Windows</OsPlatform>
+    <UnixPlatform>Unsupported</UnixPlatform>
     <Architecture>x64</Architecture>
   </PropertyGroup>
 

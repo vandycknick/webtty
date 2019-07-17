@@ -24,11 +24,15 @@ COPY src/WebTty.UI/*.csproj src/WebTty.UI/
 COPY test/WebTty.Test/*.csproj test/WebTty.Test/
 COPY test/WebTty.Integration.Test/*.csproj test/WebTty.Integration.Test/
 
-# COPY makefile
-COPY Makefile .
+# COPY tools
+COPY tools/build/* tools/build/
 
-RUN make setup
+# COPY nuke
+COPY build.sh .
+COPY .nuke .
+
+RUN ./build.sh setup
 
 COPY . .
 
-RUN make build
+RUN ./build.sh compile

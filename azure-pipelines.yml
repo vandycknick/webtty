@@ -27,13 +27,13 @@ jobs:
       - bash: node --version && yarn --version && dotnet --info
         displayName: Print versions
 
-      - bash: make setup
+      - bash: ./build.sh setup
         displayName: Install dependencies
 
-      - bash: make build
+      - bash: ./build.sh compile
         displayName: Initial build
 
-      - bash: make test-unit-ci
+      - bash: ./build.sh test
         displayName: Unit tests
 
       - task: PublishTestResults@2
@@ -44,10 +44,10 @@ jobs:
           testResultsFormat: VSTest
           testResultsFiles: artifacts/TestResults/*.trx
 
-      - bash: make
+      - bash: ./build.sh
         displayName: Package cli application
 
-      - bash: make install
+      - bash: ./build.sh install
         displayName: Install cli application
 
   - job: macOS
@@ -65,13 +65,13 @@ jobs:
       - bash: node --version && yarn --version && dotnet --info
         displayName: Print versions
 
-      - bash: make setup
+      - bash: ./build.sh setup
         displayName: Install dependencies
 
-      - bash: make build
+      - bash: ./build.sh compile
         displayName: Initial build
 
-      - bash: make test-unit-ci
+      - bash: ./build.sh test
         displayName: Unit tests
 
       - task: PublishTestResults@2
@@ -82,8 +82,8 @@ jobs:
           testResultsFormat: VSTest
           testResultsFiles: artifacts/TestResults/*.trx
 
-      - bash: make
+      - bash: ./build.sh
         displayName: Package cli application
 
-      - bash: make install
+      - bash: ./build.sh install
         displayName: Install cli application

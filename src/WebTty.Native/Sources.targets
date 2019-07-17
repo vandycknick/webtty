@@ -1,0 +1,33 @@
+<Project>
+
+  <PropertyGroup>
+    <SourcesDir>$(MSBuildProjectDirectory)</SourcesDir>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Bitness Condition="'$(Architecture)'=='x64'"  >64</Bitness>
+    <Bitness Condition="'$(Architecture)'=='arm64'">64</Bitness>
+    <Bitness Condition="'$(Architecture)'=='arm32'">32</Bitness>
+    <Endianness>le</Endianness>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(SourcesDir)/Terminal/Terminal.cs" />
+    <Compile Include="$(SourcesDir)/Terminal/Terminal.$(OsPlatform).cs" />
+    <Compile Condition="'$(UnixPlatform)' != 'Unsupported'" Include="$(SourcesDir)/Terminal/Terminal.Unix.cs" />
+
+    <Compile Include="$(SourcesDir)/Terminal/Shell.cs" />
+    <Compile Include="$(SourcesDir)/Terminal/Shell.$(OsPlatform).cs" />
+    <Compile Condition="'$(UnixPlatform)' != 'Unsupported'" Include="$(SourcesDir)/Terminal/Shell.Unix.cs" />
+
+    <Compile Include="$(SourcesDir)/Utils/**/*.cs" />
+
+    <Compile Include="$(SourcesDir)/Interop/Sys/**/*.cs" />
+
+    <Compile Include="$(SourcesDir)/Interop/Libc/Common/**/*.cs" />
+    <Compile Include="$(SourcesDir)/Interop/Libc/$(UnixPlatform)/**/*.cs" />
+
+    <Compile Include="$(SourcesDir)/Interop/Kernel32/**/*.cs" />
+  </ItemGroup>
+
+</Project>

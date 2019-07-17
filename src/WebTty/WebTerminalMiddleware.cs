@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using WebTty.Extensions;
 using WebTty.Messages;
+using WebTty.Native.Terminal;
 
 namespace WebTty
 {
@@ -147,9 +148,11 @@ namespace WebTty
 
                                 await transport.Output.WriteAsync(data.AsMemory());
 
-                                var backend = Task.Factory.StartNew(() => TerminalStdoutWriter(terminal, transport.Output, token));
+                                var backend = Task.Factory.StartNew(
+                                    function: () => TerminalStdoutReader(terminal, transport.Output, token),
+                                    creationOptions: TaskCreationOptions.LongRunning
+                                );
                             }
-
                             break;
 
                         case TerminalMessageTypes.TerminalResizeRequest:
@@ -180,9 +183,9 @@ namespace WebTty
             transport.Output.Complete();
         }
 
-        private async Task TerminalStdoutWriter(Terminal terminal, PipeWriter output, CancellationToken token)
+        private async Task TerminalStdoutReader(Terminal terminal, PipeWriter output, CancellationToken token)
         {
-            const int maxReadSize = 1024;
+            const int maxReadSize = 1024 * 172 * 42;
             const int maxBufferSize = maxReadSize * sizeof(char);
             var buffer = new char[maxReadSize];
             var byteBuffer = new byte[maxBufferSize];
