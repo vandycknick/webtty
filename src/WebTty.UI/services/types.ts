@@ -1,6 +1,3 @@
-import { AnyAction, Store } from "redux";
-import { ThunkDispatch } from "redux-thunk";
-
 const TERMINAL_SESSION = "@@webtty/TERMINAL_SESSION"
 const TERMINAL_SESSION_DISCONNECTED = "@@webtty/TERMINAL_SESSION_DISCONNECTED"
 
@@ -16,7 +13,7 @@ type TerminalSessionDisconnectedAction = {
 }
 
 type TerminalNewTabAction = {
-    type: typeof TERMINAL_NEW_TAB,
+    type: typeof TERMINAL_NEW_TAB
 }
 
 type TerminalNewTabCreatedAction = {
@@ -24,33 +21,24 @@ type TerminalNewTabCreatedAction = {
     payload: { id: number }
 }
 
-type TerminalActions = TerminalSessionAction | TerminalSessionDisconnectedAction | TerminalNewTabAction | TerminalNewTabCreatedAction
+type TerminalActions =
+    | TerminalSessionAction
+    | TerminalSessionDisconnectedAction
+    | TerminalNewTabAction
+    | TerminalNewTabCreatedAction
 
 type TerminalState = {
-    tabId: number | undefined;
+    tabId: number | undefined
 }
 
-type AppState = {
-    terminal: TerminalState
-}
-
-type AppConfig = {
-    socketUrl: string
-}
-
-type AppStore = Store<AppState, AnyAction> & { dispatch: ThunkDispatch<{}, AppConfig, AnyAction> }
+type AppState = TerminalState
 
 export {
     TERMINAL_SESSION,
     TERMINAL_SESSION_DISCONNECTED,
     TERMINAL_NEW_TAB,
     TERMINAL_NEW_TAB_CREATED,
-
     TerminalActions,
-
     TerminalState,
-
-    AppStore,
     AppState,
-    AppConfig,
 }

@@ -1,4 +1,4 @@
-import { h } from "preact"
+import { h, FunctionalComponent } from "preact"
 import { useRef, useEffect } from "preact/hooks"
 import { Terminal as Xterm, ITheme, ITerminalAddon } from "xterm"
 import "xterm/dist/xterm.css"
@@ -9,26 +9,32 @@ type TerminalProps = {
     dataSource: AsyncIterable<string>
     addons?: ITerminalAddon[]
     onInput?: (data: string) => void
-    onResize?: (data: { cols: number; rows: number; }) => void
+    onResize?: (data: { cols: number; rows: number }) => void
     onTitle?: (title: string) => void
     onAddonsLoaded?: () => void
     autoBuffer?: boolean
 }
 
-const consumeDataSource = async (dataSource: AsyncIterable<string>, terminal: Xterm, autoBuffer: boolean = true) => {
-    let buffer = "";
+type DataSourceOptions = {
+    dataSource: AsyncIterable<string>
+    terminal: Xterm
+    autoBuffer?: boolean
+}
 
-    const flushBuffer = () => {
+const consumeDataSource = async ({ dataSource, terminal, autoBuffer = true }: DataSourceOptions): Promise<void> => {
+    let buffer = ""
+
+    const flushBuffer = (): void => {
         terminal.write(buffer)
         buffer = ""
     }
 
-    const pushToBuffer = (msg: string) => {
+    const pushToBuffer = (msg: string): void => {
         if (buffer !== "") {
             buffer += msg
         } else {
             buffer = msg
-            setTimeout(flushBuffer, 16)
+            setTimeout(flushBuffer, 60)
         }
     }
 
@@ -36,7 +42,7 @@ const consumeDataSource = async (dataSource: AsyncIterable<string>, terminal: Xt
         if (autoBuffer) {
             pushToBuffer(message)
         } else {
-            terminal.write(message);
+            terminal.write(message)
         }
     }
 }
@@ -71,7 +77,15 @@ const solarized: ITheme = {
     brightWhite: "#fdf6e3",
 }
 
-function Terminal({ dataSource, onInput, onResize, onTitle, onAddonsLoaded, addons = [], autoBuffer = true }: TerminalProps) {
+const Terminal: FunctionalComponent<TerminalProps> = ({
+    dataSource,
+    onInput,
+    onResize,
+    onTitle,
+    onAddonsLoaded,
+    addons = [],
+    autoBuffer = true,
+}: TerminalProps) => {
     const wrapper = useRef<HTMLDivElement>()
     const terminalRef = useRef<Xterm | null>(null)
 
@@ -84,7 +98,7 @@ function Terminal({ dataSource, onInput, onResize, onTitle, onAddonsLoaded, addo
         if (wrapper.current) {
             terminal.open(wrapper.current)
 
-            consumeDataSource(dataSource, terminal, autoBuffer);
+            consumeDataSource({ dataSource, terminal, autoBuffer })
 
             addons.forEach(addon => terminal.loadAddon(addon))
 
@@ -94,11 +108,11 @@ function Terminal({ dataSource, onInput, onResize, onTitle, onAddonsLoaded, addo
             onResize && terminal.on("resize", onResize)
             onTitle && terminal.on("title", onTitle)
 
-            terminal.setOption("theme", solarized);
-            terminal.focus();
+            terminal.setOption("theme", solarized)
+            terminal.focus()
         }
 
-        return () => {
+        return (): void => {
             onInput && terminal.off("data", onInput)
             onResize && terminal.off("resize", onResize)
             onTitle && terminal.off("title", onTitle)
@@ -106,7 +120,11 @@ function Terminal({ dataSource, onInput, onResize, onTitle, onAddonsLoaded, addo
     }, [wrapper.current])
 
     return (
-        <div class="terminal-wrapper" style={{ backgroundColor: solarized.background || 'black' }} ref={wrapper}></div>
+        <div
+            className="terminal-wrapper"
+            style={{ backgroundColor: solarized.background || "black" }}
+            ref={wrapper}
+        ></div>
     )
 }
 

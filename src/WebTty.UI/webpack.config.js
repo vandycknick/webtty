@@ -1,9 +1,10 @@
-const WebpackModules = require("webpack-modules");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+/* eslint-disable */
+const WebpackModules = require("webpack-modules")
+const HtmlWebpackPlugin = require("html-webpack-plugin")
+const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin")
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 
-module.exports = (env, argv) => {
+module.exports = (_, argv) => {
     const config = {
         mode: argv.mode,
 
@@ -14,8 +15,8 @@ module.exports = (env, argv) => {
         resolve: {
             extensions: [".ts", ".tsx", ".js"],
             alias: {
-                react: 'preact/compat',
-                'react-dom': 'preact/compat'
+                react: "preact/compat",
+                "react-dom": "preact/compat",
             },
         },
 
@@ -24,13 +25,13 @@ module.exports = (env, argv) => {
                 {
                     test: /\.tsx?$/,
                     exclude: /node_modules/,
-                    use: [{ loader: "ts-loader" }]
+                    use: [{ loader: "ts-loader" }],
                 },
                 {
                     test: /\.css$/,
-                    use: ["style-loader", "css-loader"]
-                }
-            ]
+                    use: ["style-loader", "css-loader"],
+                },
+            ],
         },
 
         plugins: [
@@ -40,30 +41,28 @@ module.exports = (env, argv) => {
                     ? {
                           minify: {
                               removeComments: true,
-                              collapseWhitespace: true
+                              collapseWhitespace: true,
                           },
-                          inlineSource: ".(js|css)$"
+                          inlineSource: ".(js|css)$",
                       }
                     : {}),
-                template: "index.html"
+                template: "index.html",
             }),
             new HtmlWebpackInlineSourcePlugin(),
 
-            ...(argv.analyze
-                ? [new BundleAnalyzerPlugin({ analyzerMode: "static" })]
-                : [])
+            ...(argv.analyze ? [new BundleAnalyzerPlugin({ analyzerMode: "static" })] : []),
         ],
 
         devServer: {
             headers: {
-                "Access-Control-Allow-Origin": "*"
+                "Access-Control-Allow-Origin": "*",
             },
             port: 3000,
             proxy: {
-                "/ws": "http://localhost:5000"
-            }
+                "/ws": "http://localhost:5000",
+            },
         },
-    };
+    }
 
-    return config;
-};
+    return config
+}

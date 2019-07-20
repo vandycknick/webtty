@@ -1,23 +1,16 @@
-import { Provider } from "@nvd/use-redux"
-import { h } from "preact"
+import { h, FunctionComponent } from "preact"
+import { useMemo } from "preact/hooks"
 import { FitAddon } from "xterm-addon-fit"
 
 import "./index.css"
+import { useDebounce } from "./hooks/useDebounce"
 import TerminalWindowContainer from "./containers/TerminalWindowContainer"
-import debounce from "./utils/debounce";
-import { storeBuilder } from "./store";
 
-const fit = new FitAddon()
-const debounceFit = debounce(() => fit.fit(), 200)
-const store = storeBuilder()
+const App: FunctionComponent = () => {
+    const fit = useMemo(() => new FitAddon())
+    const debounceFit = useDebounce(fit.fit, 200)
 
-const App = () => (
-    <Provider value={store} >
-        <TerminalWindowContainer
-            addons={[fit]}
-            onResize={debounceFit}
-        />
-    </Provider >
-)
+    return <TerminalWindowContainer addons={[fit]} onResize={debounceFit} />
+}
 
-export default App;
+export default App

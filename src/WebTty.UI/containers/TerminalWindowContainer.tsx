@@ -1,39 +1,41 @@
-import { useActionCreators, useRedux } from "@nvd/use-redux"
-import { h } from "preact"
-import { useEffect } from "preact/hooks";
-import { ITerminalAddon } from "xterm";
-
+import { h, FunctionComponent } from "preact"
+import { ITerminalAddon } from "xterm"
 import Terminal from "../components/Terminal"
 import ResizeObserver from "../components/ResizeObserver"
-import { startTerminal, getTabStdoutStream, writeStdin, resizeTerminal, AppState } from "../store";
+import useWebTty from "../services/useWebTty"
+import configBuilder from "../config"
 
 type TerminalContainerProps = {
     addons: ITerminalAddon[]
     onResize: () => void
 }
 
-const TerminalWindowContainer = ({ addons, onResize }: TerminalContainerProps) => {
-    const actions = useActionCreators({ startTerminal } as any)
-    const state = useRedux<AppState>();
+const setDocumentTitle = (title: string): void => {
+    document.title = title
+}
 
-    useEffect(() => {
-        if (!state.terminal.tabId) actions.startTerminal();
-    }, [state.terminal.tabId])
+const config = configBuilder()
 
-    if (!state.terminal.tabId) return <div>Loading ...</div>
+const TerminalWindowContainer: FunctionComponent<TerminalContainerProps> = ({
+    addons,
+    onResize,
+}: TerminalContainerProps) => {
+    const { state, resizeTerminal, writeStdIn, stdOut } = useWebTty(config.socketUrl)
+
+    if (!state.tabId) return <div>Loading ...</div>
 
     return (
         <ResizeObserver onChange={onResize}>
             <Terminal
-                dataSource={getTabStdoutStream(state.terminal.tabId as number)}
+                dataSource={stdOut(state.tabId)}
                 addons={addons}
-                onResize={(data) => resizeTerminal(state.terminal.tabId as number, data.cols, data.rows)}
-                onInput={(msg: string) => writeStdin(state.terminal.tabId as number, msg)}
-                onTitle={title => document.title = title}
+                onResize={(data): void => resizeTerminal(state.tabId as number, data.cols, data.rows)}
+                onInput={(msg): void => writeStdIn(state.tabId as number, msg)}
+                onTitle={setDocumentTitle}
                 onAddonsLoaded={onResize}
             />
         </ResizeObserver>
     )
 }
 
-export default TerminalWindowContainer;
+export default TerminalWindowContainer

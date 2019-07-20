@@ -1,75 +1,41 @@
-interface IEventEmitter {
-    addEventListener(event: string, listener: (...args: any[]) => void): void;
-    removeEventListener(event: string, listener: (...args: any[]) => void): void;
+import AsyncQueue from "./AsyncQueue"
+
+interface EventEmitter {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    addEventListener(event: string, listener: (...args: any[]) => void): void
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    removeEventListener(event: string, listener: (...args: any[]) => void): void
 }
 
-const $terminated = Symbol.for("terminated");
+function fromEmitter<T>(
+    eventEmitter: EventEmitter,
+    data: string = "message",
+    error: string = "error",
+    close: string = "close",
+): AsyncIterable<T> {
+    const queue = new AsyncQueue<T>()
 
-const oncePromise = <T>(emitter: IEventEmitter, event: string): Promise<T> => {
-    return new Promise(resolve => {
-        var handler = (...args: any[]) => {
-            emitter.removeEventListener(event, handler);
-            resolve(...args);
-        };
-        emitter.addEventListener(event, handler);
-    });
-};
-
-function fromEmitter<T>(eventEmitter: IEventEmitter): AsyncIterable<T | typeof $terminated> {
-    let disposed = false;
-    const buffer: (T | typeof $terminated)[] = [];
-    let error: any;
-
-    const nextListener = (...args: T[]) => buffer.push(...args);
-    const errorListener = (...args: any) => {
-        if (disposed) return;
-        error = args[0];
-        dispose();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorListener = (...args: any[]): void => {
+        queue.throw(args[0])
+        dispose()
     }
-    const doneListener = () => {
-        if (disposed) return;
-        buffer.push($terminated)
-        dispose();
-    }
-    const dispose = () => {
-        eventEmitter.removeEventListener("message", nextListener);
-        eventEmitter.removeEventListener("eror", errorListener);
-        eventEmitter.removeEventListener("close", doneListener);
-        disposed = true
+    const doneListener = (): void => {
+        queue.dispose()
+        dispose()
     }
 
-    eventEmitter.addEventListener("message", nextListener);
-    eventEmitter.addEventListener("error", errorListener);
-    eventEmitter.addEventListener("close", doneListener);
-
-    return {
-        [Symbol.asyncIterator]: async function* iterator() {
-            while (!disposed) {
-                if (error) {
-                    dispose();
-                    throw error;
-                }
-                if (buffer.length === 0) {
-                    if (disposed) {
-                        dispose();
-                        return;
-                    };
-                    await oncePromise(eventEmitter, "message");
-                } else {
-                    const data = yield buffer.shift();
-                    if (data === $terminated) {
-                        dispose();
-                        return;
-                    }
-
-                    if (data !== undefined) {
-                        yield data
-                    }
-                }
-            }
-        }
+    const dispose = (): void => {
+        eventEmitter.removeEventListener(data, queue.push)
+        eventEmitter.removeEventListener(error, errorListener)
+        eventEmitter.removeEventListener(close, doneListener)
     }
+
+    eventEmitter.addEventListener(data, queue.push)
+    eventEmitter.addEventListener(error, errorListener)
+    eventEmitter.addEventListener(close, doneListener)
+
+    return queue
 }
 
-export { $terminated }
 export default fromEmitter
