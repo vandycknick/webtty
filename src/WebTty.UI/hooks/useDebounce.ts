@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "preact/hooks/src"
+import { useState, useEffect, useMemo } from "preact/hooks"
 
 export const useDebouncedValue = <T>(value: T, delay: number): T => {
     const [debouncedValue, setDebouncedValue] = useState(value)

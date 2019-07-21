@@ -33,6 +33,9 @@ jobs:
       - bash: ./build.sh compile
         displayName: Initial build
 
+      - bash: ./build.sh lint
+        displayName: Lint
+
       - bash: ./build.sh test
         displayName: Unit tests
 
@@ -70,6 +73,9 @@ jobs:
 
       - bash: ./build.sh compile
         displayName: Initial build
+
+      - bash: ./build.sh lint
+        displayName: Lint
 
       - bash: ./build.sh test
         displayName: Unit tests

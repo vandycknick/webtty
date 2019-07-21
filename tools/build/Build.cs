@@ -91,6 +91,11 @@ class Build : NukeBuild
             DeleteDirectory(UIDirectory / "node_modules");
         });
 
+    Target Lint => _ => _
+        .Executes(() => {
+            Yarn($"run lint", workingDirectory: UIDirectory);
+        });
+
     Target Test => _ => _
         .Executes(() =>
         {
