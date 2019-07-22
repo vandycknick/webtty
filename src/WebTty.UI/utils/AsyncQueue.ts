@@ -50,11 +50,13 @@ class Deferred<T> implements Promise<T> {
 class AsyncQueue<T> {
     public static from<T>(iterator: AsyncIterable<T>): AsyncQueue<T> {
         if ($listeners in iterator) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const listeners = (iterator as any)[$listeners] as AsyncQueue<T>[]
             const queue = new AsyncQueue<T>()
             listeners.push(queue)
             return queue
         } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const listeners = ((iterator as any)[$listeners] = [] as AsyncQueue<T>[])
             const queue = new AsyncQueue<T>()
             listeners.push(queue)

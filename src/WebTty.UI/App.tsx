@@ -8,7 +8,6 @@ import TerminalWindowContainer from "./containers/TerminalWindowContainer"
 
 const App: FunctionComponent = () => {
     const fit = useMemo(() => new FitAddon())
-    // eslint-disable-next-line jest/no-focused-tests
     const debounceFit = useDebounce((): void => fit.fit(), 200)
 
     return <TerminalWindowContainer addons={[fit]} onResize={debounceFit} />

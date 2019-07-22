@@ -4,7 +4,6 @@ module.exports = {
         'eslint:recommended',
         "plugin:react/recommended",
         'plugin:import/typescript',
-        'plugin:jest/recommended',
         'plugin:@typescript-eslint/recommended',
         'prettier/@typescript-eslint',
         'plugin:prettier/recommended'
@@ -31,7 +30,7 @@ module.exports = {
     settings: {
         react: {
             pragma: 'h',
-            version: 'detect',
+            version: 'latest',
         },
-    },
+    }
 };
