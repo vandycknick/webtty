@@ -5,10 +5,11 @@
   <PropertyGroup>
     <Authors>Nick Van Dyck</Authors>
     <Product>webtty</Product>
-    <Description>TODO add something here</Description>
+    <Description>🔌 WebSocket based terminal emulator</Description>
     <Copyright>Copyright © Nick Van Dyck</Copyright>
     <NeutralLanguage>en-UK</NeutralLanguage>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageIconUrl>https://raw.githubusercontent.com/nickvdyck/webtty/master/assets/logo-256x256.png</PackageIconUrl>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/nickvdyck/webtty</PackageProjectUrl>
     <RepositoryUrl>https://github.com/nickvdyck/webtty.git</RepositoryUrl>

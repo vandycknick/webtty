@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="dist\index.html" />
+    <Content Remove="dist/index.html" />
   </ItemGroup>
 
   <ItemGroup>
