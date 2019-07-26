@@ -68,7 +68,8 @@ class Build : NukeBuild
     Target Setup => _ => _
         .Executes(() =>
         {
-            Yarn($"install", workingDirectory: UIDirectory);
+            var useFrozenLockfile = IsLocalBuild ? "" : " --frozen-lockfile";
+            Yarn($"install{useFrozenLockfile}", workingDirectory: UIDirectory);
         })
         .Triggers(Restore);
 
@@ -91,9 +92,19 @@ class Build : NukeBuild
             DeleteDirectory(UIDirectory / "node_modules");
         });
 
+    Target Check => _ => _
+        .DependsOn(Setup)
+        .Triggers(Lint)
+        .Triggers(CheckTypes);
+
     Target Lint => _ => _
         .Executes(() => {
             Yarn($"run lint", workingDirectory: UIDirectory);
+        });
+
+    Target CheckTypes => _ => _
+        .Executes(() => {
+            Yarn($"tsc --noEmit", workingDirectory: UIDirectory);
         });
 
     Target Test => _ => _

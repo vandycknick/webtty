@@ -9,87 +9,126 @@ pr:
     - '*'
 
 variables:
-  configuration: Release
+  CONFIGURATION: Release
+  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
 
-jobs:
-  - job: linux
-    pool:
-      vmImage: ubuntu-16.04
-    workspace:
-      clean: all
+stages:
+  - stage: lint
+    displayName: Lint
+    jobs:
+      - job: Linux
+        pool:
+          vmImage: ubuntu-16.04
+        workspace:
+          clean: all
 
-    steps:
-      - task: NodeTool@0
-        displayName: Node install
-        inputs:
-          versionSpec: '10.16.0'
+        steps:
+          - task: NodeTool@0
+            displayName: Install Node
+            inputs:
+              versionSpec: '10.16.0'
 
-      - bash: node --version && yarn --version && dotnet --info
-        displayName: Print versions
+          - task: CacheBeta@0
+            inputs:
+              key: |
+                yarn
+                $(Agent.OS)
+                $(Build.SourcesDirectory)/src/WebTty.Ui/yarn.lock
+              path: $(YARN_CACHE_FOLDER)
+            displayName: Cache packages
 
-      - bash: ./build.sh setup
-        displayName: Install dependencies
+          - script: ./build.sh setup
+            displayName: Install dependencies
 
-      - bash: ./build.sh compile
-        displayName: Initial build
+          - script: ./build.sh lint
+            displayName: Lint
 
-      - bash: ./build.sh lint
-        displayName: Lint
+          - script: ./build.sh checktypes
+            displayName: Check Types
 
-      - bash: ./build.sh test
-        displayName: Unit tests
+  - stage: test_and_build
+    displayName: Test and Build
+    jobs:
+      - job: Linux
+        pool:
+          vmImage: ubuntu-16.04
 
-      - task: PublishTestResults@2
-        displayName: Publish unit test results
-        condition: always()
-        inputs:
-          testRunTitle: linux
-          testResultsFormat: VSTest
-          testResultsFiles: artifacts/TestResults/*.trx
+        steps:
+          - task: NodeTool@0
+            displayName: Install Node
+            inputs:
+              versionSpec: '10.16.0'
 
-      - bash: ./build.sh
-        displayName: Package cli application
+          - task: CacheBeta@0
+            inputs:
+              key: |
+                yarn
+                $(Agent.OS)
+                $(Build.SourcesDirectory)/src/WebTty.Ui/yarn.lock
+              path: $(YARN_CACHE_FOLDER)
+            displayName: Cache packages
 
-      - bash: ./build.sh install
-        displayName: Install cli application
+          - script: ./build.sh setup
+            displayName: Install dependencies
 
-  - job: macOS
-    pool:
-      vmImage: macOS-10.14
-    workspace:
-      clean: all
+          - script: ./build.sh compile
+            displayName: Initial build
 
-    steps:
-      - task: NodeTool@0
-        displayName: Node install
-        inputs:
-          versionSpec: '10.16.0'
+          - script: ./build.sh test
+            displayName: Run Unit Tests
 
-      - bash: node --version && yarn --version && dotnet --info
-        displayName: Print versions
+          - task: PublishTestResults@2
+            displayName: Publish unit test results
+            condition: always()
+            inputs:
+              testRunTitle: UnitTests
+              testResultsFormat: VSTest
+              testResultsFiles: artifacts/TestResults/*.trx
 
-      - bash: ./build.sh setup
-        displayName: Install dependencies
+          - script: ./build.sh
+            displayName: Package
 
-      - bash: ./build.sh compile
-        displayName: Initial build
+          - publish: artifacts
+            artifact: webtty
 
-      - bash: ./build.sh lint
-        displayName: Lint
+  - stage: test_e2e
+    displayName: Test E2E
+    jobs:
+      - job: Linux
+        pool:
+          vmImage: ubuntu-16.04
 
-      - bash: ./build.sh test
-        displayName: Unit tests
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: webtty
+              path: $(Build.SourcesDirectory)/artifacts
 
-      - task: PublishTestResults@2
-        displayName: Publish unit test results
-        condition: always()
-        inputs:
-          testRunTitle: macOS
-          testResultsFormat: VSTest
-          testResultsFiles: artifacts/TestResults/*.trx
+          - script: ./build.sh install
+            displayName: Install Tool
 
-      - bash: ./build.sh
-        displayName: Package cli application
+      - job: macOS
+        pool:
+          vmImage: macOS-10.14
 
-      - bash: ./build.sh install
-        displayName: Install cli application
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: webtty
+              path: $(Build.SourcesDirectory)/artifacts
+
+          - script: ./build.sh install
+            displayName: Install Tool
+
+      - job: Windows
+        pool:
+          vmImage: vs2017-win2016
+
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: webtty
+              path: $(Build.SourcesDirectory)/artifacts
+
+          - powershell: ./build.ps1 install
+            displayName: Install Tool
