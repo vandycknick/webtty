@@ -1,10 +1,16 @@
 {
-    "extends": "@nvd/tsconfig",
-    "compilerOptions": {
-        "declaration": false,
-        "jsx": "react",
-        "jsxFactory": "h",
-        "outDir": "./dist/",
-        "target": "es5"
+  "extends": "@nvd/tsconfig",
+  "compilerOptions": {
+    "declaration": false,
+    "jsx": "react",
+    "jsxFactory": "h",
+    "outDir": "./dist/",
+    "target": "es5",
+    "baseUrl": ".",
+    "paths": {
+      "@webtty/*": [
+        ".tmp/*"
+      ]
     }
+  }
 }

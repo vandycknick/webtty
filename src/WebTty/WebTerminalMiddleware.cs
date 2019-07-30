@@ -119,6 +119,8 @@ namespace WebTty
                 try
                 {
                     var segment = GetArraySegment(result.Buffer);
+                    var message = MessagePack.MessagePackSerializer.Deserialize<Message>(segment);
+
                     var h = MessagePack.MessagePackBinary.ReadArrayHeader(segment.Array, segment.Offset, out var read);
                     var type = MessagePack.MessagePackBinary.ReadInt32(segment.Array, segment.Offset + read, out read);
 
