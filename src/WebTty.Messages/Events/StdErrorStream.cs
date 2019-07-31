@@ -17,6 +17,7 @@ namespace WebTty.Messages.Events
         [Required]
         public string TabId { get; set; }
 
+        [Required]
         public string Data { get; set; }
     }
 }

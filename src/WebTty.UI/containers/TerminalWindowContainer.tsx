@@ -29,8 +29,8 @@ const TerminalWindowContainer: FunctionComponent<TerminalContainerProps> = ({
             <Terminal
                 dataSource={stdOut(state.tabId)}
                 addons={addons}
-                onResize={(data): void => resizeTerminal(state.tabId as number, data.cols, data.rows)}
-                onInput={(msg): void => writeStdIn(state.tabId as number, msg)}
+                onResize={(data): void => resizeTerminal(state.tabId as string, data.cols, data.rows)}
+                onInput={(msg): void => writeStdIn(state.tabId as string, msg)}
                 onTitle={setDocumentTitle}
                 onAddonsLoaded={onResize}
             />

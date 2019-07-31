@@ -1,16 +1,18 @@
 using System;
-using MessagePack;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebTty.Messages
 {
-    [MessagePackObject]
+    [MessagePack.MessagePackObject]
     [Serializable]
     public class Message
     {
-        [Key(0)]
+        [Required]
+        [MessagePack.Key(0)]
         public string Type { get; set; }
 
-        [Key(1)]
+        [Required]
+        [MessagePack.Key(1)]
         public byte[] Payload { get; set; }
     }
 }

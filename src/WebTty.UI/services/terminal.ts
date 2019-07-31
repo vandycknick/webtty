@@ -1,18 +1,15 @@
 import { produce } from "immer"
-import msgpack5 from "msgpack5"
 import { TerminalState, TerminalActions, TERMINAL_NEW_TAB_CREATED } from "./types"
 import AsyncQueue from "../utils/AsyncQueue"
-import {
-    TerminalNewTabMessage,
-    TerminalResizeMessage,
-    TerminalInputMessage,
-    TerminalOutputMessage,
-    TerminalNewTabCreatedMessage,
-} from "./messages"
+import { OpenNewTabCommand, ResizeTabCommand, SendInputCommand, StdOutStream, TabOpened } from "@webtty/messages"
+import { Commands, Events } from "./serializers"
 
 const initialState = {
     tabId: undefined,
 }
+
+type DispatchCommand = (command: Commands) => void
+type Dispatch<A, R = void> = (action: A) => R
 
 const terminalReducer = (state: TerminalState = initialState, action: TerminalActions): TerminalState =>
     produce(state, draft => {
@@ -22,82 +19,46 @@ const terminalReducer = (state: TerminalState = initialState, action: TerminalAc
         }
     })
 
-type Dispatch<A, R = void> = (action: A) => R
-
-const openNewTab = (writeToSocket: (msg: TerminalNewTabMessage) => void) => (): void => {
-    const msg = new TerminalNewTabMessage()
-    writeToSocket(msg)
+const openNewTab = (dispatch: DispatchCommand) => (): void => {
+    const command = new OpenNewTabCommand()
+    dispatch(command)
 }
 
-const resizeTerminal = (writeToSocket: (msg: TerminalResizeMessage) => void) => (
-    id: number,
-    cols: number,
-    rows: number,
-): void => {
-    const msg = new TerminalResizeMessage(id, cols, rows)
-    writeToSocket(msg)
+const resizeTerminal = (dispatch: DispatchCommand) => (id: string, cols: number, rows: number): void => {
+    const command = new ResizeTabCommand()
+    command.init({
+        TabId: id,
+        Cols: cols,
+        Rows: rows,
+    })
+    dispatch(command)
 }
 
-const writeStdIn = (writeToSocket: (msg: TerminalInputMessage) => void) => (id: number, input: string): void => {
-    const msg = new TerminalInputMessage(id, input)
-    writeToSocket(msg)
+const writeStdIn = (dispatch: DispatchCommand) => (id: string, input: string): void => {
+    const command = new SendInputCommand()
+    command.init({
+        TabId: id,
+        Payload: input,
+    })
+    dispatch(command)
 }
 
-async function* parseMessages(
-    dataStream: AsyncIterable<MessageEvent>,
-): AsyncIterable<TerminalOutputMessage | TerminalNewTabCreatedMessage> {
-    const msgpack = msgpack5()
-    const decoder = new TextDecoder()
-
-    for await (let message of dataStream) {
-        if (!message) continue
-
-        const properties = msgpack.decode(Buffer.from(message.data))
-        const type: number = properties[0]
-
-        switch (type) {
-            case 0:
-            case 1:
-            case 3:
-                break
-
-            case 2: {
-                const id = properties[1]
-                const body = decoder.decode(properties[2])
-                const msg = new TerminalOutputMessage(id, body)
-                yield msg
-                break
-            }
-            case 5: {
-                const msg = new TerminalNewTabCreatedMessage(properties[1])
-                yield msg
-                break
-            }
-            default:
-                throw new Error("unknown type")
-        }
-    }
-}
-
-async function* stdoutMessageStream(
-    id: number,
-    messageStream: AsyncQueue<TerminalOutputMessage | TerminalNewTabCreatedMessage>,
-): AsyncIterableIterator<string> {
+async function* stdoutMessageStream(id: string, messageStream: AsyncQueue<Events>): AsyncIterableIterator<string> {
     for await (let message of messageStream) {
-        if (message instanceof TerminalOutputMessage) {
-            if (message.id == id) yield message.payload
+        if (message instanceof StdOutStream) {
+            if (message.tabId == id) yield message.data
         }
     }
 }
 
-const newTabMessageStream = (messageStream: AsyncQueue<TerminalOutputMessage | TerminalNewTabCreatedMessage>) =>
+const newTabMessageStream = (messageStream: AsyncQueue<Events>) =>
     async function(dispatch: Dispatch<TerminalActions>): Promise<void> {
         for await (let message of messageStream) {
-            if (message instanceof TerminalNewTabCreatedMessage) {
-                dispatch({ type: TERMINAL_NEW_TAB_CREATED, payload: message })
+            if (message instanceof TabOpened) {
+                dispatch({ type: TERMINAL_NEW_TAB_CREATED, payload: { id: message.id } })
             }
         }
     }
 
 export { terminalReducer }
-export { openNewTab, resizeTerminal, writeStdIn, stdoutMessageStream, parseMessages, newTabMessageStream }
+export { openNewTab, resizeTerminal, writeStdIn, stdoutMessageStream, newTabMessageStream }

@@ -2,6 +2,7 @@
 const WebpackModules = require("webpack-modules")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin")
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin")
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 
 module.exports = (_, argv) => {
@@ -18,6 +19,9 @@ module.exports = (_, argv) => {
                 react: "preact/compat",
                 "react-dom": "preact/compat",
             },
+            plugins: [
+                new TsconfigPathsPlugin(),
+            ],
         },
 
         module: {

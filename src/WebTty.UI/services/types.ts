@@ -18,7 +18,7 @@ type TerminalNewTabAction = {
 
 type TerminalNewTabCreatedAction = {
     type: typeof TERMINAL_NEW_TAB_CREATED
-    payload: { id: number }
+    payload: { id: string }
 }
 
 type TerminalActions =
@@ -28,7 +28,7 @@ type TerminalActions =
     | TerminalNewTabCreatedAction
 
 type TerminalState = {
-    tabId: number | undefined
+    tabId: string | undefined
 }
 
 type AppState = TerminalState

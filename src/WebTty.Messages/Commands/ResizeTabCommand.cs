@@ -11,7 +11,6 @@ namespace WebTty.Messages.Commands
     {
         [DefaultValue("v0")]
         [ReadOnly(true)]
-        [Required]
         public string Version { get; }
 
         [Required]

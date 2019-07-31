@@ -8,20 +8,19 @@ namespace WebTty.Native.Terminal
     {
         public const int DEFAULT_WIDTH = 80;
         public const int DEFAULT_HEIGHT = 24;
-        private static int iid = 0;
 
         public StreamWriter StandardIn { get; private set; }
         public StreamReader StandardOut { get; private set; }
 
         private int childpid;
 
-        public int Id { get; private set; }
+        public string Id { get; private set; }
         public bool IsRunning { get; private set; }
         public int ExitCode { get; private set; } = 0;
 
         public Terminal()
         {
-            Id = ++iid;
+            Id = Guid.NewGuid().ToString();
         }
 
         public void Start()
