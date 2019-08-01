@@ -72,11 +72,13 @@ namespace WebTty
                 catch (Exception ex)
                 {
                     error = ex;
+                    Console.WriteLine("Unknown exception:");
+                    Console.WriteLine(error);
+                    Console.WriteLine("---");
                 }
                 finally
                 {
                     tokenSource.Cancel();
-
                     if (socket.IsOpen())
                     {
                         // We're done sending, send the close frame to the client if the websocket is still open
@@ -93,83 +95,76 @@ namespace WebTty
 
         }
 
-        private static ArraySegment<byte> GetArraySegment(in ReadOnlySequence<byte> input)
-        {
-            if (input.IsSingleSegment)
-            {
-                var isArray = MemoryMarshal.TryGetArray(input.First, out var arraySegment);
-                // This will never be false unless we started using un-managed buffers
-                Debug.Assert(isArray);
-                return arraySegment;
-            }
-
-            // Should be rare
-            return new ArraySegment<byte>(input.ToArray());
-        }
-
         private async Task ProcessTerminalAsync(IDuplexPipe transport, List<Terminal> terminals, CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
-                var result = await transport.Input.ReadAsync();
-                var buffer = result.Buffer;
+                var result = await transport.Input.ReadAsync(token);
 
-                if (result.IsCompleted && buffer.Length <= 0)
+                if (result.IsCompleted && result.Buffer.Length <= 0)
                 {
                     break;
                 }
 
                 try
                 {
-                    var command = CommandDeserializer.Deserialize(result.Buffer);
+                    object command = null;
+                    try
+                    {
+                        command = CommandDeserializer.Deserialize(result.Buffer);
+                    }
+                    catch
+                    {
+                        transport.Input.AdvanceTo(result.Buffer.Start);
+                        continue;
+                    }
 
                     switch (command)
                     {
                         case SendInputCommand inputCommand:
-                            {
-                                var terminal = terminals.FirstOrDefault(term => term.Id == inputCommand.TabId);
-
-                                await terminal?.StandardIn.WriteAsync(inputCommand.Payload.AsMemory(), token);
-                            }
+                        {
+                            var terminal = terminals.FirstOrDefault(term => term.Id == inputCommand.TabId);
+                            await terminal?.StandardIn.WriteAsync(inputCommand.Payload.AsMemory(), token);
                             break;
+                        }
 
                         case OpenNewTabCommand newTabCommand:
+                        {
+                            var terminal = new Terminal();
+                            terminal.Start();
+                            terminal.StandardIn.AutoFlush = true;
+
+                            terminals.Add(terminal);
+
+                            var @event = new TabOpened
                             {
-                                var terminal = new Terminal();
-                                terminal.Start();
-                                terminal.StandardIn.AutoFlush = true;
+                                Id = terminal.Id,
+                            };
 
-                                terminals.Add(terminal);
+                            var segment = MessagePack.MessagePackSerializer.SerializeUnsafe(@event);
+                            var message = new Message
+                            {
+                                Type = nameof(TabOpened),
+                                Payload = segment.AsSpan(segment.Offset, segment.Count).ToArray(),
+                            };
 
-                                var @event = new TabOpened
-                                {
-                                    Id = terminal.Id,
-                                };
+                            var data = MessagePack.MessagePackSerializer.SerializeUnsafe(message);
 
-                                var segment = MessagePack.MessagePackSerializer.SerializeUnsafe(@event);
-                                var message = new Message
-                                {
-                                    Type = nameof(TabOpened),
-                                    Payload = segment.AsSpan(segment.Offset, segment.Count).ToArray(),
-                                };
+                            await transport.Output.WriteAsync(data.AsMemory());
 
-                                var data = MessagePack.MessagePackSerializer.SerializeUnsafe(message);
-
-                                await transport.Output.WriteAsync(data.AsMemory());
-
-                                var backend = Task.Factory.StartNew(
-                                    function: () => TerminalStdoutReader(terminal, transport.Output, token),
-                                    creationOptions: TaskCreationOptions.LongRunning
-                                );
-                            }
+                            var backend = Task.Factory.StartNew(
+                                function: () => TerminalStdoutReader(terminal, transport.Output, token),
+                                creationOptions: TaskCreationOptions.LongRunning
+                            );
                             break;
+                        }
 
                         case ResizeTabCommand resizeTabCommand:
-                            {
-                                var terminal = terminals.FirstOrDefault(term => term.Id == resizeTabCommand.TabId);
-                                terminal?.SetWindowSize(resizeTabCommand.Cols, resizeTabCommand.Rows);
-                            }
+                        {
+                            var terminal = terminals.FirstOrDefault(term => term.Id == resizeTabCommand.TabId);
+                            terminal?.SetWindowSize(resizeTabCommand.Cols, resizeTabCommand.Rows);
                             break;
+                        }
 
                     }
                 }
@@ -179,12 +174,9 @@ namespace WebTty
                     continue;
                 }
 
-                transport.Input.AdvanceTo(buffer.End);
+                transport.Input.AdvanceTo(result.Buffer.End);
 
-                if (result.IsCompleted)
-                {
-                    break;
-                }
+                if (result.IsCompleted) break;
             }
 
             transport.Input.Complete();
