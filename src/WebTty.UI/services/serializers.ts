@@ -14,11 +14,21 @@ import {
 type Commands = OpenNewTabCommand | ResizeTabCommand | SendInputCommand
 type Events = TabOpened | TabResized | StdOutStream | StdErrorStream
 
+const getCommandName = (command: Commands): string => {
+    if (command instanceof OpenNewTabCommand) return "OpenNewTabCommand"
+
+    if (command instanceof ResizeTabCommand) return "ResizeTabCommand"
+
+    if (command instanceof SendInputCommand) return "SendInputCommand"
+
+    throw new Error("Unknown command")
+}
+
 const serializeCommands = (command: Commands): Buffer => {
     const msgpack = msgpack5()
     const message = new Message()
     message.init({
-        Type: command.constructor.name,
+        Type: getCommandName(command),
         Payload: msgpack.encode(command.toJSON()).slice(),
     })
 
