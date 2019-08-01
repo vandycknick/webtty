@@ -68,6 +68,9 @@ class Build : NukeBuild
     Target Setup => _ => _
         .Executes(() =>
         {
+            DotNetRun(s => s
+                .SetProjectFile(Solution.GetProject("jsonschema")));
+
             var useFrozenLockfile = IsLocalBuild ? "" : " --frozen-lockfile";
             Yarn($"install{useFrozenLockfile}", workingDirectory: UIDirectory);
         })
