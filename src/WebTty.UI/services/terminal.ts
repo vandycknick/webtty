@@ -44,9 +44,10 @@ const writeStdIn = (dispatch: DispatchCommand) => (id: string, input: string): v
 }
 
 async function* stdoutMessageStream(id: string, messageStream: AsyncQueue<Events>): AsyncIterableIterator<string> {
+    const decoder = new TextDecoder()
     for await (let message of messageStream) {
         if (message instanceof StdOutStream) {
-            if (message.tabId == id) yield message.data
+            if (message.tabId == id) yield decoder.decode(Buffer.from(message.data))
         }
     }
 }

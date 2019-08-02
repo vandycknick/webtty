@@ -13,6 +13,6 @@ namespace WebTty.Messages
 
         [Required]
         [MessagePack.Key(1)]
-        public byte[] Payload { get; set; }
+        public ArraySegment<byte> Payload { get; set; }
     }
 }

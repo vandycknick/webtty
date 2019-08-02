@@ -18,6 +18,6 @@ namespace WebTty.Messages.Events
         public string TabId { get; set; }
 
         [Required]
-        public string Data { get; set; }
+        public ArraySegment<byte> Data { get; set; }
     }
 }

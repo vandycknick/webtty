@@ -26,10 +26,9 @@ const getCommandName = (command: Commands): string => {
 
 const serializeCommands = (command: Commands): Buffer => {
     const msgpack = msgpack5()
-    const message = new Message()
-    message.init({
-        Type: getCommandName(command),
-        Payload: msgpack.encode(command.toJSON()).slice(),
+    const message = new Message({
+        type: getCommandName(command),
+        payload: msgpack.encode(command.toJSON()) as any,
     })
 
     return msgpack.encode([message.type, message.payload]).slice()
@@ -37,7 +36,6 @@ const serializeCommands = (command: Commands): Buffer => {
 
 async function* deserializeMessages(dataStream: AsyncIterable<MessageEvent>): AsyncIterable<Events> {
     const msgpack = msgpack5()
-    // const decoder = new TextDecoder()
 
     for await (let event of dataStream) {
         if (!event) continue
@@ -48,29 +46,27 @@ async function* deserializeMessages(dataStream: AsyncIterable<MessageEvent>): As
 
         switch (message.type) {
             case "TabOpened": {
-                const command = new TabOpened()
-                command.init(data)
+                const command = TabOpened.fromJS(data)
                 yield command
                 break
             }
 
             case "TabResized": {
-                const command = new TabResized()
-                command.init(data)
+                const command = TabResized.fromJS(data)
                 yield command
                 break
             }
 
             case "StdOutStream": {
-                const command = new StdOutStream()
-                command.init(data)
+                const command = StdOutStream.fromJS(data)
+                command.data = Array.from(data["Data"])
                 yield command
                 break
             }
 
             case "StdErrStream": {
-                const command = new StdErrorStream()
-                command.init(data)
+                const command = StdErrorStream.fromJS(data)
+                command.data = Array.from(data["Data"])
                 yield command
                 break
             }

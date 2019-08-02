@@ -185,7 +185,7 @@ namespace WebTty
 
         private async Task TerminalStdoutReader(Terminal terminal, PipeWriter output, CancellationToken token)
         {
-            const int maxReadSize = 1024 * 172 * 42;
+            const int maxReadSize = 1024;
             const int maxBufferSize = maxReadSize * sizeof(char);
             var buffer = new char[maxReadSize];
             var byteBuffer = new byte[maxBufferSize];
@@ -194,26 +194,27 @@ namespace WebTty
             {
                 try
                 {
-                    var memory = output.GetMemory(maxBufferSize);
                     var read = await terminal.StandardOut.ReadAsync(buffer, 0, maxReadSize);
-                    // var bytesWritten = Encoding.UTF8.GetBytes(buffer.AsSpan(0, read), byteBuffer);
+                    var bytesWritten = Encoding.UTF8.GetBytes(buffer.AsSpan(0, read), byteBuffer);
+                    var charSegment = new ArraySegment<byte>(byteBuffer, 0, bytesWritten);
 
                     var @event = new StdOutStream
                     {
                         TabId = terminal.Id,
-                        Data = new string(buffer.AsSpan(0, read)),
+                        Data = charSegment,
                     };
 
                     var segment = MessagePack.MessagePackSerializer.SerializeUnsafe(@event);
                     var message = new Message
                     {
                         Type = nameof(StdOutStream),
-                        Payload = segment.AsSpan(segment.Offset, segment.Count).ToArray(),
+                        Payload = segment,
                     };
 
                     // https://github.com/dotnet/corefx/blob/edbee902747970e86dbcf19727e72b8216946bb8/src/Common/src/CoreLib/System/Runtime/InteropServices/MemoryMarshal.cs#L25
                     // https://github.com/dotnet/corefx/blob/edbee902747970e86dbcf19727e72b8216946bb8/src/Common/src/CoreLib/Internal/Runtime/CompilerServices/Unsafe.cs#L76
                     // https://github.com/dotnet/corefx/blob/edbee902747970e86dbcf19727e72b8216946bb8/src/Common/src/CoreLib/System/ArraySegment.cs#L29
+                    var memory = output.GetMemory(maxBufferSize);
                     if (MemoryMarshal.TryGetArray<byte>(memory, out var seg))
                     {
                         var byteArray = seg.Array;

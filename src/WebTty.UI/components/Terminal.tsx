@@ -34,7 +34,7 @@ const consumeDataSource = async ({ dataSource, terminal, autoBuffer = true }: Da
             buffer += msg
         } else {
             buffer = msg
-            setTimeout(flushBuffer, 60)
+            setTimeout(flushBuffer, 16)
         }
     }
 
