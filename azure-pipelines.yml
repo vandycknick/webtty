@@ -33,7 +33,7 @@ stages:
               key: |
                 yarn
                 $(Agent.OS)
-                $(Build.SourcesDirectory)/src/WebTty.Ui/yarn.lock
+                $(Build.SourcesDirectory)/src/WebTty.UI/yarn.lock
               path: $(YARN_CACHE_FOLDER)
             displayName: Cache packages
 
