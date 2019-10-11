@@ -1,7 +1,7 @@
 import { h, FunctionalComponent } from "preact"
 import { useRef, useEffect } from "preact/hooks"
-import { Terminal as Xterm, ITheme, ITerminalAddon } from "xterm"
-import "xterm/dist/xterm.css"
+import { Terminal as Xterm, ITheme, ITerminalAddon, IDisposable } from "xterm"
+import "xterm/css/xterm.css"
 
 import "./Terminal.css"
 
@@ -90,6 +90,7 @@ const Terminal: FunctionalComponent<TerminalProps> = ({
     const terminalRef = useRef<Xterm | null>(null)
 
     useEffect(() => {
+        const disposables: IDisposable[] = []
         if (!terminalRef.current) {
             terminalRef.current = new Xterm()
         }
@@ -104,18 +105,24 @@ const Terminal: FunctionalComponent<TerminalProps> = ({
 
             onAddonsLoaded && onAddonsLoaded()
 
-            onInput && terminal.on("data", onInput)
-            onResize && terminal.on("resize", onResize)
-            onTitle && terminal.on("title", onTitle)
+            if (onInput) {
+                disposables.push(terminal.onData(onInput))
+            }
+
+            if (onResize) {
+                disposables.push(terminal.onResize(onResize))
+            }
+
+            if (onTitle) {
+                terminal.onTitleChange(onTitle)
+            }
 
             terminal.setOption("theme", solarized)
             terminal.focus()
         }
 
         return (): void => {
-            onInput && terminal.off("data", onInput)
-            onResize && terminal.off("resize", onResize)
-            onTitle && terminal.off("title", onTitle)
+            disposables.forEach(disposable => disposable.dispose())
         }
     }, [wrapper.current])
 
