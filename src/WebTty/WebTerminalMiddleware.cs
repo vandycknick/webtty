@@ -32,7 +32,7 @@ namespace WebTty
             _options = options.Value;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
             if (context.Request.Path != _options.Path)
             {
@@ -109,12 +109,14 @@ namespace WebTty
                 try
                 {
                     object command = null;
+                    // Console.WriteLine("Received a message");
                     try
                     {
                         command = CommandDeserializer.Deserialize(result.Buffer);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Console.WriteLine($"Error {ex}");
                         transport.Input.AdvanceTo(result.Buffer.Start);
                         continue;
                     }
@@ -141,20 +143,17 @@ namespace WebTty
                                 Id = terminal.Id,
                             };
 
-                            var segment = MessagePack.MessagePackSerializer.SerializeUnsafe(@event);
-                            var message = new Message
-                            {
-                                Type = nameof(TabOpened),
-                                Payload = segment.AsSpan(segment.Offset, segment.Count).ToArray(),
-                            };
+                            var data = MessagePack.MessagePackSerializer.Serialize(
+                                new object[]{ nameof(TabOpened), @event}
+                            );
 
-                            var data = MessagePack.MessagePackSerializer.SerializeUnsafe(message);
-
-                            await transport.Output.WriteAsync(data.AsMemory());
+                            await transport.Output.WriteAsync(data);
 
                             var backend = Task.Factory.StartNew(
-                                function: () => TerminalStdoutReader(terminal, transport.Output, token),
-                                creationOptions: TaskCreationOptions.LongRunning
+                                function: () => TerminalStdoutReaderAsync(terminal, transport.Output, token),
+                                cancellationToken: token,
+                                creationOptions: TaskCreationOptions.LongRunning,
+                                scheduler: TaskScheduler.Default
                             );
                             break;
                         }
@@ -163,6 +162,12 @@ namespace WebTty
                         {
                             var terminal = terminals.FirstOrDefault(term => term.Id == resizeTabCommand.TabId);
                             terminal?.SetWindowSize(resizeTabCommand.Cols, resizeTabCommand.Rows);
+                            break;
+                        }
+
+                        default:
+                        {
+                            Console.WriteLine("Unknown command");
                             break;
                         }
 
@@ -179,11 +184,11 @@ namespace WebTty
                 if (result.IsCompleted) break;
             }
 
-            transport.Input.Complete();
-            transport.Output.Complete();
+            await transport.Input.CompleteAsync();
+            await transport.Output.CompleteAsync();
         }
 
-        private async Task TerminalStdoutReader(Terminal terminal, PipeWriter output, CancellationToken token)
+        private async Task TerminalStdoutReaderAsync(Terminal terminal, PipeWriter output, CancellationToken token)
         {
             const int maxReadSize = 1024;
             const int maxBufferSize = maxReadSize * sizeof(char);
@@ -197,39 +202,14 @@ namespace WebTty
                     var read = await terminal.StandardOut.ReadAsync(buffer, 0, maxReadSize);
                     var bytesWritten = Encoding.UTF8.GetBytes(buffer.AsSpan(0, read), byteBuffer);
                     var charSegment = new ArraySegment<byte>(byteBuffer, 0, bytesWritten);
-
                     var @event = new StdOutStream
                     {
                         TabId = terminal.Id,
                         Data = charSegment,
                     };
+                    MessagePack.MessagePackSerializer.Serialize(output, new object[]{ nameof(StdOutStream), @event, "end"});
 
-                    var segment = MessagePack.MessagePackSerializer.SerializeUnsafe(@event);
-                    var message = new Message
-                    {
-                        Type = nameof(StdOutStream),
-                        Payload = segment,
-                    };
-
-                    // https://github.com/dotnet/corefx/blob/edbee902747970e86dbcf19727e72b8216946bb8/src/Common/src/CoreLib/System/Runtime/InteropServices/MemoryMarshal.cs#L25
-                    // https://github.com/dotnet/corefx/blob/edbee902747970e86dbcf19727e72b8216946bb8/src/Common/src/CoreLib/Internal/Runtime/CompilerServices/Unsafe.cs#L76
-                    // https://github.com/dotnet/corefx/blob/edbee902747970e86dbcf19727e72b8216946bb8/src/Common/src/CoreLib/System/ArraySegment.cs#L29
-                    var memory = output.GetMemory(maxBufferSize);
-                    if (MemoryMarshal.TryGetArray<byte>(memory, out var seg))
-                    {
-                        var byteArray = seg.Array;
-
-                        var written = MessagePack.MessagePackSerializer.Serialize(
-                            ref byteArray,
-                            0,
-                            message,
-                            MessagePack.MessagePackSerializer.DefaultResolver
-                        );
-
-                        output.Advance(written);
-                    }
-
-                    var result = await output.FlushAsync();
+                    var result = await output.FlushAsync(token);
 
                     if (result.IsCompleted)
                     {
@@ -243,7 +223,7 @@ namespace WebTty
                 }
             }
 
-            output.Complete();
+            await output.CompleteAsync();
         }
     }
 }

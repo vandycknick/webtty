@@ -4,13 +4,13 @@
     <br />
 </h1>
 
-> WebSocket based terminal emulator
+> Terminal emulator build on top of WebSockets
 
 [![Build Status][azure-ci-badge]][azure-ci-url]
 
 
 ## Introduction
-WebTTY is a cross-platform CLI application using web technologies to give you access to a pty over a WebSocket connection.
+WebTTY is a cross-platform CLI tool allowing a user to get access to a terminal via any supported browser.
 
 ## Install
 
@@ -33,8 +33,6 @@ Options
       --version              Show current version
   -?, -h, --help             Show help information
 ```
-
-
 
 [azure-ci-badge]: https://dev.azure.com/vandycknick/webtty/_apis/build/status/nickvdyck.webtty?branchName=master
 [azure-ci-url]: https://dev.azure.com/vandycknick/webtty/_build/latest?definitionId=15&branchName=master

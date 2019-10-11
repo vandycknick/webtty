@@ -38,7 +38,7 @@ const consumeDataSource = async ({ dataSource, terminal, autoBuffer = true }: Da
         }
     }
 
-    for await (let message of dataSource) {
+    for await (const message of dataSource) {
         if (autoBuffer) {
             pushToBuffer(message)
         } else {

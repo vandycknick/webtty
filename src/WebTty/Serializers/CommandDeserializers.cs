@@ -36,20 +36,16 @@ namespace WebTty.Serializers
             var segment = GetArraySegment(input);
             var message = MessagePack.MessagePackSerializer.Deserialize<Message>(segment);
 
-            switch (message.Type)
+            return message.Type switch
             {
-                case nameof(OpenNewTabCommand):
-                    return MessagePack.MessagePackSerializer.Deserialize<OpenNewTabCommand>(message.Payload);
+                nameof(OpenNewTabCommand) => MessagePack.MessagePackSerializer.Deserialize<OpenNewTabCommand>(message.Payload),
 
-                case nameof(ResizeTabCommand):
-                    return MessagePack.MessagePackSerializer.Deserialize<ResizeTabCommand>(message.Payload);
+                nameof(ResizeTabCommand) => MessagePack.MessagePackSerializer.Deserialize<ResizeTabCommand>(message.Payload),
 
-                case nameof(SendInputCommand):
-                    return MessagePack.MessagePackSerializer.Deserialize<SendInputCommand>(message.Payload);
+                nameof(SendInputCommand) => MessagePack.MessagePackSerializer.Deserialize<SendInputCommand>(message.Payload),
 
-                default:
-                    throw new UnknownCommandException(message.Type);
-            }
+                _ => throw new UnknownCommandException(message.Type),
+            };
         }
     }
 }

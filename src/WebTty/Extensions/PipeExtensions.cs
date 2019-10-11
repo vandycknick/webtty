@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.IO.Pipelines;
 using System.Net.WebSockets;
 using System.Threading;
@@ -31,7 +30,7 @@ namespace WebTty.Extensions
                     }
                     catch (Exception ex)
                     {
-                        pipe.Writer.Complete(ex);
+                        await pipe.Writer.CompleteAsync(ex);
                         throw;
                     }
 
@@ -43,7 +42,7 @@ namespace WebTty.Extensions
                 }
 
                 // Tell the PipeReader that there's no more data coming
-                pipe.Writer.Complete();
+                await pipe.Writer.CompleteAsync();
             }).Forget();
 
             return pipe.Reader;
@@ -60,28 +59,41 @@ namespace WebTty.Extensions
                 {
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        ReadResult readResult = await pipe.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
-                        if (readResult.Buffer.Length > 0)
+                        var result = await pipe.Reader.ReadAsync(cancellationToken);
+                        try
                         {
-                            foreach (ReadOnlyMemory<byte> segment in readResult.Buffer)
+                            if (result.IsCanceled)
                             {
-                                await webSocket.SendAsync(segment, WebSocketMessageType.Binary, endOfMessage: true, cancellationToken).ConfigureAwait(false);
+                                break;
+                            }
+
+                            if (!result.Buffer.IsEmpty )
+                            {
+                                if (webSocket.IsOpen())
+                                {
+                                    await webSocket.SendAsync(result.Buffer, WebSocketMessageType.Binary);
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            else if (result.IsCompleted)
+                            {
+                                break;
                             }
                         }
-
-                        pipe.Reader.AdvanceTo(readResult.Buffer.End);
-
-                        if (readResult.IsCompleted)
+                        finally
                         {
-                            break;
+                            pipe.Reader.AdvanceTo(result.Buffer.End);
                         }
                     }
 
-                    pipe.Reader.Complete();
+                    await pipe.Reader.CompleteAsync();
                 }
                 catch (Exception ex)
                 {
-                    pipe.Reader.Complete(ex);
+                    await pipe.Reader.CompleteAsync(ex);
                     throw;
                 }
             }).Forget();
