@@ -1,4 +1,5 @@
 /* eslint-disable */
+const { DefinePlugin } = require('webpack');
 const WebpackModules = require("webpack-modules")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin")
@@ -19,9 +20,7 @@ module.exports = (_, argv) => {
                 react: "preact/compat",
                 "react-dom": "preact/compat",
             },
-            plugins: [
-                new TsconfigPathsPlugin(),
-            ],
+            plugins: [new TsconfigPathsPlugin()],
         },
 
         module: {
@@ -39,6 +38,9 @@ module.exports = (_, argv) => {
         },
 
         plugins: [
+            new DefinePlugin({
+                "process.env.NODE_ENV": JSON.stringify(argv.mode === "production" ? "production" : "development"),
+            }),
             new WebpackModules(),
             new HtmlWebpackPlugin({
                 ...(argv.mode == "production"

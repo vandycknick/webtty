@@ -58,8 +58,6 @@ async function* deserializeMessages(dataStream: AsyncIterable<MessageEvent>): As
             }
         }
 
-        console.log(messages.length)
-
         for (const part of messages) {
             const properties = msgpack.decode(part)
             const message = new Message({ type: properties[0], payload: properties[1] })
