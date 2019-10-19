@@ -1,8 +1,13 @@
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WebTty.Transport;
 using WebTty.UI;
+using WebTty.Terminal;
+using WebTty.Protocol;
+using WebTty.Common;
 
 namespace WebTty
 {
@@ -11,6 +16,15 @@ namespace WebTty
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddResponseCompression();
+            services.AddMediatR(config => config.AsScoped(), typeof(Startup));
+
+            services.AddSingleton<IProtocol, BinaryProtocol>();
+            services.AddScoped<ITransport, WebSocketsTransport>();
+            services.AddScoped<IConnection, HttpConnection>();
+            services.AddScoped<IConnectionHandler, TerminalConnectionHandler>();
+            services.AddScoped<IMessageDispatcher, TerminalMessageDispatcher>();
+
+            services.AddScoped<TerminalManager>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -2,9 +2,9 @@ using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 
-namespace WebTty
+namespace WebTty.Terminal
 {
-    public static class WebTerminalExtensions
+    public static class ApplicationBuilderExtensions
     {
         public static IApplicationBuilder UseWebTerminal(this IApplicationBuilder app)
         {
@@ -13,7 +13,7 @@ namespace WebTty
                 throw new ArgumentNullException(nameof(app));
             }
 
-            app.UseWebTerminal(new WebTerminalOptions());
+            app.UseWebTerminal(new TerminalOptions());
 
             return app;
         }
@@ -25,7 +25,7 @@ namespace WebTty
                 throw new ArgumentNullException(nameof(app));
             }
 
-            var options = new WebTerminalOptions
+            var options = new TerminalOptions
             {
                 Path = path,
             };
@@ -35,7 +35,7 @@ namespace WebTty
             return app;
         }
 
-        public static IApplicationBuilder UseWebTerminal(this IApplicationBuilder app, WebTerminalOptions options)
+        public static IApplicationBuilder UseWebTerminal(this IApplicationBuilder app, TerminalOptions options)
         {
             if (app == null)
             {
@@ -47,7 +47,7 @@ namespace WebTty
                 throw new ArgumentNullException(nameof(options));
             }
 
-            app.UseMiddleware<WebTerminalMiddleware>(Options.Create(options));
+            app.UseMiddleware<TerminalMiddleware>(Options.Create(options));
 
             return app;
         }

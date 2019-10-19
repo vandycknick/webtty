@@ -1,6 +1,6 @@
-namespace WebTty
+namespace WebTty.Terminal
 {
-    public class WebTerminalOptions
+    public class TerminalOptions
     {
         public string Path { get; set; } = "/ws";
     }

@@ -10,6 +10,7 @@
     "watch": "webpack-dev-server"
   },
   "dependencies": {
+    "@msgpack/msgpack": "^1.9.1",
     "immer": "4.0.1",
     "msgpack5": "4.2.1",
     "preact": "10.0.0",

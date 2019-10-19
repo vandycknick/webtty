@@ -1,18 +1,14 @@
-﻿using System;
+﻿using MediatR;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using MessagePack;
 
-namespace WebTty.Messages.Commands
+namespace WebTty.Messages
 {
-    [MessagePackObject(keyAsPropertyName: true)]
+    [Message]
     [Serializable]
-    public class ResizeTabCommand
+    public class ResizeTabMessage : INotification
     {
-        [DefaultValue("v0")]
-        [ReadOnly(true)]
-        public string Version { get; }
-
         [Required]
         public string TabId { get; set; }
 

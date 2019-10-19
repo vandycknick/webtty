@@ -2,16 +2,16 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NJsonSchema" Version="10.0.21" />
-    <PackageReference Include="NJsonSchema.CodeGeneration.TypeScript" Version="10.0.21" />
+    <PackageReference Include="NJsonSchema" Version="10.0.27" />
+    <PackageReference Include="NJsonSchema.CodeGeneration.TypeScript" Version="10.0.27" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WebTty.Messages\WebTty.Messages.csproj" />
+    <ProjectReference Include="..\..\src\WebTty\WebTty.csproj" />
   </ItemGroup>
 
 </Project>

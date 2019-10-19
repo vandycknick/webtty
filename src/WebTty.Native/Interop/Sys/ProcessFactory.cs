@@ -66,7 +66,6 @@ namespace WebTty.Native.Interop
 
         private static PROCESS_INFORMATION RunProcess(ref STARTUPINFOEX sInfoEx, string commandLine)
         {
-            Console.WriteLine(commandLine);
             int securityAttributeSize = Marshal.SizeOf<SECURITY_ATTRIBUTES>();
             var pSec = new SECURITY_ATTRIBUTES { nLength = securityAttributeSize };
             var tSec = new SECURITY_ATTRIBUTES { nLength = securityAttributeSize };

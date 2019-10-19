@@ -1,97 +1,50 @@
-import msgpack5 from "msgpack5"
+import { encode, decode } from "@msgpack/msgpack"
+import { OpenNewTabReply, StdOutMessage, OpenNewTabRequest, StdInputRequest, ResizeTabMessage } from "@webtty/messages"
+import { BinaryMessageFormat } from "utils/BinaryFormat"
 
-import {
-    TabOpened,
-    Message,
-    TabResized,
-    StdOutStream,
-    StdErrorStream,
-    OpenNewTabCommand,
-    ResizeTabCommand,
-    SendInputCommand,
-} from "@webtty/messages"
+type Commands = any
+type Events = any
 
-type Commands = OpenNewTabCommand | ResizeTabCommand | SendInputCommand
-type Events = TabOpened | TabResized | StdOutStream | StdErrorStream
+const getName = (message: unknown): string => {
+    if (message instanceof OpenNewTabRequest) return "OpenNewTabRequest"
+    if (message instanceof ResizeTabMessage) return "ResizeTabMessage"
+    if (message instanceof StdInputRequest) return "StdInputRequest"
 
-const getCommandName = (command: Commands): string => {
-    if (command instanceof OpenNewTabCommand) return "OpenNewTabCommand"
-
-    if (command instanceof ResizeTabCommand) return "ResizeTabCommand"
-
-    if (command instanceof SendInputCommand) return "SendInputCommand"
-
-    throw new Error("Unknown command")
+    return ""
 }
 
-const serializeCommands = (command: Commands): Buffer => {
-    const msgpack = msgpack5()
-    const message = new Message({
-        type: getCommandName(command),
-        payload: msgpack.encode(command.toJSON()) as any,
-    })
-
-    return msgpack.encode([message.type, message.payload]).slice()
+const serializeCommands = (message: OpenNewTabRequest | ResizeTabMessage | StdInputRequest): ArrayBuffer => {
+    const bytes = encode(message.toJSON())
+    const payload = encode([getName(message), bytes]).slice()
+    const data = BinaryMessageFormat.write(payload)
+    return data
 }
 
-async function* deserializeMessages(dataStream: AsyncIterable<MessageEvent>): AsyncIterable<Events> {
-    const msgpack = msgpack5()
-
+async function* deserializeMessages(dataStream: AsyncIterable<MessageEvent>): AsyncIterable<any> {
     for await (const event of dataStream) {
         if (!event) continue
 
-        const messages: Buffer[] = []
-        let buffer = Buffer.from(event.data)
-        while (buffer.length) {
-            const index = buffer.findIndex((_, i, b) => {
-                if (b[i + 1] === 163 && b[i + 2] === 101 && b[i + 3] === 110 && b[i + 4] === 100 && b[i + 5] === 147) {
-                    return true
-                }
-                return false
-            })
-            if (index > 1) {
-                messages.push(buffer.slice(0, index + 5))
-                buffer = buffer.slice(index + 5)
-            } else {
-                messages.push(buffer)
-                buffer = Buffer.from([])
-            }
-        }
+        const messages = BinaryMessageFormat.parse(event.data)
 
-        for (const part of messages) {
-            const properties = msgpack.decode(part)
-            const message = new Message({ type: properties[0], payload: properties[1] })
-            const data = properties[1]
+        for (const message of messages) {
+            const decoded = decode(message) as [string, Buffer]
+            const type = decoded[0]
+            const payload = decode(decoded[1])
 
-            switch (message.type) {
-                case "TabOpened": {
-                    const command = TabOpened.fromJS(data)
-                    yield command
+            switch (type) {
+                case "OpenNewTabReply":
+                    yield OpenNewTabReply.fromJS(payload)
                     break
-                }
 
-                case "TabResized": {
-                    const command = TabResized.fromJS(data)
-                    yield command
-                    break
-                }
-
-                case "StdOutStream": {
-                    const command = StdOutStream.fromJS(data)
-                    command.data = Array.from(data["Data"])
-                    yield command
-                    break
-                }
-
-                case "StdErrStream": {
-                    const command = StdErrorStream.fromJS(data)
-                    command.data = Array.from(data["Data"])
-                    yield command
+                case "StdOutMessage": {
+                    const stdOut = StdOutMessage.fromJS(payload)
+                    stdOut.data = Array.from((payload as any)["Data"])
+                    yield stdOut
                     break
                 }
 
                 default:
-                    throw new Error("Unknown type")
+                    continue
             }
         }
     }
