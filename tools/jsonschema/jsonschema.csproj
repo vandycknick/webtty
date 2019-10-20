@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WebTty\WebTty.csproj" />
+    <ProjectReference Include="..\..\src\WebTty.Messages\WebTty.Messages.csproj" />
   </ItemGroup>
 
 </Project>

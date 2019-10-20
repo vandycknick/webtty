@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WebTty.UI\WebTty.UI.csproj" />
+     <ProjectReference Include="..\WebTty.Messages\WebTty.Messages.csproj" />
   </ItemGroup>
 
 </Project>

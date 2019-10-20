@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using WebTty.Common;
 using WebTty.Messages;
+using WebTty.Messages.Helpers;
 
 namespace WebTty.Protocol
 {
@@ -12,15 +13,9 @@ namespace WebTty.Protocol
         private readonly Dictionary<string, Type> _namedTypeMap = new Dictionary<string, Type>();
         private readonly Dictionary<Type, MessageDeserializerBase> _deserializerMap = new Dictionary<Type, MessageDeserializerBase>();
 
-        public BinaryDeserializerMap()
+        public BinaryDeserializerMap(IMessageResolver resolver)
         {
-            var messageTypes = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(type => type.IsClass && !string.IsNullOrEmpty(type.Namespace))
-                .Where(type => {
-                    var attributes = type.GetCustomAttributes(typeof(MessageAttribute), true);
-                    return attributes != null && attributes.Length > 0;
-                })
-                .ToList();
+            var messageTypes = resolver.GetMessages();
 
             foreach (var type in messageTypes)
             {

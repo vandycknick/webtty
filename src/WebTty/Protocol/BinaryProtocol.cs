@@ -9,7 +9,12 @@ namespace WebTty.Protocol
 {
     public class BinaryProtocol : IProtocol
     {
-        private static readonly BinaryDeserializerMap DeserializerMap = new BinaryDeserializerMap();
+        private readonly BinaryDeserializerMap _deserializerMap;
+
+        public BinaryProtocol(BinaryDeserializerMap deserializerMap)
+        {
+            _deserializerMap = deserializerMap;
+        }
 
         public bool TryParseMessage(ref ReadOnlySequence<byte> input, out object message)
         {
@@ -24,7 +29,7 @@ namespace WebTty.Protocol
             var _ = MessagePackBinary.ReadArrayHeader(segment.Array, segment.Offset, out var read);
             var id = MessagePackBinary.ReadString(segment.Array, segment.Offset + read, out var readId);
 
-            if (DeserializerMap.TryGetValue(id, out var deserializer))
+            if (_deserializerMap.TryGetValue(id, out var deserializer))
             {
                 var messageBytes = MessagePackBinary.ReadBytes(segment.Array, segment.Offset + read + readId, out _);
                 message = deserializer.Deserialize(messageBytes);

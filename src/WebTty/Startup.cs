@@ -8,6 +8,7 @@ using WebTty.UI;
 using WebTty.Terminal;
 using WebTty.Protocol;
 using WebTty.Common;
+using WebTty.Messages.Helpers;
 
 namespace WebTty
 {
@@ -18,6 +19,8 @@ namespace WebTty
             services.AddResponseCompression();
             services.AddMediatR(config => config.AsScoped(), typeof(Startup));
 
+            services.AddSingleton<IMessageResolver, MessageResolver>();
+            services.AddSingleton<BinaryDeserializerMap>();
             services.AddSingleton<IProtocol, BinaryProtocol>();
             services.AddScoped<ITransport, WebSocketsTransport>();
             services.AddScoped<IConnection, HttpConnection>();

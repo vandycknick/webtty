@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using NJsonSchema;
 using NJsonSchema.CodeGeneration.TypeScript;
 using NJsonSchema.Generation;
-using WebTty;
-using WebTty.Messages;
+using WebTty.Messages.Helpers;
 
 namespace jsonschema
 {
@@ -29,8 +25,9 @@ namespace jsonschema
             };
 
             var mainModule = "";
+            var messages = new MessageResolver();
 
-            foreach (var type in GetMessages<Startup>())
+            foreach (var type in messages.GetMessages())
             {
                 generator.Generate(type, resolver);
                 var codeGenerator = new TypeScriptGenerator(JsonSchema.FromType(type), tsSettings);
@@ -54,20 +51,6 @@ namespace jsonschema
             }
 
             Console.WriteLine(schema.ToJson());
-        }
-
-        static List<Type> GetMessages<TFromAssembly>()
-        {
-            var assembly = Assembly.GetAssembly(typeof(TFromAssembly));
-
-            var types =
-                from t in assembly.GetTypes()
-                where t.IsClass && !string.IsNullOrEmpty(t.Namespace)
-                let attributes = t.GetCustomAttributes(typeof(MessageAttribute), true)
-                where attributes != null && attributes.Length > 0
-                select t;
-
-            return types.ToList();
         }
     }
 }

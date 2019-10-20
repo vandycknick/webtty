@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using WebTty.Messages.Internal;
 
 namespace WebTty.Messages
 {
