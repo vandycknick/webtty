@@ -5,7 +5,7 @@ import { terminalReducer, stdoutMessageStream } from "./terminal"
 import AsyncQueue from "../utils/AsyncQueue"
 import { openNewTab, resizeTerminal, writeStdIn, newTabMessageStream } from "./terminal"
 import { TerminalState } from "./types"
-import { serializeCommands, Commands, Events, deserializeMessages } from "./serializers"
+import { serializeCommands, Messages, deserializeMessages } from "./serializers"
 
 type WebTtyConnection = {
     state: TerminalState
@@ -22,7 +22,7 @@ const useWebTty = (endpoint: string): WebTtyConnection => {
     const [state, dispatch] = useReducer(terminalReducer, { tabId: undefined })
 
     const actions = useMemo(() => {
-        const dispatchCommand = (command: Commands): void => {
+        const dispatchCommand = (command: Messages): void => {
             const serialized = serializeCommands(command)
             sendMessage(serialized)
         }
@@ -34,7 +34,7 @@ const useWebTty = (endpoint: string): WebTtyConnection => {
         }
     }, [sendMessage])
 
-    const messageStream = useMemo((): AsyncQueue<Events> => {
+    const messageStream = useMemo((): AsyncQueue<Messages> => {
         const eventStream = deserializeMessages(dataStream)
         const queue = AsyncQueue.from(eventStream)
         return queue

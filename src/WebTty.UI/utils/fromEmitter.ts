@@ -9,9 +9,9 @@ interface EventEmitter {
 
 function fromEmitter<T>(
     eventEmitter: EventEmitter,
-    data: string = "message",
-    error: string = "error",
-    close: string = "close",
+    data = "message",
+    error = "error",
+    close = "close",
 ): AsyncIterable<T> {
     const queue = new AsyncQueue<T>()
 

@@ -2,13 +2,13 @@ import { produce } from "immer"
 import { TerminalState, TerminalActions, TERMINAL_NEW_TAB_CREATED } from "./types"
 import AsyncQueue from "../utils/AsyncQueue"
 import { OpenNewTabRequest, OpenNewTabReply, StdOutMessage, ResizeTabMessage, StdInputRequest } from "@webtty/messages"
-import { Commands, Events } from "./serializers"
+import { Messages } from "./serializers"
 
 const initialState = {
     tabId: undefined,
 }
 
-type DispatchCommand = (command: Commands) => void
+type DispatchCommand = (command: Messages) => void
 type Dispatch<A, R = void> = (action: A) => R
 
 const terminalReducer = (state: TerminalState = initialState, action: TerminalActions): TerminalState =>
@@ -34,7 +34,7 @@ const writeStdIn = (dispatch: DispatchCommand) => (id: string, payload: string):
     dispatch(input)
 }
 
-async function* stdoutMessageStream(id: string, messageStream: AsyncQueue<Events>): AsyncIterableIterator<string> {
+async function* stdoutMessageStream(id: string, messageStream: AsyncQueue<Messages>): AsyncIterableIterator<string> {
     const decoder = new TextDecoder()
     for await (const message of messageStream) {
         if (message instanceof StdOutMessage) {
@@ -43,7 +43,7 @@ async function* stdoutMessageStream(id: string, messageStream: AsyncQueue<Events
     }
 }
 
-const newTabMessageStream = (messageStream: AsyncQueue<Events>) =>
+const newTabMessageStream = (messageStream: AsyncQueue<Messages>) =>
     async function(dispatch: Dispatch<TerminalActions>): Promise<void> {
         for await (const message of messageStream) {
             if (message instanceof OpenNewTabReply) {

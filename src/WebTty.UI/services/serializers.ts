@@ -2,8 +2,13 @@ import { encode, decode } from "@msgpack/msgpack"
 import { OpenNewTabReply, StdOutMessage, OpenNewTabRequest, StdInputRequest, ResizeTabMessage } from "@webtty/messages"
 import { BinaryMessageFormat } from "utils/BinaryFormat"
 
-type Commands = any
-type Events = any
+type Messages =
+    | OpenNewTabReply
+    | StdOutMessage
+    | OpenNewTabRequest
+    | OpenNewTabReply
+    | ResizeTabMessage
+    | StdInputRequest
 
 const getName = (message: unknown): string => {
     if (message instanceof OpenNewTabRequest) return "OpenNewTabRequest"
@@ -13,14 +18,14 @@ const getName = (message: unknown): string => {
     return ""
 }
 
-const serializeCommands = (message: OpenNewTabRequest | ResizeTabMessage | StdInputRequest): ArrayBuffer => {
+const serializeCommands = (message: Messages): ArrayBuffer => {
     const bytes = encode(message.toJSON())
     const payload = encode([getName(message), bytes]).slice()
     const data = BinaryMessageFormat.write(payload)
     return data
 }
 
-async function* deserializeMessages(dataStream: AsyncIterable<MessageEvent>): AsyncIterable<any> {
+async function* deserializeMessages(dataStream: AsyncIterable<MessageEvent>): AsyncIterable<Messages> {
     for await (const event of dataStream) {
         if (!event) continue
 
@@ -38,7 +43,7 @@ async function* deserializeMessages(dataStream: AsyncIterable<MessageEvent>): As
 
                 case "StdOutMessage": {
                     const stdOut = StdOutMessage.fromJS(payload)
-                    stdOut.data = Array.from((payload as any)["Data"])
+                    stdOut.data = Array.from((payload as { Data: number[] })["Data"])
                     yield stdOut
                     break
                 }
@@ -50,5 +55,5 @@ async function* deserializeMessages(dataStream: AsyncIterable<MessageEvent>): As
     }
 }
 
-export { Commands, Events }
+export { Messages }
 export { serializeCommands, deserializeMessages }

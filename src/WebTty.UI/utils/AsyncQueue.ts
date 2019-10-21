@@ -18,7 +18,7 @@ class AsyncQueue<T> {
             listeners.push(queue)
             ;(async function(): Promise<void> {
                 try {
-                    for await (let message of iterator) {
+                    for await (const message of iterator) {
                         listeners.forEach(l => {
                             if (l.isDisposed) return
 
