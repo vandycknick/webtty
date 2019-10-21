@@ -5,6 +5,8 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
 
     <ToolCommandName>webtty</ToolCommandName>
+    <AssemblyName>webtty</AssemblyName>
+
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <IsPackaging>false</IsPackaging>
