@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
@@ -25,14 +26,42 @@ namespace WebTty
                     .SuppressStatusMessages(true)
                     .UseKestrel(o =>
                     {
-                        o.ListenLocalhost(5000);
+                        if (_options.Address.ToLower() == "localhost")
+                        {
+                            o.ListenLocalhost(_options.Port);
+                        }
+                        else if (_options.Address.ToLower() == "any")
+                        {
+                            o.ListenAnyIP(_options.Port);
+                        }
+                        else if (IPAddress.TryParse(_options.Address, out var address))
+                        {
+                            o.Listen(
+                                address,
+                                _options.Port
+                            );
+                        }
+                        else
+                        {
+                            Console.WriteLine("TODO: add message here and kill app");
+                        }
                     })
                     .UseStartup<Startup>()
                     .Build();
 
 
+                string StringifyAddress(string address)
+                {
+                    return address switch
+                    {
+                        "localhost" => "localhost",
+                        "any" => "+",
+                        _ => address,
+                    };
+                }
+
                 await host.StartAsync(cts.Token);
-                Console.WriteLine($"Listening on http://localhost:{_options.Port}");
+                Console.WriteLine($"Listening on http://{StringifyAddress(_options.Address)}:{_options.Port}");
                 Console.WriteLine("");
                 Console.WriteLine("Press CTRL+C to exit");
                 await host.WaitForShutdownAsync(cts.Token);

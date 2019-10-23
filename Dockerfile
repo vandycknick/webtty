@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 
 WORKDIR /app
 
@@ -11,10 +11,13 @@ RUN apt update && apt install -y nodejs make yarn
 
 # COPY solution
 COPY webtty.sln .
+COPY Directory.Build.props .
+COPY Version.props .
 
 # COPY src
 COPY src/WebTty/*.csproj src/WebTty/
 COPY src/WebTty.Native/*.csproj src/WebTty.Native/
+COPY src/WebTty.Messages/*.csproj src/WebTty.Messages/
 
 COPY src/WebTty.UI/package.json src/WebTty.UI/
 COPY src/WebTty.UI/yarn.lock src/WebTty.UI/
@@ -26,13 +29,23 @@ COPY test/WebTty.Integration.Test/*.csproj test/WebTty.Integration.Test/
 
 # COPY tools
 COPY tools/build/* tools/build/
+COPY tools/jsonschema/* tools/jsonschema/
 
 # COPY nuke
 COPY build.sh .
 COPY .nuke .
 
-RUN ./build.sh setup
+RUN ./build.sh restore
 
 COPY . .
 
-RUN ./build.sh compile
+RUN ./build.sh setup
+RUN ./build.sh compile --configuration Release
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-alpine as runtime
+ENV ASPNETCORE_URLS=""
+WORKDIR /webtty
+
+COPY --from=build /app/.build/bin/WebTty/Release/netcoreapp3.0/ .
+
+ENTRYPOINT ["dotnet", "webtty.dll", "-a", "any"]

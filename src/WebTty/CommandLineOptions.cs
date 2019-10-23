@@ -10,6 +10,7 @@ namespace WebTty
     {
         public bool ShowHelp { get; private set; }
         public bool ShowVersion { get; private set; }
+        public string Address { get; private set; } = "localhost";
         public int Port { get; private set; } = 5000;
         public string Version => GetVersion();
         public string Name => GetName();
@@ -21,6 +22,7 @@ namespace WebTty
         {
             _options = new OptionSet
             {
+                { "a|address=", "IP address to use [localhost]. Use any to listen to any available address. Ex (0.0.0.0, any, 192.168.2.3, ...)", (string address) => Address = address ?? "localhost" },
                 { "p|port=", "Port to use [5000]. Use 0 for a dynamic port.", (int? port) => Port = port ?? 5000 },
                 { "version", "Show current version", version => ShowVersion = version != null },
                 { "?|h|help", "Show help information", help => ShowHelp = help != null },
