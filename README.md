@@ -7,6 +7,7 @@
 > Terminal emulator build on top of WebSockets
 
 [![Build Status][azure-ci-badge]][azure-ci-url]
+[![NuGet][nuget-package-badge]][nuget-package-url]
 
 
 ## Introduction
@@ -36,3 +37,7 @@ Options
 
 [azure-ci-badge]: https://dev.azure.com/vandycknick/webtty/_apis/build/status/nickvdyck.webtty?branchName=master
 [azure-ci-url]: https://dev.azure.com/vandycknick/webtty/_build/latest?definitionId=15&branchName=master
+
+[nuget-package-url]: https://www.nuget.org/packages/webtty/
+[nuget-package-badge]: https://img.shields.io/nuget/v/webtty.svg?style=flat-square&label=nuget
+

@@ -8,7 +8,7 @@ Accepted
 
 ## Context
 
-This repository could potentially contain multiple solutions that all consists of multiple projects. For this I will need a build system that is capable of creating multiple assemblies or executables. Some of those projects may require more advanced tooling because of the need to target multiple platforms or because to the requirement of a different dev stack (eg front end development). Thus I need some extra tooling to make development easier and make it possible to publish a single artefact.
+This repository could potentially contain multiple solutions that all consists of multiple projects. For this I will need a build system that is capable of creating multiple assemblies or executables. Some of those projects may require more advanced tooling because of the need to target multiple platforms or because to the requirement of a different dev stack (eg front end development). Thus extra tooling to ease development and publishing a single artefact will be needed.
 
 The different tools I considered for this:
 - Makefile
