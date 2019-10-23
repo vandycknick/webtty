@@ -8,9 +8,9 @@
     <Description>🔌 WebSocket based terminal emulator</Description>
     <Copyright>Copyright © Nick Van Dyck</Copyright>
     <NeutralLanguage>en-UK</NeutralLanguage>
+    <PackageIcon>logo-256x256.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageIconUrl>https://raw.githubusercontent.com/nickvdyck/webtty/master/assets/logo-256x256.png</PackageIconUrl>
-    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/nickvdyck/webtty</PackageProjectUrl>
     <RepositoryUrl>https://github.com/nickvdyck/webtty.git</RepositoryUrl>
     <PackageReleaseNotes>See $(PackageProjectUrl)/blob/master/CHANGELOG.md for release notes.</PackageReleaseNotes>
@@ -24,5 +24,10 @@
     <BaseIntermediateOutputPath>$(BuildDirectory)obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
     <BaseOutputPath>$(BuildDirectory)bin/$(MSBuildProjectName)/</BaseOutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)assets\logo-256x256.png" Pack="true" PackagePath="/"/>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" Visible="false" PackagePath="/"/>
+  </ItemGroup>
 
 </Project>
