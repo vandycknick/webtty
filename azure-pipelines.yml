@@ -54,6 +54,12 @@ stages:
           vmImage: ubuntu-16.04
 
         steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core sdk'
+            inputs:
+              packageType: sdk
+              version: 3.0.100
+
           - task: NodeTool@0
             displayName: Install Node
             inputs:
@@ -99,6 +105,12 @@ stages:
           vmImage: ubuntu-16.04
 
         steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core sdk'
+            inputs:
+              packageType: sdk
+              version: 3.0.100
+
           - task: DownloadPipelineArtifact@2
             inputs:
               artifact: webtty
@@ -112,6 +124,12 @@ stages:
           vmImage: macOS-10.14
 
         steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core sdk'
+            inputs:
+              packageType: sdk
+              version: 3.0.100
+
           - task: DownloadPipelineArtifact@2
             inputs:
               artifact: webtty
@@ -125,6 +143,12 @@ stages:
           vmImage: vs2017-win2016
 
         steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core sdk'
+            inputs:
+              packageType: sdk
+              version: 3.0.100
+
           - task: DownloadPipelineArtifact@2
             inputs:
               artifact: webtty
