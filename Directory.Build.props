@@ -7,7 +7,7 @@
     <Product>webtty</Product>
     <Description>🔌 WebSocket based terminal emulator</Description>
     <Copyright>Copyright © Nick Van Dyck</Copyright>
-    <NeutralLanguage>en-UK</NeutralLanguage>
+    <NeutralLanguage>en-GB</NeutralLanguage>
     <PackageIcon>logo-256x256.png</PackageIcon>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>

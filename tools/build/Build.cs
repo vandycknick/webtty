@@ -8,7 +8,11 @@ using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Nuke.Common.Tools.Git.GitTasks;
 using System.Runtime.InteropServices;
+using System.Linq;
+using System.IO;
+using System.Xml.Linq;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -27,6 +31,8 @@ class Build : NukeBuild
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+
+
 
     [Solution] readonly Solution Solution;
 
@@ -48,12 +54,24 @@ class Build : NukeBuild
     Target Install => _ => _
         .Executes(() =>
         {
-            var buildNumber = GitVersion.RevListHeadCount();
+            var buildNumber = GitRevListHeadCount();
+            var versionSuffix = $"build.{buildNumber}";
+
+            var fileName = "Version.props";
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var versionPropsFilePath = Path.Combine(currentDirectory, fileName);
+
+            var versionProps = XElement.Load(versionPropsFilePath);
+            var query = from props in versionProps.Elements("PropertyGroup")
+                        from v in props.Elements("VersionPrefix")
+                        select v.Value;
+
+            var version = query.ToList().FirstOrDefault();
 
             DotNetToolInstall(s => s
                 .AddSources(ArtifactsDirectory)
                 .SetGlobal(true)
-                .SetVersion($"0.1.0-build.{buildNumber}")
+                .SetVersion($"{version}-{versionSuffix}")
                 .SetPackageName(CliToolName));
         });
 
@@ -195,13 +213,13 @@ class Build : NukeBuild
             DotNetRestore(s => s
                 .SetForceEvaluate(true));
 
-            var buildNumber = GitVersion.RevListHeadCount();
-            var sourceRevisionId = GitVersion.RevParseHead();
+            var buildNumber = GitRevListHeadCount();
+            var sourceRevisionId = GitRevParseHead();
 
             DotNetBuild(s => s
                 .SetProjectFile(Solution.GetProject("WebTty"))
                 .SetConfiguration(Configuration)
-                .SetProperty("BuildNumber", buildNumber)
+                .SetVersionSuffix($"build.{buildNumber}")
                 .SetProperty("SourceRevisionId", sourceRevisionId)
                 .SetProperty("IsPackaging", true));
 
@@ -210,7 +228,7 @@ class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetNoBuild(true)
-                .SetProperty("BuildNumber", buildNumber)
+                .SetVersionSuffix($"build.{buildNumber}")
                 .SetProperty("SourceRevisionId", sourceRevisionId)
                 .SetProperty("IsPackaging", true));
         });
@@ -228,5 +246,12 @@ class Build : NukeBuild
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetVersionSuffix(suffix));
         });
+
+
+    public static string GitRevListHeadCount() =>
+        Git("rev-list --count HEAD").FirstOrDefault().Text.Trim();
+
+    public static string GitRevParseHead() =>
+        Git("rev-parse HEAD").FirstOrDefault().Text.Trim();
 
 }
