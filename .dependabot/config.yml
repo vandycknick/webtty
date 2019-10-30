@@ -1,0 +1,13 @@
+version: 1
+update_configs:
+  - package_manager: "javascript"
+    directory: "/src/WebTty.UI"
+    update_schedule: "weekly"
+
+  - package_manager: "dotnet:nuget"
+    directory: "/"
+    update_schedule: "weekly"
+
+  - package_manager: "docker"
+    directory: "/"
+    update_schedule: "weekly"
