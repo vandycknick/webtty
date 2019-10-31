@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@msgpack/msgpack": "1.9.1",
-    "immer": "4.0.2",
+    "immer": "5.0.0",
     "preact": "10.0.1",
     "resize-observer-polyfill": "1.5.1",
     "xterm": "4.2.0",
