@@ -12,7 +12,7 @@
   "dependencies": {
     "@msgpack/msgpack": "1.9.1",
     "immer": "5.0.0",
-    "preact": "10.0.1",
+    "preact": "10.0.4",
     "resize-observer-polyfill": "1.5.1",
     "xterm": "4.2.0",
     "xterm-addon-fit": "0.3.0"
