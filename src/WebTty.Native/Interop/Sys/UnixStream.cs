@@ -3,7 +3,7 @@ using System.IO;
 
 namespace WebTty.Native.Interop
 {
-    internal sealed unsafe class UnixStream : Stream, IDisposable
+    internal sealed unsafe class UnixStream : Stream
     {
         private const int InvalidFileDescriptor = -1;
 

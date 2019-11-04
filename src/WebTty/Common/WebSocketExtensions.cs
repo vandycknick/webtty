@@ -29,8 +29,7 @@ namespace WebTty.Common
         private static async ValueTask SendMultiSegmentAsync(WebSocket webSocket, ReadOnlySequence<byte> buffer, WebSocketMessageType webSocketMessageType, CancellationToken cancellationToken = default)
         {
             var position = buffer.Start;
-            // Get a segment before the loop so we can be one segment behind while writing
-            // This allows us to do a non-zero byte write for the endOfMessage = true send
+
             buffer.TryGet(ref position, out var prevSegment);
             while (buffer.TryGet(ref position, out var segment))
             {

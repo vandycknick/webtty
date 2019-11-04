@@ -25,7 +25,7 @@ namespace WebTty.Native.Terminal
 
         public void Start()
         {
-            var shell = Shell.GetUserDefault();
+            var shell = GetDefaultShell();
             StartCore(shell, DEFAULT_WIDTH, DEFAULT_HEIGHT);
         }
 

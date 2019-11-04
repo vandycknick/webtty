@@ -17,6 +17,8 @@ namespace WebTty.Native.Terminal
 
         private IntPtr ptyHandle = IntPtr.Zero;
 
+        public static string GetDefaultShell() => "cmd";
+
         private sealed class PtyPipe : IDisposable
         {
             private readonly SafeFileHandle _readSide;

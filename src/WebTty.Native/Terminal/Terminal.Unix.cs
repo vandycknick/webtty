@@ -8,6 +8,13 @@ namespace WebTty.Native.Terminal
     {
         private int ptyHandle;
 
+        public static string GetDefaultShell()
+        {
+            var uid = Libc.getuid();
+            var pwd = Libc.getpwuid(uid);
+            return pwd.pw_shell;
+        }
+
         private void StartCore(string shell, int width, int height)
         {
             var filename = ResolvePath(shell);
@@ -85,6 +92,8 @@ namespace WebTty.Native.Terminal
 
         private void DisposeManagedState()
         {
+            StandardIn.Dispose();
+            StandardOut.Dispose();
         }
     }
 }

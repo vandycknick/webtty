@@ -5,10 +5,10 @@ using System.Text;
 
 namespace WebTty.Native.Utils
 {
-    internal static unsafe class ArrayHelpers
+    internal static class ArrayHelpers
     {
-        // https://github.com/dotnet/corefx/blob/4464cceace7615502a1003bc7488f206a47c82ee/src/Common/src/Interop/Unix/System.Native/Interop.ForkAndExecProcess.cs#L61
-        public static void AllocNullTerminatedArray(string[] arr, ref byte** arrPtr)
+        // https://github.com/dotnet/corefx/blob/800862e8c7337efd09be5daffa49421f1399a031/src/Common/src/Interop/Unix/System.Native/Interop.ForkAndExecProcess.cs#L51
+        public static unsafe void AllocNullTerminatedArray(string[] arr, ref byte** arrPtr)
         {
             int arrLength = arr.Length + 1; // +1 is for null termination
 
@@ -39,7 +39,7 @@ namespace WebTty.Native.Utils
             }
         }
 
-        // https://github.com/dotnet/corefx/blob/4464cceace7615502a1003bc7488f206a47c82ee/src/Common/src/Interop/Unix/System.Native/Interop.ForkAndExecProcess.cs#L92
+        // https://github.com/dotnet/corefx/blob/800862e8c7337efd09be5daffa49421f1399a031/src/Common/src/Interop/Unix/System.Native/Interop.ForkAndExecProcess.cs#L82
         public static unsafe void FreeArray(byte** arr, int length)
         {
             if (arr != null)
