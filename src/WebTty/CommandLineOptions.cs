@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
 using Mono.Options;
 
 namespace WebTty
 {
-    public class CommandLineOptions
+    public sealed class CommandLineOptions
     {
         public bool ShowHelp { get; private set; }
         public bool ShowVersion { get; private set; }
@@ -16,6 +16,7 @@ namespace WebTty
         public string Name => GetName();
         public List<string> Rest { get; private set; }
 
+        private OptionException ParseException {get; set; }
         private readonly OptionSet _options;
 
         private CommandLineOptions()
@@ -29,30 +30,39 @@ namespace WebTty
             };
         }
 
-        public void WriteHelp()
+        public void WriteOptions(TextWriter writer) => _options.WriteOptionDescriptions(writer);
+
+        public bool TryGetInvalidOptions(out string message)
         {
-            Console.WriteLine($"{Name}: {Version}");
-            Console.WriteLine();
-            Console.WriteLine("TODO: add more information here");
-            Console.WriteLine();
-            Console.WriteLine($"Usage: {Name} [options]");
-            Console.WriteLine();
-            Console.WriteLine("Options");
-            Console.WriteLine();
-            _options.WriteOptionDescriptions(Console.Out);
+            if (ParseException != null)
+            {
+                message = ParseException.Message;
+                return true;
+            }
+
+            message = string.Empty;
+            return false;
         }
 
         private CommandLineOptions Parse(string[] args)
         {
-            Rest = _options.Parse(args);
+            try
+            {
+                Rest = _options.Parse(args);
+            }
+            catch (OptionException ex)
+            {
+                ParseException = ex;
+            }
             return this;
         }
+
         public static CommandLineOptions Build(string[] args) => new CommandLineOptions().Parse(args);
 
-        public static string GetVersion() =>
+        private static string GetVersion() =>
             typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
-        public static string GetName() =>
+        private static string GetName() =>
             typeof(Program).Assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
     }
 }

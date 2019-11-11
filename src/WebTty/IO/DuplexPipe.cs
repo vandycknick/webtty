@@ -1,6 +1,6 @@
 using System.IO.Pipelines;
 
-namespace WebTty.Common
+namespace WebTty.IO
 {
     internal class DuplexPipe : IDuplexPipe
     {
