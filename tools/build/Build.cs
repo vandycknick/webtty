@@ -131,29 +131,21 @@ class Build : NukeBuild
     Target Test => _ => _
         .Executes(() =>
         {
-            if (IsLocalBuild)
-            {
-                DotNetTest(s => s
-                    .SetProjectFile(Solution.GetProject("WebTty.Test")));
-
-                DotNetTest(s => s
-                    .SetProjectFile(Solution.GetProject("WebTty.Integration.Test")));
-            }
-            else
-            {
-                DotNetTest(s => s
-                    .SetProjectFile(Solution.GetProject("WebTty.Test"))
-                    .SetNoBuild(true)
+            DotNetTest(s => s
+                .SetProjectFile(Solution.GetProject("WebTty.Test"))
+                .When(!IsLocalBuild, s =>
+                    s.SetNoBuild(true)
                     .SetResultsDirectory(ArtifactsDirectory / "TestResults")
-                    .SetLogger("trx"));
+                    .SetLogger("trx")
+                )
+            );
 
-                // Temporary remove until I have a better plan to run integration tests in ci
-                // DotNetTest(s => s
-                //     .SetProjectFile(Solution.GetProject("WebTty.Integration.Test"))
-                //     .SetNoBuild(true)
-                //     .SetResultsDirectory(ArtifactsDirectory / "TestResults")
-                //     .SetLogger("trx"));
-            }
+            // Temporary removed until I have a better plan to run integration tests in ci
+            // DotNetTest(s => s
+            //     .SetProjectFile(Solution.GetProject("WebTty.Integration.Test"))
+            //     .SetNoBuild(true)
+            //     .SetResultsDirectory(ArtifactsDirectory / "TestResults")
+            //     .SetLogger("trx"));
         });
 
     Target Watch => _ => _
@@ -246,7 +238,6 @@ class Build : NukeBuild
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetVersionSuffix(suffix));
         });
-
 
     public static string GitRevListHeadCount() =>
         Git("rev-list --count HEAD").FirstOrDefault().Text.Trim();

@@ -10,39 +10,39 @@ namespace WebTty.Test
         [InlineData("--help")]
         public void CommandLineOptions_Build_ShouldSetShowHelpToTrueWhenPassedHelpOptions(string arg1)
         {
-            // Arrange
+            // Given
             var args = new string[] { arg1 };
 
-            // Act
+            // When
             var options = CommandLineOptions.Build(args);
 
-            // Assert
+            // Then
             Assert.True(options.ShowHelp);
         }
 
         [Fact]
         public void CommnandLineOptions_Build_ShouldSetVersionToTrueWhenPassedVersionOption()
         {
-            // Arrange
+            // Given
             var args = new string[] { "--version" };
 
-            // Act
+            // When
             var options = CommandLineOptions.Build(args);
 
-            // Assert
+            // Then
             Assert.True(options.ShowVersion);
         }
 
         [Fact]
         public void CommandLineOptions_Build_ShouldSetShowHelpToFalseWhenNoHelpArgumentsAreGiven()
         {
-            // Arrange
+            // Given
             var args = new string[] { "--hello", "--world" };
 
-            // Act
+            // When
             var options = CommandLineOptions.Build(args);
 
-            // Assert
+            // Then
             Assert.False(options.ShowHelp);
         }
 
@@ -65,14 +65,30 @@ namespace WebTty.Test
         [InlineData("--port", "0")]
         public void CommandLineOptions_Build_SetsThePortToTheGivenValue(string arg, string value)
         {
-            // Arrange
+            // Given
             var args = new string[] { arg, value };
 
-            // Act
+            // When
             var options = CommandLineOptions.Build(args);
 
-            // Assert
+            // Then
             Assert.Equal(expected: int.Parse(value), options.Port);
+        }
+
+        [Theory]
+        [InlineData(new string[]{ "-p" }, true, "Missing required value for option '-p'.")]
+        [InlineData(new string[]{ "--help" }, false, "")]
+        public void CommandLineOptions_TryGetInvalidOptions_ReturnsFalseAndAnErrorMessageWhenGivenAnInvalidOption(string[] args, bool hasError, string errorMessage)
+        {
+            //Given
+            var options = CommandLineOptions.Build(args);
+
+            //When
+            var result = options.TryGetInvalidOptions(out string message);
+
+            //Then
+            Assert.Equal(hasError, result);
+            Assert.Equal(errorMessage, message);
         }
     }
 }
