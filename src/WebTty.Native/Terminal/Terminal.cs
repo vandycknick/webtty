@@ -12,7 +12,7 @@ namespace WebTty.Native.Terminal
         public StreamWriter StandardIn { get; private set; }
         public StreamReader StandardOut { get; private set; }
 
-        private int childpid;
+        private int processId;
 
         public string Id { get; private set; }
         public bool IsRunning { get; private set; }
@@ -32,6 +32,8 @@ namespace WebTty.Native.Terminal
         public void Kill() => KillCore();
 
         public void WaitForExit() => WaitForExitCore();
+
+        public void Close() => CloseCore();
 
         private static string ResolvePath(string filename)
         {
@@ -93,7 +95,7 @@ namespace WebTty.Native.Terminal
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    DisposeManagedState();
+                    Close();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

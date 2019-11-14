@@ -9,10 +9,11 @@ namespace WebTty.Native.Interop
         internal static int STDOUT_FILENO => 1;
         internal static int STDERR_FILENO => 2;
 
+        [DllImport(libc, SetLastError = true)]
+        internal static extern int fork();
 
         [DllImport(libc, SetLastError = true)]
         internal static extern unsafe int execve(string filename, byte** argv, byte** envp);
-
 
         internal static int SEEK_SET => 0;
         internal static int SEEK_CUR => 1;
@@ -23,6 +24,8 @@ namespace WebTty.Native.Interop
         [DllImport(libc, SetLastError = true)]
         internal static extern int ftruncate(int fd, off_t length);
 
+        [DllImport(libc, SetLastError = true)]
+        internal static extern int close(int fildes);
 
         [DllImport(libc, SetLastError = true)]
         internal static extern long read(int fd, void* buf, uint count);
@@ -35,5 +38,21 @@ namespace WebTty.Native.Interop
         internal static extern uid_t geteuid();
         [DllImport(libc)]
         internal static extern gid_t getgid();
+
+
+        [DllImport(libc)]
+        public static extern pid_t getpgrp();
+        [DllImport(libc, SetLastError = true)]
+        public static extern pid_t getpgid(pid_t pid);
+
+
+        [DllImport(libc, SetLastError = true)]
+        internal static extern pid_t setsid();
+
+        [DllImport(libc, SetLastError = true)]
+        internal static extern pid_t setpgrp();
+
+        [DllImport(libc, SetLastError = true)]
+        internal static extern int setpgid(pid_t pid, pid_t pgid);
     }
 }

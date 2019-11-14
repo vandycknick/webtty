@@ -111,18 +111,7 @@ namespace WebTty.Native.Terminal
             process?.Dispose();
         }
 
-        public void SetWindowSize(int col, int rows)
-        {
-            var size = new COORD
-            {
-                X = (short)col,
-                Y = (short)rows,
-            };
-
-            Kernel32.ResizePseudoConsole(ptyHandle, size);
-        }
-
-        private void DisposeManagedState()
+        private void CloseCore()
         {
             inputPipe?.Dispose();
             outputPipe?.Dispose();
@@ -137,6 +126,17 @@ namespace WebTty.Native.Terminal
             {
                 Kernel32.ClosePseudoConsole(ptyHandle);
             }
+        }
+
+        public void SetWindowSize(int col, int rows)
+        {
+            var size = new COORD
+            {
+                X = (short)col,
+                Y = (short)rows,
+            };
+
+            Kernel32.ResizePseudoConsole(ptyHandle, size);
         }
     }
 }

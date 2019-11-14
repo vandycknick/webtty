@@ -39,9 +39,9 @@ namespace WebTty.Terminal
 
         private async Task ProcessOutputCoreAsync(Native.Terminal.Terminal terminal, CancellationToken token)
         {
-            await Task.Delay(1);
             terminal.Start();
-            terminal.StandardIn.AutoFlush = true;
+            // This is here because of a weird race condition, I should figure that on e out
+            await Task.Delay(10);
 
             const int maxReadSize = 1024;
             const int maxBufferSize = maxReadSize * sizeof(char);
@@ -59,11 +59,11 @@ namespace WebTty.Terminal
                         if (read == 0) continue;
 
                         var bytesWritten = Encoding.UTF8.GetBytes(buffer.AsSpan(0, read), byteBuffer);
-                        var charSegment = new ArraySegment<byte>(byteBuffer, 0, bytesWritten);
+                        var byteSegment = new ArraySegment<byte>(byteBuffer, 0, bytesWritten);
                         var stdOut = new StdOutMessage
                         {
                             TabId = terminal.Id,
-                            Data = charSegment,
+                            Data = byteSegment,
                         };
 
                         await _handler.WriteAsync(stdOut);
@@ -75,6 +75,8 @@ namespace WebTty.Terminal
                     }
                 }
             }
+
+            Kill(terminal.Id);
         }
 
         public async ValueTask SendInput(string id, ReadOnlyMemory<char> input, CancellationToken token)
@@ -82,6 +84,7 @@ namespace WebTty.Terminal
             if (_terminals.TryGetValue(id, out var terminal))
             {
                 await terminal.StandardIn.WriteAsync(input, token);
+                await terminal.StandardIn.FlushAsync();
             }
         }
 
@@ -99,7 +102,6 @@ namespace WebTty.Terminal
             {
                 Console.WriteLine($"Killing terminal with id {id}");
                 removed.Kill();
-                removed.WaitForExit();
                 removed.Dispose();
             }
         }

@@ -1,12 +1,17 @@
+using System;
 using System.ComponentModel;
 using System.IO;
+using System.Text;
+using Microsoft.Win32.SafeHandles;
 using WebTty.Native.Interop;
+using WebTty.Native.Utils;
 
 namespace WebTty.Native.Terminal
 {
     public sealed partial class Terminal
     {
-        private int ptyHandle;
+        private int _ptyHandle;
+        private UnixStream _ptyStream;
 
         public static string GetDefaultShell()
         {
@@ -24,53 +29,118 @@ namespace WebTty.Native.Terminal
                 ws_row = (ushort)height
             };
 
-            var pid = Sys.ForkPtyAndExec(
+            var pid = ForkPtyAndExec(
                 filename,
                 new string[] { filename },
                 GetEnvironmentVariables(),
-                out ptyHandle,
+                out _ptyHandle,
                 size
             );
 
-            childpid = pid;
+            processId = pid;
 
-            var ret = Libc.waitpid(childpid, out var _, WaitPidOptions.WNOHANG);
+            var ret = Libc.waitpid(processId, out var _, WaitPidOptions.WNOHANG);
 
             if (ret == 0)
             {
                 IsRunning = true;
             }
 
-            var stream = new UnixStream(ptyHandle);
+            _ptyStream = new UnixStream(_ptyHandle);
+            StandardIn = new StreamWriter(_ptyStream);
+            StandardOut = new StreamReader(_ptyStream);
+        }
 
-            StandardIn = new StreamWriter(stream);
-            StandardOut = new StreamReader(stream);
+        private int WaitPidNoHang(int pid, out int exitCode)
+        {
+            int result;
+            int status;
+            while (Sys.ShouldRetrySyscall(result = Libc.waitpid(pid, out status, WaitPidOptions.WNOHANG))) ;
+
+            if (result > 0)
+            {
+                if (Libc.WIFEXITED(status))
+                {
+                    exitCode = Libc.WEXITSTATUS(status);
+                }
+                else if (Libc.WIFSIGNALED(status))
+                {
+                    exitCode = 128 + Libc.WTERMSIG(status);
+                }
+                else
+                {
+                    exitCode = -1;
+                }
+            }
+            else
+            {
+                exitCode = -1;
+            }
+
+            return result;
+        }
+
+        private void ReapChildren(bool all = true)
+        {
+            int result;
+            int exitCode;
+
+            while (Sys.ShouldRetrySyscall(result = Libc.waitpid(processId, out exitCode, WaitPidOptions.None))) ;
+
+            if (result == processId)
+            {
+
+                if (Libc.WIFEXITED(exitCode))
+                {
+                    ExitCode = Libc.WEXITSTATUS(exitCode);
+                }
+                else if (Libc.WIFSIGNALED(exitCode))
+                {
+                    ExitCode = 128 + Libc.WTERMSIG(exitCode);
+                }
+                else
+                {
+                    ExitCode = -1;
+                }
+            }
+            else
+            {
+                // Unexpected.
+                Sys.ThrowExceptionForLastError();
+            }
+
+            if (all) // Very ugly at the moment but will reap some leftover processes (not all the time though)
+            {
+                int pid;
+                do
+                {
+                    pid = WaitPidNoHang(-1, out var _);
+                } while (pid > 0);
+            }
+
+            IsRunning = false;
         }
 
         private void WaitForExitCore()
         {
-            int ret;
 
-            ret = Libc.waitpid(childpid, out var status, WaitPidOptions.None);
-
-            IsRunning = false;
-
-            if (ret == childpid)
-            {
-                ExitCode = Libc.WEXITSTATUS(status);
-            }
-            else
-            {
-                ExitCode = -1;
-            }
         }
 
         private void KillCore()
         {
-            if (Libc.kill(childpid, Libc.SIGKILL) != 0)
+            if (Libc.kill(processId, Libc.SIGKILL) != 0)
             {
                 throw new Win32Exception();
             }
+        }
+
+        public void CloseCore()
+        {
+            StandardIn.Dispose();
+            StandardOut.Dispose();
+            _ptyStream.Dispose();
+
+            ReapChildren();
         }
 
         public void SetWindowSize(int col, int rows)
@@ -84,16 +154,64 @@ namespace WebTty.Native.Terminal
             int retVal;
             do
             {
-                retVal = Libc.ioctl(ptyHandle, Libc.TIOCSWINSZ, ref size);
+                retVal = Libc.ioctl(_ptyHandle, Libc.TIOCSWINSZ, ref size);
             } while (Sys.ShouldRetrySyscall(retVal));
 
             Sys.ThrowExceptionForLastErrorIf(retVal);
         }
 
-        private void DisposeManagedState()
+        private static int ForkPtyAndExec(string programName, string[] args, string[] env, out int master, winsize winSize)
         {
-            StandardIn.Dispose();
-            StandardOut.Dispose();
+            unsafe
+            {
+                byte** argvPtr = null;
+                byte** envpPtr = null;
+
+                try
+                {
+                    ArrayHelpers.AllocNullTerminatedArray(args, ref argvPtr);
+                    ArrayHelpers.AllocNullTerminatedArray(env, ref envpPtr);
+
+                    if (Libc.openpty(out master, out var slave, IntPtr.Zero, IntPtr.Zero, ref winSize) == -1)
+                    {
+                        throw new Win32Exception("Could not open a pty");
+                    }
+
+                    var pid = Libc.fork();
+
+                    if (pid < 0)
+                    {
+                        Libc.close(master);
+                        Libc.close(slave);
+                        throw new Exception("Error during fork");
+                    }
+
+                    if (pid == 0)
+                    {
+
+
+                        Libc.close(master);
+
+                        if (Libc.login_tty(slave) == -1)
+                        {
+                            Console.WriteLine($"could not login to tty {Libc.errno}");
+                            // throw new Exception("could not login to tty");
+                        }
+
+                        Libc.execve(programName, argvPtr, envpPtr);
+                        throw new Exception("Execve should not return");
+                    }
+
+                    Libc.close(slave);
+
+                    return pid;
+                }
+                finally
+                {
+                    ArrayHelpers.FreeArray(argvPtr, args.Length);
+                    ArrayHelpers.FreeArray(envpPtr, env.Length);
+                }
+            }
         }
     }
 }

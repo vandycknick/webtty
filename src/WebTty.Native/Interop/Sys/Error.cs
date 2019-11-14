@@ -2,9 +2,9 @@ namespace WebTty.Native.Interop
 {
     internal static partial class Sys
     {
-        public static bool ShouldRetrySyscall(int ret)
+        public static bool ShouldRetrySyscall(int result)
         {
-            if (ret == -1 && Libc.errno == Libc.EINTR)
+            if (result == -1 && Libc.errno == Libc.EINTR)
             {
                 return true;
             }
