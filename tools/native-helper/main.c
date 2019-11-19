@@ -64,5 +64,7 @@ void print_errno() {
 void print_ioctl() {
     printf("=== IOCTL ===\n");
     printf("TIOCSWINSZ is (long) 0x%lx\n", TIOCSWINSZ);
+    printf("TIOCSCTTY is (int) 0x%x\n", TIOCSCTTY);
+    printf("TIOCNOTTY is (int) 0x%x\n", TIOCNOTTY);
     printf("=== IOCTL ===\n\n");
 }

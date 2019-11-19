@@ -16,7 +16,7 @@ COPY Version.props .
 
 # COPY src
 COPY src/WebTty/*.csproj src/WebTty/
-COPY src/WebTty.Native/*.csproj src/WebTty.Native/
+COPY src/WebTty.Exec/*.csproj src/WebTty.Exec/
 COPY src/WebTty.Messages/*.csproj src/WebTty.Messages/
 
 COPY src/WebTty.UI/package.json src/WebTty.UI/

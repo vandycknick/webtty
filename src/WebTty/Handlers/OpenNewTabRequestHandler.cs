@@ -27,7 +27,7 @@ namespace WebTty.Handlers
 
             return new OpenNewTabReply
             {
-                Id = terminal.Id
+                Id = terminal.Id.ToString()
             };
         }
     }

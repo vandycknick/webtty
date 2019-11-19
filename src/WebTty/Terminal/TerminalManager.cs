@@ -12,22 +12,23 @@ namespace WebTty.Terminal
     {
         private readonly IConnectionHandler _handler;
 
-        private readonly ConcurrentDictionary<string, Native.Terminal.Terminal> _terminals = new ConcurrentDictionary<string, Native.Terminal.Terminal>();
+        private readonly ConcurrentDictionary<string, Terminal> _terminals = new ConcurrentDictionary<string, Terminal>();
 
         public TerminalManager(IConnectionHandler handler)
         {
             _handler = handler;
         }
 
-        public Native.Terminal.Terminal Start()
+        public Terminal Start()
         {
-            var terminal = new Native.Terminal.Terminal();
+            var terminal = new Terminal();
+            terminal.Start();
 
-            _terminals.TryAdd(terminal.Id, terminal);
+            _terminals.TryAdd(terminal.Id.ToString(), terminal);
             return terminal;
         }
 
-        public void ProcessOutput(Native.Terminal.Terminal terminal, CancellationToken token = default)
+        public void ProcessOutput(Terminal terminal, CancellationToken token = default)
         {
             var backend = Task.Factory.StartNew(
                 function: () => ProcessOutputCoreAsync(terminal, token),
@@ -37,11 +38,9 @@ namespace WebTty.Terminal
             );
         }
 
-        private async Task ProcessOutputCoreAsync(Native.Terminal.Terminal terminal, CancellationToken token)
+        private async Task ProcessOutputCoreAsync(Terminal terminal, CancellationToken token)
         {
-            terminal.Start();
-            // This is here because of a weird race condition, I should figure that on e out
-            await Task.Delay(10);
+            await terminal.WaitUntilReady();
 
             const int maxReadSize = 1024;
             const int maxBufferSize = maxReadSize * sizeof(char);
@@ -50,11 +49,11 @@ namespace WebTty.Terminal
 
             using (var t = token.Register(() => Kill(terminal.Id)))
             {
-                while (!terminal.StandardOut.EndOfStream && !t.Token.IsCancellationRequested)
+                while (!terminal.Output.EndOfStream && !t.Token.IsCancellationRequested)
                 {
                     try
                     {
-                        var read = await terminal.StandardOut.ReadAsync(buffer.AsMemory(), t.Token);
+                        var read = await terminal.Output.ReadAsync(buffer.AsMemory(), t.Token);
 
                         if (read == 0) continue;
 
@@ -62,7 +61,7 @@ namespace WebTty.Terminal
                         var byteSegment = new ArraySegment<byte>(byteBuffer, 0, bytesWritten);
                         var stdOut = new StdOutMessage
                         {
-                            TabId = terminal.Id,
+                            TabId = terminal.Id.ToString(),
                             Data = byteSegment,
                         };
 
@@ -83,8 +82,8 @@ namespace WebTty.Terminal
         {
             if (_terminals.TryGetValue(id, out var terminal))
             {
-                await terminal.StandardIn.WriteAsync(input, token);
-                await terminal.StandardIn.FlushAsync();
+                await terminal.Input.WriteAsync(input, token);
+                await terminal.Input.FlushAsync();
             }
         }
 
@@ -92,16 +91,16 @@ namespace WebTty.Terminal
         {
             if (_terminals.TryGetValue(id, out var terminal))
             {
-                terminal.SetWindowSize(cols, rows);
+                terminal.SetWindowSize(rows, cols);
             }
         }
 
-        public void Kill(string id)
+        public void Kill(Guid id)
         {
-            if (_terminals.TryRemove(id, out var removed))
+            if (_terminals.TryRemove(id.ToString(), out var removed))
             {
                 Console.WriteLine($"Killing terminal with id {id}");
-                removed.Kill();
+                removed.Stop();
                 removed.Dispose();
             }
         }

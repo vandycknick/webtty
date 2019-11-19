@@ -18,12 +18,6 @@ using System.Xml.Linq;
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
 {
-    /// Support plugins are available for:
-    ///   - JetBrains ReSharper        https://nuke.build/resharper
-    ///   - JetBrains Rider            https://nuke.build/rider
-    ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
-    ///   - Microsoft VSCode           https://nuke.build/vscode
-
     public static int Main() => Execute<Build>(build => build.Default);
 
     [PathExecutable("yarn")]
@@ -32,8 +26,6 @@ class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-
-
     [Solution] readonly Solution Solution;
 
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -41,8 +33,9 @@ class Build : NukeBuild
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath BuildOutputDirectory => RootDirectory / ".build";
 
-    AbsolutePath UIDirectory => SourceDirectory / "WebTty.UI";
-    AbsolutePath NativeDirectory => SourceDirectory / "WebTty.Native/WebTty.Native.csproj";
+    private const string CLI_PROJECT = "WebTty";
+    private const string EXEC_PROJECT = "WebTty.Exec";
+    private const string UI_PROJECT = "WebTty.UI";
 
     readonly string CliToolName = "webtty";
 
@@ -90,14 +83,17 @@ class Build : NukeBuild
                 .SetProjectFile(Solution.GetProject("jsonschema")));
 
             var useFrozenLockfile = IsLocalBuild ? "" : " --frozen-lockfile";
-            Yarn($"install{useFrozenLockfile}", workingDirectory: UIDirectory);
+            Yarn(
+                $"install{useFrozenLockfile}",
+                workingDirectory: Solution.GetProject(UI_PROJECT).Directory
+            );
         })
         .Triggers(Restore);
 
     Target Clean => _ => _
         .Executes(() =>
         {
-            Yarn($"run clean", workingDirectory: UIDirectory);
+            Yarn($"run clean", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
@@ -105,12 +101,13 @@ class Build : NukeBuild
         .DependsOn(Clean)
         .Executes(() =>
         {
+
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
             DeleteDirectory(BuildOutputDirectory / "bin");
             DeleteDirectory(BuildOutputDirectory / "obj");
             DeleteDirectory(ArtifactsDirectory);
-            DeleteDirectory(UIDirectory / "node_modules");
+            DeleteDirectory(Solution.GetProject(UI_PROJECT).Directory / "node_modules");
         });
 
     Target Check => _ => _
@@ -120,12 +117,12 @@ class Build : NukeBuild
 
     Target Lint => _ => _
         .Executes(() => {
-            Yarn($"run lint", workingDirectory: UIDirectory);
+            Yarn($"run lint", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
         });
 
     Target CheckTypes => _ => _
         .Executes(() => {
-            Yarn($"tsc --noEmit", workingDirectory: UIDirectory);
+            Yarn($"tsc --noEmit", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
         });
 
     Target Test => _ => _
@@ -163,13 +160,13 @@ class Build : NukeBuild
     Target WatchUI => _ => _
         .Executes(() =>
         {
-            Yarn("run watch", workingDirectory: UIDirectory);
+            Yarn("run watch", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
         });
 
     Target WatchServer => _ => _
         .Executes(() =>
         {
-            DotNet("watch run", workingDirectory: SourceDirectory / "WebTty");
+            DotNet("watch run", workingDirectory: Solution.GetProject(CLI_PROJECT).Directory);
         });
 
     Target Restore => _ => _
@@ -192,7 +189,7 @@ class Build : NukeBuild
     Target CompileUI => _ => _
         .Executes(() =>
         {
-            Yarn($"run build", workingDirectory: UIDirectory);
+            Yarn($"run build", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
         });
 
     Target Package => _ => _
@@ -209,14 +206,14 @@ class Build : NukeBuild
             var sourceRevisionId = GitRevParseHead();
 
             DotNetBuild(s => s
-                .SetProjectFile(Solution.GetProject("WebTty"))
+                .SetProjectFile(Solution.GetProject(CLI_PROJECT))
                 .SetConfiguration(Configuration)
                 .SetVersionSuffix($"build.{buildNumber}")
                 .SetProperty("SourceRevisionId", sourceRevisionId)
                 .SetProperty("IsPackaging", true));
 
             DotNetPack(s => s
-                .SetProject(Solution.GetProject("WebTty"))
+                .SetProject(Solution.GetProject(CLI_PROJECT))
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetNoBuild(true)
@@ -233,7 +230,7 @@ class Build : NukeBuild
             var suffix = $"build.{DateTime.Now.ToString("yyyyMMddHHmmss")}";
 
             DotNetPack(s => s
-                .SetProject(NativeDirectory)
+                .SetProject(Solution.GetProject(EXEC_PROJECT))
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetVersionSuffix(suffix));

@@ -1,0 +1,13 @@
+<Project>
+
+  <Import Project="Version.props" />
+  <Import Project="../../BuildOutput.props" />
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>WebTty.Exec</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AssemblyName>WebTty.Exec</AssemblyName>
+  </PropertyGroup>
+
+</Project>

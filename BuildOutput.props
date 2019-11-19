@@ -1,0 +1,10 @@
+<Project>
+
+  <PropertyGroup>
+    <BuildDirectory>$(MSBuildThisFileDirectory).build/</BuildDirectory>
+    <BaseIntermediateOutputPath>$(BuildDirectory)obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(BuildDirectory)bin/$(MSBuildProjectName)/</BaseOutputPath>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+  </PropertyGroup>
+
+</Project>
