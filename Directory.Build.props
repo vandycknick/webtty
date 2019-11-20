@@ -1,6 +1,7 @@
 <Project>
 
   <Import Project="Version.props" />
+  <Import Project="BuildOutput.props" />
 
   <PropertyGroup>
     <Authors>Nick Van Dyck</Authors>
@@ -20,9 +21,6 @@
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateFullPaths Condition="'$(VSCODE_CWD)' != ''">true</GenerateFullPaths>
-    <BuildDirectory>$(MSBuildThisFileDirectory).build/</BuildDirectory>
-    <BaseIntermediateOutputPath>$(BuildDirectory)obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
-    <BaseOutputPath>$(BuildDirectory)bin/$(MSBuildProjectName)/</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>

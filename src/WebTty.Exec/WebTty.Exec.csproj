@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>true</IsPackable>
+    <BuildOutputTargetFolder>ref</BuildOutputTargetFolder>
+
+    <OsPlatform Condition="$([MSBuild]::IsOsPlatform(Linux))">Linux</OsPlatform>
+    <OsPlatform Condition="$([MSBuild]::IsOsPlatform(OSX))">MacOS</OsPlatform>
+    <OsPlatform Condition="$([MSBuild]::IsOsPlatform(Windows))">Windows</OsPlatform>
+    <UnixPlatform>$(OsPlatform)</UnixPlatform>
+    <UnixPlatform Condition="'$(OsPlatform)' == 'Windows'">Unsupported</UnixPlatform>
+    <Architecture>x64</Architecture>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildProjectDirectory)/Sources.targets" />
+
+  <ItemGroup>
+    <None Include="$(BuildDirectory)bin/WebTty.Exec.linux-x64/$(Configuration)/$(TargetFramework)/*.dll" Pack="true">
+      <PackagePath>runtimes/linux-x64/lib/$(TargetFramework)</PackagePath>
+    </None>
+    <None Include="$(BuildDirectory)bin/WebTty.Exec.macos-x64/$(Configuration)/$(TargetFramework)/*.dll" Pack="true">
+      <PackagePath>runtimes/osx-x64/lib/$(TargetFramework)</PackagePath>
+    </None>
+    <None Include="$(BuildDirectory)bin/WebTty.Exec.windows-x64/$(Configuration)/$(TargetFramework)/*.dll" Pack="true">
+      <PackagePath>runtimes/win-x64/lib/$(TargetFramework)</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <Target Name="BuildPlatform" BeforeTargets="Restore">
+    <Exec Command="dotnet build -c $(Configuration) ./WebTty.Exec.linux-x64.csproj" />
+    <Exec Command="dotnet build -c $(Configuration) ./WebTty.Exec.macos-x64.csproj" />
+    <Exec Command="dotnet build -c $(Configuration) ./WebTty.Exec.windows-x64.csproj" />
+  </Target>
+
+</Project>

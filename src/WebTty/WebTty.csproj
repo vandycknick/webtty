@@ -24,11 +24,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsPackaging)' == 'true'">
-    <PackageReference Include="WebTty.Native" Version="0.1.0-build.*" Pack="true" />
+    <PackageReference Include="WebTty.Exec" Version="0.1.0-build.*" Pack="true" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsPackaging)' == 'false'">
-    <ProjectReference Include="..\WebTty.Native\WebTty.Native.csproj" />
+    <ProjectReference Include="..\WebTty.Exec\WebTty.Exec.csproj" />
   </ItemGroup>
 
   <ItemGroup>
