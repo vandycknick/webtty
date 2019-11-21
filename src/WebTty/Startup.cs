@@ -36,13 +36,10 @@ namespace WebTty
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-            }
 
             app.UseStatusCodePages();
             app.UseResponseCompression();
+
             app.UseMiddleware<UiMiddleware>();
             app.UseWebSockets();
             app.UseWebTerminal();

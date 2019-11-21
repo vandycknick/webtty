@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using Mono.Options;
 
@@ -9,23 +11,51 @@ namespace WebTty
     {
         public bool ShowHelp { get; private set; }
         public bool ShowVersion { get; private set; }
-        public string Address { get; private set; } = "localhost";
+        public IPAddress Address { get; private set; } = IPAddress.Loopback;
+        public string UnixSocket { get; private set; }
         public int Port { get; private set; } = 5000;
+        public string Path { get; private set; }
         public string Version => GetVersion();
         public string Name => GetName();
         public List<string> Rest { get; private set; }
 
-        private OptionException ParseException {get; set; }
+        private Exception ParseException { get; set; }
         private readonly OptionSet _options;
 
         private CommandLineOptions()
         {
             _options = new OptionSet
             {
-                { "a|address=", "IP address to use [localhost]. Use any to listen to any available address. Ex (0.0.0.0, any, 192.168.2.3, ...)", (string address) => Address = address ?? "localhost" },
-                { "p|port=", "Port to use [5000]. Use 0 for a dynamic port.", (int? port) => Port = port ?? 5000 },
-                { "version", "Show current version", version => ShowVersion = version != null },
-                { "?|h|help", "Show help information", help => ShowHelp = help != null },
+                {
+                    "a|address=",
+                    "IP address to use [localhost]. Use any to listen to any available address. Ex (0.0.0.0, any, 192.168.2.3, ...)",
+                    a => Address = ParseIPAddress(a)
+                },
+                {
+                    "s|unix-socket=",
+                    "Use the given Unix domain socket path for the server to listen to",
+                    socket => UnixSocket = socket
+                },
+                {
+                    "p|port=",
+                    "Port to use [5000]. Use 0 for a dynamic port.",
+                    (int? port) => Port = port ?? 5000
+                },
+                {
+                    "path=",
+                    "Path to use, defaults to /tty",
+                    path => Path = string.IsNullOrEmpty(path) ? "/tty" : path
+                },
+                {
+                    "version",
+                    "Show current version",
+                    version => ShowVersion = version != null
+                },
+                {
+                    "?|h|help",
+                    "Show help information",
+                    help => ShowHelp = help != null
+                },
             };
         }
 
@@ -49,11 +79,30 @@ namespace WebTty
             {
                 Rest = _options.Parse(args);
             }
-            catch (OptionException ex)
+            catch (Exception ex)
             {
                 ParseException = ex;
             }
             return this;
+        }
+
+        private IPAddress ParseIPAddress(string value)
+        {
+            if (string.Equals("localhost", value, StringComparison.OrdinalIgnoreCase))
+            {
+                return IPAddress.Loopback;
+            }
+
+            if (string.Equals("any", value, StringComparison.OrdinalIgnoreCase))
+            {
+                return IPAddress.Any;
+            }
+
+            if (!IPAddress.TryParse(value, out var address))
+            {
+                throw new FormatException($"'{value}' is not a valid IP address");
+            }
+            return address;
         }
 
         public static CommandLineOptions Build(string[] args) => new CommandLineOptions().Parse(args);

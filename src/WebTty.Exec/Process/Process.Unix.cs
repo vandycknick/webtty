@@ -117,7 +117,7 @@ namespace WebTty.Exec
             Error.ThrowExceptionForLastErrorIf(retVal);
         }
 
-        public void CloseCore()
+        private void CloseCore()
         {
 
         }

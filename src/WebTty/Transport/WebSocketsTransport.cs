@@ -184,7 +184,6 @@ namespace WebTty.Transport
                     var buffer = result.Buffer;
 
                     // Get a frame from the application
-
                     try
                     {
                         if (result.IsCanceled)
@@ -197,7 +196,6 @@ namespace WebTty.Transport
                             try
                             {
                                 // Log.SendPayload(_logger, buffer.Length);
-
                                 if (socket.IsOpen())
                                 {
                                     await socket.SendAsync(buffer, WebSocketMessageType.Binary);

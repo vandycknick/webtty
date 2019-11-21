@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
@@ -23,47 +21,23 @@ namespace WebTty
         public async Task RunAsync(CancellationToken token = default)
         {
             var host = WebHost
-                .CreateDefaultBuilder(new string[] { })
+                .CreateDefaultBuilder()
                 .PreferHostingUrls(false)
                 .SuppressStatusMessages(true)
-                .UseKestrel(o =>
+                .UseKestrel(kestrel =>
                 {
-                    if (_options.Address.ToLower() == "localhost")
+                    kestrel.Listen(_options.Address, _options.Port);
+
+                    if (!string.IsNullOrEmpty(_options.UnixSocket))
                     {
-                        o.ListenLocalhost(_options.Port);
-                    }
-                    else if (_options.Address.ToLower() == "any")
-                    {
-                        o.ListenAnyIP(_options.Port);
-                    }
-                    else if (IPAddress.TryParse(_options.Address, out var address))
-                    {
-                        o.Listen(
-                            address,
-                            _options.Port
-                        );
-                    }
-                    else
-                    {
-                        Console.WriteLine("TODO: add message here and kill app");
+                        kestrel.ListenUnixSocket(_options.UnixSocket);
                     }
                 })
                 .UseStartup<Startup>()
                 .Build();
 
-
-            string StringifyAddress(string address)
-            {
-                return address switch
-                {
-                    "localhost" => "localhost",
-                    "any" => "+",
-                    _ => address,
-                };
-            }
-
             await host.StartAsync(token);
-            _console.WriteLine($"Listening on http://{StringifyAddress(_options.Address)}:{_options.Port}");
+            _console.WriteLine($"Listening on http://{_options.Address.ToString()}:{_options.Port}");
             _console.WriteLine("");
             _console.WriteLine("Press CTRL+C to exit");
             await host.WaitForShutdownAsync(token);
