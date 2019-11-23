@@ -14,7 +14,7 @@ namespace WebTty
         public IPAddress Address { get; private set; } = IPAddress.Loopback;
         public string UnixSocket { get; private set; }
         public int Port { get; private set; } = 5000;
-        public string Path { get; private set; }
+        public string Path { get; private set; } = "/tty";
         public string Version => GetVersion();
         public string Name => GetName();
         public List<string> Rest { get; private set; }

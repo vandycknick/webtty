@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore;
 using WebTty.Common;
 using WebTty.IO;
 
@@ -23,19 +24,19 @@ namespace WebTty
         {
             _console.WriteLine($"{_options.Name}: {_options.Version}");
             _console.WriteLine();
-            _console.WriteLine("TODO: add more information here");
+            _console.WriteLine("🔌 WebSocket based terminal emulator");
             _console.WriteLine();
-            _console.WriteLine($"Usage: {_options.Name} [options]");
-            _console.WriteLine();
-            _console.WriteLine("Options");
+            _console.WriteLine($"Usage: {_options.Name} [options] -- [command] [<arguments...>]");
+            _console.WriteLine("Options:");
             _console.WriteLine();
             _options.WriteOptions(_console.Out);
         }
 
         private void WriteErrorMessage(string message)
         {
-            _console.WriteLine($"{_options.Name}: {_options.Version}");
+            _console.WriteLine("Error:");
             _console.WriteLine(message);
+            _console.WriteLine();
             _console.WriteLine($"Try '{_options.Name} --help' for more information.");
         }
 
@@ -75,7 +76,8 @@ namespace WebTty
         {
             var console = NetConsole.Instance;
             var options = CommandLineOptions.Build(args);
-            var server = new WebTtyServer(options, console);
+            var hostBuilder = WebHost.CreateDefaultBuilder();
+            var server = new WebTtyServer(options, console, hostBuilder);
 
             using var cts = new CancellationTokenSource();
             return new Program(console, server, options).ExecuteAsync(cts.Token);

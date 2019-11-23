@@ -65,7 +65,7 @@ module.exports = (_, argv) => {
             },
             port: 3000,
             proxy: {
-                "/ws": "http://localhost:5000",
+                "/tty": "http://localhost:5000",
             },
         },
     }

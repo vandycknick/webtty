@@ -131,7 +131,6 @@ namespace WebTty.Test
             var output = console.OutString.GetStringBuilder();
 
             //Then
-            Assert.Contains($"{options.Name}: {options.Version}", output.ToString());
             Assert.Contains("Missing required value for option '--port'.", output.ToString());
             Assert.Contains($"Try '{options.Name} --help' for more information.", output.ToString());
         }
@@ -169,7 +168,6 @@ namespace WebTty.Test
             var output = console.OutString.GetStringBuilder();
 
             //Then
-            Assert.Contains($"{options.Name}: {options.Version}", output.ToString());
             Assert.Contains("some error", output.ToString());
             Assert.Contains($"Try '{options.Name} --help' for more information.", output.ToString());
         }
