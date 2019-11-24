@@ -19,7 +19,6 @@ namespace WebTty
     {
         private readonly CommandLineOptions _options;
         private readonly IConsole _console;
-
         private readonly IWebHostBuilder _hostBuilder;
 
         public WebTtyServer(CommandLineOptions options, IConsole console, IWebHostBuilder hostBuilder)
@@ -45,7 +44,7 @@ namespace WebTty
             services.AddScoped<TerminalManager>();
         }
 
-        public void Configure(IApplicationBuilder app)
+        private void Configure(IApplicationBuilder app)
         {
             var env = app.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
 
