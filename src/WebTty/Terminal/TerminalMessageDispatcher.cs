@@ -1,7 +1,7 @@
-using System.Threading.Tasks;
 using MediatR;
+using System.Linq;
+using System.Threading.Tasks;
 using WebTty.Common;
-using WebTty.Messages;
 
 namespace WebTty.Terminal
 {
@@ -15,28 +15,25 @@ namespace WebTty.Terminal
 
         public async Task<object> Dispatch(object message)
         {
-            switch (message)
+            var interfaces = message.GetType().GetInterfaces();
+
+            if (
+                interfaces.Contains(typeof(IRequest)) ||
+                interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>))
+            )
             {
-                case OpenNewTabRequest request:
-                {
-                    var reply = await _mediator.Send(request);
-                    return reply;
-                }
-
-                case ResizeTabMessage resize:
-                {
-                    await _mediator.Publish(resize);
-                    return null;
-                }
-
-                case StdInputRequest request:
-                {
-                    await _mediator.Send(request);
-                    return null;
-                }
-
-                default:
-                    return null;
+                var reply = await _mediator.Send((dynamic)message);
+                return reply;
+            }
+            else if(interfaces.Contains(typeof(INotification)))
+            {
+                await _mediator.Publish(message);
+                return null;
+            }
+            else
+            {
+                System.Console.WriteLine("no match found");
+                return null;
             }
         }
     }

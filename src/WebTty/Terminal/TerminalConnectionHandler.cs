@@ -40,7 +40,10 @@ namespace WebTty.Terminal
                     while (_protocol.TryParseMessage(ref buffer, out var message))
                     {
                         var reply = await _dispatcher.Dispatch(message);
-                        await WriteAsync(reply);
+                        if (reply != null && !(reply is MediatR.Unit))
+                        {
+                            await WriteAsync(reply);
+                        }
                     }
                 }
                 catch (Exception ex)

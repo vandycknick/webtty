@@ -3,7 +3,6 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using MessagePack;
-using WebTty.Messages;
 
 namespace WebTty.Protocol
 {
@@ -26,7 +25,7 @@ namespace WebTty.Protocol
 
             var segment = GetArraySegment(payload);
 
-            var _ = MessagePackBinary.ReadArrayHeader(segment.Array, segment.Offset, out var read);
+            _ = MessagePackBinary.ReadArrayHeader(segment.Array, segment.Offset, out var read);
             var id = MessagePackBinary.ReadString(segment.Array, segment.Offset + read, out var readId);
 
             if (_deserializerMap.TryGetValue(id, out var deserializer))

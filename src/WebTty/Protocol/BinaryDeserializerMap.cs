@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using WebTty.Common;
-using WebTty.Messages;
 using WebTty.Messages.Helpers;
 
 namespace WebTty.Protocol
