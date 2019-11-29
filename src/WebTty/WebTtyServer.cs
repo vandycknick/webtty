@@ -33,6 +33,7 @@ namespace WebTty
             services.AddResponseCompression();
             services.AddMediatR(config => config.AsScoped(), GetType());
 
+            services.AddSingleton(_options);
             services.AddSingleton<IMessageResolver, MessageResolver>();
             services.AddSingleton<BinaryDeserializerMap>();
             services.AddSingleton<IProtocol, BinaryProtocol>();
