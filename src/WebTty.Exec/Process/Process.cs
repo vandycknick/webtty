@@ -17,7 +17,7 @@ namespace WebTty.Exec
         /// The argv slice will become os.Args in the new process,
         /// so it normally starts with the program name.
         /// </summary>
-        public static IProcess Start(string filename, List<string> argv, ProcAttr attr)
+        public static IProcess Start(string filename, IReadOnlyCollection<string> argv, ProcAttr attr)
         {
             var proc = new Process
             {
@@ -37,7 +37,7 @@ namespace WebTty.Exec
         public int ExitCode { get; private set; }
 
         private string _fileName { get; set; }
-        private List<string> _argv { get; set; }
+        private IReadOnlyCollection<string> _argv { get; set; }
         private ProcAttr _attr { get; set; }
 
         private Process()

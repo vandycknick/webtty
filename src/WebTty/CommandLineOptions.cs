@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
+using FluentValidation;
 using Mono.Options;
 
 namespace WebTty
@@ -17,7 +19,10 @@ namespace WebTty
         public string Path { get; private set; } = "/tty";
         public string Version => GetVersion();
         public string Name => GetName();
-        public List<string> Rest { get; private set; }
+        public string Command => Rest.FirstOrDefault() ?? "";
+        public IReadOnlyCollection<string> CommandArgs => Rest.Skip(1).ToList();
+
+        private IReadOnlyCollection<string> Rest { get; set; }
 
         private Exception ParseException { get; set; }
         private readonly OptionSet _options;
@@ -69,6 +74,15 @@ namespace WebTty
                 return true;
             }
 
+            var validator = new CommandLineOptionsValidator();
+            var result = validator.Validate(this);
+
+            if (!result.IsValid)
+            {
+                message = result.Errors.FirstOrDefault().ErrorMessage;
+                return true;
+            }
+
             message = string.Empty;
             return false;
         }
@@ -112,5 +126,27 @@ namespace WebTty
 
         private static string GetName() =>
             typeof(Program).Assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
+
+        public class CommandLineOptionsValidator : AbstractValidator<CommandLineOptions>
+        {
+            public CommandLineOptionsValidator()
+            {
+                RuleFor(options => options.Path)
+                    .NotEmpty()
+                    .Custom((path, context) =>
+                    {
+                        if (!path.StartsWith('/'))
+                        {
+                            context.AddFailure("'--path' should start with a slash (/).");
+                        }
+                    });
+
+                RuleFor(options => options.Port)
+                    .NotNull()
+                    .GreaterThan(0)
+                    .LessThanOrEqualTo(65535)
+                    .WithName("--port");
+            }
+        }
     }
 }

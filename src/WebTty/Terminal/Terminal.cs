@@ -21,9 +21,14 @@ namespace WebTty.Terminal
             Id = Guid.NewGuid();
         }
 
-        public void Start()
+        public void Start() =>
+            Start(Process.GetDefaultShell());
+
+        public void Start(string command) =>
+            Start(command, Array.Empty<string>());
+
+        public void Start(string command, IReadOnlyCollection<string> args)
         {
-            var shell = Process.GetDefaultShell();
             var attr = new ProcAttr
             {
                 RedirectStdin = true,
@@ -35,7 +40,7 @@ namespace WebTty.Terminal
                 },
             };
 
-            proc = Process.Start(shell, new List<string>(), attr);
+            proc = Process.Start(command, args, attr);
         }
 
         public void Stop()

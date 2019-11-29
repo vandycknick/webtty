@@ -11,18 +11,27 @@ namespace WebTty.Terminal
     public class TerminalManager
     {
         private readonly IConnectionHandler _handler;
-
+        private readonly CommandLineOptions _options;
         private readonly ConcurrentDictionary<string, Terminal> _terminals = new ConcurrentDictionary<string, Terminal>();
 
-        public TerminalManager(IConnectionHandler handler)
+        public TerminalManager(IConnectionHandler handler, CommandLineOptions options)
         {
             _handler = handler;
+            _options = options;
         }
 
         public Terminal Start()
         {
             var terminal = new Terminal();
-            terminal.Start();
+
+            if (!string.IsNullOrEmpty(_options.Command))
+            {
+                terminal.Start(_options.Command, _options.CommandArgs);
+            }
+            else
+            {
+                terminal.Start();
+            }
 
             _terminals.TryAdd(terminal.Id.ToString(), terminal);
             return terminal;
