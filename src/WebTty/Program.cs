@@ -27,8 +27,8 @@ namespace WebTty
             _console.WriteLine("🔌 WebSocket based terminal emulator");
             _console.WriteLine();
             _console.WriteLine($"Usage: {_options.Name} [options] -- [command] [<arguments...>]");
-            _console.WriteLine("Options:");
             _console.WriteLine();
+            _console.WriteLine("Options:");
             _options.WriteOptions(_console.Out);
         }
 

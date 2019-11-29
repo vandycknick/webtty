@@ -26,11 +26,18 @@ dotnet tool install -g webtty
 ```
 λ webtty --help
 
-Usage: webtty [options]
+🔌 WebSocket based terminal emulator
 
-Options
+Usage: webtty [options] -- [command] [<arguments...>]
 
+Options:
+  -a, --address=VALUE        IP address to use [localhost]. Use any to listen
+                               to any available address. Ex (0.0.0.0, any, 192.
+                               168.2.3, ...)
+  -s, --unix-socket=VALUE    Use the given Unix domain socket path for the
+                               server to listen to
   -p, --port=VALUE           Port to use [5000]. Use 0 for a dynamic port.
+      --path=VALUE           Path to use, defaults to /tty
       --version              Show current version
   -?, -h, --help             Show help information
 ```
