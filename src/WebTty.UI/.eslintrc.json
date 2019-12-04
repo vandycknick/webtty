@@ -28,7 +28,8 @@
     }
   },
   "rules": {
-    "no-undef": "off", // https://github.com/typescript-eslint/typescript-eslint/issues/342,,
+    "no-undef": "off", // https://github.com/typescript-eslint/typescript-eslint/issues/342,
+    "react/prop-types": "off",
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
@@ -42,7 +43,8 @@
     ],
     "@typescript-eslint/no-use-before-define": [
       "off"
-    ]
+    ],
+    "@typescript-eslint/interface-name-prefix": "off"
   },
   "overrides": [
     {

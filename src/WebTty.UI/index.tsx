@@ -8,6 +8,9 @@ if (process.env.NODE_ENV === "development") {
 import { h, render } from "preact"
 
 import "./index.css"
-import App from "./App"
+import App from "./containers/App"
+import createContext from "./context"
 
-render(<App />, document.body)
+const [store, services] = createContext()
+
+render(<App store={store} services={services} />, document.body)
