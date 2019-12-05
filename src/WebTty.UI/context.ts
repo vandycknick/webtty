@@ -37,6 +37,7 @@ const createContext = (): [Store, AppServices] => {
         .build()
 
     // Start Application (TODO: maybe add this as an init function adn export)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     store.dispatch(startSession() as any)
 
     return [store, services]

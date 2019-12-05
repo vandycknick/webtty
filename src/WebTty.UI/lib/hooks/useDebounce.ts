@@ -12,11 +12,14 @@ export const useDebouncedValue = <T>(value: T, delay: number): T => {
     return debouncedValue
 }
 
-export const useDebounce = <T extends Function>(handle: T, delay: number): T => {
+export const useDebounce = <T extends Function>(
+    handle: T,
+    delay: number,
+): T => {
     const wrappedHandle = useMemo(() => {
         let timeout: number
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const wrapped = (...args: any[]): void => {
+
+        const wrapped = (...args: unknown[]): void => {
             window.clearTimeout(timeout)
             timeout = window.setTimeout(() => {
                 timeout = -1
