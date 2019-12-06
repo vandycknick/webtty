@@ -9,7 +9,8 @@
     "plugin:prettier/recommended"
   ],
   "plugins": [
-    "react"
+    "react",
+    "react-hooks"
   ],
   "settings": {
     "react": {
@@ -30,6 +31,9 @@
   "rules": {
     "no-undef": "off", // https://github.com/typescript-eslint/typescript-eslint/issues/342,
     "react/prop-types": "off",
+    "react/jsx-no-bind": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {

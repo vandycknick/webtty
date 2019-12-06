@@ -14,7 +14,10 @@ const TabContainer: FunctionComponent<TabContainerProps> = ({ tabId }) => {
     const dispatch = useDispatch<AppDispatch>()
     const theme = useSelector(selectTheme)
     const { terminalManager } = useServices<AppServices>()
-    const stdout = useMemo(() => terminalManager.getStdout(tabId), [tabId])
+    const stdout = useMemo(() => terminalManager.getStdout(tabId), [
+        terminalManager,
+        tabId,
+    ])
 
     const onInput = useCallback(
         (payload: string) => dispatch(writeInput(tabId, payload)),

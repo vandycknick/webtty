@@ -22,7 +22,7 @@ const ResizeObserver: FunctionComponent<ResizeObserverProps> = (
         observer.observe(wrapperRef.current)
 
         return (): void => observer.disconnect()
-    }, [wrapperRef.current])
+    }, [props])
 
     return <div ref={wrapperRef}>{props.children}</div>
 }

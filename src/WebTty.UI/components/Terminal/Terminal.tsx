@@ -65,6 +65,7 @@ const Terminal: FunctionalComponent<TerminalProps> = ({
     const wrapper = useRef<HTMLDivElement>()
     const terminalRef = useRef<Xterm | null>(null)
 
+    // Only runs on mount
     useEffect(() => {
         const disposables: IDisposable[] = []
         if (!terminalRef.current) {
@@ -103,7 +104,7 @@ const Terminal: FunctionalComponent<TerminalProps> = ({
         return (): void => {
             disposables.forEach(disposable => disposable.dispose())
         }
-    }, [wrapper.current])
+    })
 
     return (
         <div
