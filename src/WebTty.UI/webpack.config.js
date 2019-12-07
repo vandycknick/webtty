@@ -1,18 +1,33 @@
 /* eslint-disable */
-const { DefinePlugin } = require('webpack');
+const path = require("path")
+const fs = require("fs")
+const { DefinePlugin } = require("webpack")
 const WebpackModules = require("webpack-modules")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
-const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin")
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin")
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 
+const readTemplateContent = indexPath => {
+    const buffer = fs.readFileSync(indexPath)
+    const template = buffer.toString("utf-8")
+    const templateSource = template.slice(template.indexOf("<!doctype html>"))
+    return templateSource
+}
+
 module.exports = (_, argv) => {
+    const mode = argv.mode === "production" ? "production" : "development";
+
     const config = {
-        mode: argv.mode,
+        mode,
+
+        devtool: mode === "production" ? "source-map" : "inline-source-map",
 
         entry: "./index.tsx",
 
-        devtool: argv.mode == "production" ? "source-map" : "inline-source-map",
+        output: {
+            path: path.join(__dirname, "wwwroot"),
+            filename: "[name].[chunkhash].js",
+        },
 
         resolve: {
             extensions: [".ts", ".tsx", ".js"],
@@ -39,24 +54,25 @@ module.exports = (_, argv) => {
 
         plugins: [
             new DefinePlugin({
-                "process.env.NODE_ENV": JSON.stringify(argv.mode === "production" ? "production" : "development"),
+                "process.env.NODE_ENV": JSON.stringify(
+                    argv.mode === "production" ? "production" : "development",
+                ),
             }),
             new WebpackModules(),
-            new HtmlWebpackPlugin({
-                ...(argv.mode == "production"
-                    ? {
-                          minify: {
-                              removeComments: true,
-                              collapseWhitespace: true,
-                          },
-                          inlineSource: ".(js|css)$",
-                      }
-                    : {}),
-                template: "index.html",
-            }),
-            new HtmlWebpackInlineSourcePlugin(),
 
-            ...(argv.analyze ? [new BundleAnalyzerPlugin({ analyzerMode: "static" })] : []),
+            ...(mode === "development"
+                ? [
+                      new HtmlWebpackPlugin({
+                          templateContent: readTemplateContent(
+                              "Pages/Index.cshtml",
+                          ),
+                      }),
+                  ]
+                : []),
+
+            ...(argv.analyze
+                ? [new BundleAnalyzerPlugin({ analyzerMode: "static" })]
+                : []),
         ],
 
         devServer: {

@@ -1,17 +1,18 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using MediatR;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.IO;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using WebTty.IO;
 using WebTty.Common;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Builder;
-using MediatR;
 using WebTty.Messages.Helpers;
 using WebTty.Protocol;
 using WebTty.Transport;
 using WebTty.Terminal;
-using Microsoft.Extensions.Hosting;
-using WebTty.UI;
 
 namespace WebTty
 {
@@ -30,7 +31,6 @@ namespace WebTty
 
         private void ConfigureServices(IServiceCollection services)
         {
-            services.AddResponseCompression();
             services.AddMediatR(config => config.AsScoped(), GetType());
 
             services.AddSingleton(_options);
@@ -43,6 +43,9 @@ namespace WebTty
             services.AddScoped<IMessageDispatcher, TerminalMessageDispatcher>();
 
             services.AddScoped<TerminalManager>();
+
+            services.AddResponseCompression();
+            services.AddRazorPages();
         }
 
         private void Configure(IApplicationBuilder app)
@@ -57,14 +60,33 @@ namespace WebTty
             app.UseStatusCodePages();
             app.UseResponseCompression();
 
-            app.UseMiddleware<UiMiddleware>();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapRazorPages();
+            });
+
             app.UseWebSockets();
             app.UseWebTerminal(_options.Path);
         }
 
+        private string GetCurrentAssemblyRootPath()
+        {
+            var root = Assembly.GetExecutingAssembly().Location;
+            var rootDirectory = Path.GetDirectoryName(root);
+            return rootDirectory;
+        }
+
         public async Task RunAsync(CancellationToken token = default)
         {
+            var contentRoot = GetCurrentAssemblyRootPath();
+
             var host = _hostBuilder
+                .UseStaticWebAssets()
+                .UseContentRoot(contentRoot)
                 .PreferHostingUrls(false)
                 .SuppressStatusMessages(true)
                 .UseKestrel(kestrel =>

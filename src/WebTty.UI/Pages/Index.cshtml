@@ -1,12 +1,18 @@
+﻿@page
+@model WebTty.UI.Pages.IndexModel
+
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>WebTty</title>
 </head>
 <body>
     <div class="app"></div>
+    <script id="config" type="text/json">@Model.Config</script>
+    <script type="text/javascript" asp-src-include="_content/WebTty.UI/main.*.js"></script>
 </body>
 </html>
+

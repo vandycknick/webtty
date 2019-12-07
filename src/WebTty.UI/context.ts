@@ -13,7 +13,7 @@ const createContext = (): [Store, AppServices] => {
     const config = new ConfigBuilder<AppConfig>()
         .addVariable("socketUrl", `ws://${window.location.host}/tty`)
         .addVariableDevelopment("socketUrl", "ws://localhost:5000/tty")
-        .addFromDom("#webtty-config")
+        .addFromDom("config")
         .build(configValidator)
 
     const connection = new ConnectionBuilder()

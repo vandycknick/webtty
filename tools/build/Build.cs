@@ -205,18 +205,10 @@ class Build : NukeBuild
             var buildNumber = GitRevListHeadCount();
             var sourceRevisionId = GitRevParseHead();
 
-            DotNetBuild(s => s
-                .SetProjectFile(Solution.GetProject(CLI_PROJECT))
-                .SetConfiguration(Configuration)
-                .SetVersionSuffix($"build.{buildNumber}")
-                .SetProperty("SourceRevisionId", sourceRevisionId)
-                .SetProperty("IsPackaging", true));
-
             DotNetPack(s => s
                 .SetProject(Solution.GetProject(CLI_PROJECT))
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetNoBuild(true)
                 .SetVersionSuffix($"build.{buildNumber}")
                 .SetProperty("SourceRevisionId", sourceRevisionId)
                 .SetProperty("IsPackaging", true));
