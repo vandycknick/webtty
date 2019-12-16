@@ -1,12 +1,14 @@
 import { h, FunctionalComponent } from "preact"
 import { useRef, useEffect } from "preact/hooks"
 import { Terminal as Xterm, ITheme, ITerminalAddon, IDisposable } from "xterm"
-import "xterm/css/xterm.css"
 
+import "xterm/css/xterm.css"
 import "./Terminal.css"
 
+import { CancellationTokenSource } from "lib/utils/CancellationToken"
+
 type TerminalProps = {
-    dataSource: AsyncIterable<string>
+    dataSource: AsyncIterableIterator<string>
     theme?: ITheme
     addons?: ITerminalAddon[]
     onInput?: (data: string) => void
@@ -17,16 +19,16 @@ type TerminalProps = {
 }
 
 type DataSourceOptions = {
-    dataSource: AsyncIterable<string>
+    dataSource: AsyncIterableIterator<string>
     terminal: Xterm
     autoBuffer?: boolean
 }
 
-const consumeDataSource = async ({
+const consumeDataSource = ({
     dataSource,
     terminal,
     autoBuffer = true,
-}: DataSourceOptions): Promise<void> => {
+}: DataSourceOptions): IDisposable => {
     let buffer = ""
 
     const flushBuffer = (): void => {
@@ -43,13 +45,24 @@ const consumeDataSource = async ({
         }
     }
 
-    for await (const message of dataSource) {
-        if (autoBuffer) {
-            pushToBuffer(message)
-        } else {
-            terminal.write(message)
+    const tokenSource = new CancellationTokenSource()
+    const { token } = tokenSource
+    ;(async function() {
+        while (!token.isCancelled) {
+            const data = await dataSource.next()
+
+            if (data.done || token.isCancelled) return
+
+            if (autoBuffer) {
+                pushToBuffer(data.value)
+            } else {
+                terminal.write(data.value)
+            }
         }
-    }
+        console.log("exiting")
+    })()
+
+    return tokenSource
 }
 
 const Terminal: FunctionalComponent<TerminalProps> = ({
@@ -63,22 +76,21 @@ const Terminal: FunctionalComponent<TerminalProps> = ({
     autoBuffer = true,
 }: TerminalProps) => {
     const wrapper = useRef<HTMLDivElement>()
-    const terminalRef = useRef<Xterm | null>(null)
 
     // Only runs on mount
     useEffect(() => {
         const disposables: IDisposable[] = []
-        if (!terminalRef.current) {
-            terminalRef.current = new Xterm()
-        }
+        let terminal: Xterm | undefined = undefined
 
-        const terminal = terminalRef.current
         if (wrapper.current) {
+            terminal = new Xterm()
             terminal.open(wrapper.current)
 
-            consumeDataSource({ dataSource, terminal, autoBuffer })
+            disposables.push(
+                consumeDataSource({ dataSource, terminal, autoBuffer }),
+            )
 
-            addons.forEach(addon => terminal.loadAddon(addon))
+            addons.forEach(addon => terminal?.loadAddon(addon))
 
             onAddonsLoaded?.()
 
@@ -102,7 +114,9 @@ const Terminal: FunctionalComponent<TerminalProps> = ({
         }
 
         return (): void => {
+            console.log("unmounting terminal component")
             disposables.forEach(disposable => disposable.dispose())
+            terminal?.dispose()
         }
     })
 

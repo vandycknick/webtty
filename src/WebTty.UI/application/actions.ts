@@ -25,7 +25,7 @@ type TerminalActions =
 
 type UISetThemeAction = {
     type: typeof UI_SET_THEME
-    theme: "default" | "solarized"
+    theme: string
 }
 
 type UIActions = UISetThemeAction

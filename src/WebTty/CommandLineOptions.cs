@@ -17,6 +17,7 @@ namespace WebTty
         public string UnixSocket { get; private set; }
         public int Port { get; private set; } = 5000;
         public string Path { get; private set; } = "/tty";
+        public string Theme { get; set; } = "default";
         public string Version => GetVersion();
         public string Name => GetName();
         public string Command => Rest.FirstOrDefault() ?? "";
@@ -50,6 +51,11 @@ namespace WebTty
                     "path=",
                     "Path to use, defaults to /tty",
                     path => Path = string.IsNullOrEmpty(path) ? "/tty" : path
+                },
+                {
+                    "theme=",
+                    "Theme to use, uses a simple black theme by default",
+                    theme => Theme = string.IsNullOrEmpty(theme) ? "default" : theme
                 },
                 {
                     "version",

@@ -11,7 +11,7 @@
 </head>
 <body>
     <div class="app"></div>
-    <script id="config" type="text/json">@Model.Config</script>
+    <script id="config" type="text/json">@Html.Raw(Model.Config)</script>
     <script type="text/javascript" asp-src-include="_content/WebTty.UI/main.*.js"></script>
 </body>
 </html>

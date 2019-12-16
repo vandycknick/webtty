@@ -13,6 +13,7 @@ using WebTty.Messages.Helpers;
 using WebTty.Protocol;
 using WebTty.Transport;
 using WebTty.Terminal;
+using WebTty.UI.Common;
 
 namespace WebTty
 {
@@ -44,6 +45,10 @@ namespace WebTty
 
             services.AddScoped<TerminalManager>();
 
+            services.AddWebClient(config => {
+                config.TtyPath = _options.Path;
+                config.Theme = _options.Theme;
+            });
             services.AddResponseCompression();
             services.AddRazorPages();
         }

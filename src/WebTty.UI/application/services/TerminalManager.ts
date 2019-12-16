@@ -47,12 +47,16 @@ class TerminalManager {
         this.stdoutMap.get(tabId)?.write(payload)
     }
 
-    public getStdout(tabId: string): AsyncIterable<string> {
-        if (!this.stdoutMap.has(tabId)) {
-            this.stdoutMap.set(tabId, new MemoryStream())
+    public getStdout(tabId: string): AsyncIterableIterator<string> {
+        const stream = this.stdoutMap.get(tabId)
+
+        if (stream == undefined) {
+            const newStream = new MemoryStream()
+            this.stdoutMap.set(tabId, newStream)
+            return newStream[Symbol.asyncIterator]()
         }
 
-        return this.stdoutMap.get(tabId) ?? MemoryStream.null
+        return stream[Symbol.asyncIterator]()
     }
 
     public send(
