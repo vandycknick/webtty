@@ -1,30 +1,12 @@
 import { ThunkAction } from "redux-thunk"
 
+import { OpenNewTabReply, StdOutMessage } from "@webtty/messages"
+import terminalNewTabCreated from "application/actionCreators/terminalNewTabCreated"
 import { IDisposable } from "lib/types"
-import Deferred from "lib/utils/Deferred"
+import { CancellationTokenSource } from "lib/utils/CancellationToken"
 
 import { TerminalActions } from "../actions"
 import { AppServices } from "../interfaces"
-import { OpenNewTabReply, StdOutMessage } from "@webtty/messages"
-import terminalNewTabCreated from "application/actionCreators/terminalNewTabCreated"
-
-class CancellationToken {
-    private readonly deferred: Deferred<void>
-    private isCancelledInternal = false
-
-    constructor() {
-        this.deferred = new Deferred()
-        this.deferred.then(() => (this.isCancelledInternal = true))
-    }
-
-    public get isCancelled(): boolean {
-        return this.isCancelledInternal
-    }
-
-    public cancel = (): void => this.deferred.resolve()
-
-    public promise = (): Promise<void> => this.deferred
-}
 
 const processTty = (): ThunkAction<
     IDisposable,
@@ -32,14 +14,15 @@ const processTty = (): ThunkAction<
     AppServices,
     TerminalActions
 > => (dispatch, _, { terminalManager }) => {
-    const token = new CancellationToken()
+    const tokenSource = new CancellationTokenSource()
+    const token = tokenSource.token
     const decoder = new TextDecoder()
     const messages = terminalManager.messages()
     ;(async () => {
         while (!token.isCancelled) {
             const result = await Promise.race([
                 messages.next(),
-                token.promise(),
+                tokenSource.promise(),
             ])
 
             if (result === undefined || result.done) {
@@ -59,9 +42,7 @@ const processTty = (): ThunkAction<
         }
     })()
 
-    return {
-        dispose: (): void => token.cancel(),
-    }
+    return tokenSource
 }
 
 export default processTty

@@ -6,7 +6,9 @@ import TerminalManager from "./services/TerminalManager"
 import { TerminalActions, UIActions } from "./actions"
 
 interface AppConfig {
-    socketUrl: string
+    ttyHost: string
+    ttyPath: string
+    theme: string
 }
 
 interface AppServices {

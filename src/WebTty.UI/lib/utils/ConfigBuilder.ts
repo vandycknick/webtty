@@ -22,7 +22,12 @@ class ConfigBuilder<TConfig> {
         const $el = document.getElementById(id)
 
         if ($el !== null) {
-            const config: Partial<TConfig> = JSON.parse($el.innerText)
+            let config: Partial<TConfig> = {}
+            try {
+                config = JSON.parse($el.innerText)
+            } catch (ex) {
+                config = {}
+            }
             Object.assign(this.configMap, config)
         }
         return this

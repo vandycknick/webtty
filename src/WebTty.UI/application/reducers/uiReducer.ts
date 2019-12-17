@@ -3,7 +3,7 @@ import { UIState, UIActions, UI_SET_THEME } from "application/actions"
 import produce from "immer"
 
 const initialState: UIState = {
-    theme: "solarized",
+    theme: "default",
 }
 
 const uiReducer: Reducer<UIState, UIActions> = (state = initialState, action) =>

@@ -9,7 +9,7 @@ import { useDebounce } from "lib/hooks/useDebounce"
 import { ITheme } from "application/themes"
 
 interface TabProps {
-    source: AsyncIterable<string>
+    source: AsyncIterableIterator<string>
     theme?: ITheme
     onInput: (msg: string) => void
     onResize: (data: { cols: number; rows: number }) => void

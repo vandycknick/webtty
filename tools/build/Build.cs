@@ -95,6 +95,7 @@ class Build : NukeBuild
         {
             Yarn($"run clean", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
             EnsureCleanDirectory(ArtifactsDirectory);
+            EnsureCleanDirectory(Solution.GetProject(UI_PROJECT).Directory / "wwwroot");
         });
 
     Target Purge => _ => _
@@ -106,6 +107,7 @@ class Build : NukeBuild
             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
             DeleteDirectory(BuildOutputDirectory / "bin");
             DeleteDirectory(BuildOutputDirectory / "obj");
+            DeleteDirectory(BuildOutputDirectory / "tools");
             DeleteDirectory(ArtifactsDirectory);
             DeleteDirectory(Solution.GetProject(UI_PROJECT).Directory / "node_modules");
         });
@@ -146,6 +148,7 @@ class Build : NukeBuild
         });
 
     Target Watch => _ => _
+        .DependsOn(Clean)
         .DependsOn(CompileUI)
         .Executes(() =>
         {
@@ -205,18 +208,10 @@ class Build : NukeBuild
             var buildNumber = GitRevListHeadCount();
             var sourceRevisionId = GitRevParseHead();
 
-            DotNetBuild(s => s
-                .SetProjectFile(Solution.GetProject(CLI_PROJECT))
-                .SetConfiguration(Configuration)
-                .SetVersionSuffix($"build.{buildNumber}")
-                .SetProperty("SourceRevisionId", sourceRevisionId)
-                .SetProperty("IsPackaging", true));
-
             DotNetPack(s => s
                 .SetProject(Solution.GetProject(CLI_PROJECT))
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetNoBuild(true)
                 .SetVersionSuffix($"build.{buildNumber}")
                 .SetProperty("SourceRevisionId", sourceRevisionId)
                 .SetProperty("IsPackaging", true));

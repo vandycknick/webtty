@@ -1,6 +1,6 @@
 # Project specific
 .envrc_secrets
-dist
+wwwroot
 .build
 artifacts
 

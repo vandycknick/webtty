@@ -28,8 +28,7 @@ interface ITheme {
 }
 
 interface IThemeMap {
-    default: ITheme
-    solarized: ITheme
+    [index: string]: ITheme
 }
 
 const themes: IThemeMap = {

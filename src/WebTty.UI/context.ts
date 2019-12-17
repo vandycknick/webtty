@@ -11,13 +11,14 @@ import configValidator from "application/validators/configValidator"
 const createContext = (): [Store, AppServices] => {
     // Services
     const config = new ConfigBuilder<AppConfig>()
-        .addVariable("socketUrl", `ws://${window.location.host}/tty`)
-        .addVariableDevelopment("socketUrl", "ws://localhost:5000/tty")
-        .addFromDom("#webtty-config")
+        .addFromDom("config")
+        .addVariable("ttyHost", `ws://${window.location.host}`)
+        .addVariableDevelopment("ttyHost", `ws://localhost:5000`)
+        .addVariableDevelopment("ttyPath", "/tty")
         .build(configValidator)
 
     const connection = new ConnectionBuilder()
-        .withUrl(config.socketUrl)
+        .withUrl(`${config.ttyHost}${config.ttyPath}`)
         .useWebSocket("arraybuffer")
         .build()
 
@@ -36,7 +37,7 @@ const createContext = (): [Store, AppServices] => {
         .useReducer(reducers)
         .build()
 
-    // Start Application (TODO: maybe add this as an init function adn export)
+    // Start Application (TODO: maybe add this as an init function and export)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     store.dispatch(startSession() as any)
 
