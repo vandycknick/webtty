@@ -2,10 +2,8 @@
 const path = require("path")
 const fs = require("fs")
 const { DefinePlugin } = require("webpack")
-const WebpackModules = require("webpack-modules")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin")
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 
 const readTemplateContent = indexPath => {
     const buffer = fs.readFileSync(indexPath)
@@ -58,7 +56,6 @@ module.exports = (_, argv) => {
                     argv.mode === "production" ? "production" : "development",
                 ),
             }),
-            new WebpackModules(),
 
             ...(mode === "development"
                 ? [
@@ -68,10 +65,6 @@ module.exports = (_, argv) => {
                           ),
                       }),
                   ]
-                : []),
-
-            ...(argv.analyze
-                ? [new BundleAnalyzerPlugin({ analyzerMode: "static" })]
                 : []),
         ],
 
