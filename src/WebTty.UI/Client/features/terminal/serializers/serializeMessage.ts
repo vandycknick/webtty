@@ -17,8 +17,7 @@ const getName = (message: unknown): string => {
 }
 
 const serializeMessage = (message: Messages): ArrayBuffer => {
-    const bytes = encode(message.toJSON())
-    const payload = encode([getName(message), bytes]).slice()
+    const payload = encode([getName(message), message.toJSON()]).slice()
     const data = BinaryMessageFormatter.write(payload)
     return data
 }

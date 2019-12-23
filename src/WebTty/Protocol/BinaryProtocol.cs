@@ -1,7 +1,4 @@
-using System;
 using System.Buffers;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using MessagePack;
 
 namespace WebTty.Protocol
@@ -23,51 +20,37 @@ namespace WebTty.Protocol
                 return false;
             }
 
-            var segment = GetArraySegment(payload);
+            var reader = new MessagePackReader(payload);
 
-            _ = MessagePackBinary.ReadArrayHeader(segment.Array, segment.Offset, out var read);
-            var id = MessagePackBinary.ReadString(segment.Array, segment.Offset + read, out var readId);
+            _ = reader.ReadArrayHeader();
+            var id = reader.ReadString();
 
             if (_deserializerMap.TryGetValue(id, out var deserializer))
             {
-                var messageBytes = MessagePackBinary.ReadBytes(segment.Array, segment.Offset + read + readId, out _);
-                message = deserializer.Deserialize(messageBytes);
+                message = deserializer.Deserialize(ref reader);
                 return true;
             }
-            else
-            {
-                message = default;
-                return false;
-            }
-        }
 
-        private static ArraySegment<byte> GetArraySegment(in ReadOnlySequence<byte> input)
-        {
-            if (input.IsSingleSegment)
-            {
-                var isArray = MemoryMarshal.TryGetArray(input.First, out var arraySegment);
-                // This will never be false unless we started using un-managed buffers
-                Debug.Assert(isArray);
-                return arraySegment;
-            }
-
-            // Should be rare
-            return new ArraySegment<byte>(input.ToArray());
+            message = default;
+            return false;
         }
 
         public void WriteMessage(object message, IBufferWriter<byte> output)
         {
-            var writer = MemoryBufferWriter.Get();
+            var memory = MemoryBufferWriter.Get();
+            var writer = new MessagePackWriter(memory);
             var name = message.GetType().Name;
 
-            MessagePackBinary.WriteArrayHeader(writer, 2);
-            MessagePackBinary.WriteString(writer, name);
+            writer.WriteArrayHeader(2);
+            writer.Write(name);
 
-            var data = MessagePackSerializer.SerializeUnsafe(message);
-            MessagePackBinary.WriteBytes(writer, data.Array, data.Offset, data.Count);
+            MessagePackSerializer.Serialize(ref writer, message);
 
-            BinaryMessageHelpers.WriteLengthPrefix(writer.Length, output);
-            writer.CopyTo(output);
+            writer.Flush();
+
+            BinaryMessageHelpers.WriteLengthPrefix(memory.Length, output);
+            memory.CopyTo(output);
+            MemoryBufferWriter.Return(memory);
         }
     }
 }

@@ -15,9 +15,7 @@ function* deserializeMessages(
 }
 
 const deserializeMessage = (buffer: Uint8Array): Messages | undefined => {
-    const decoded = decode(buffer) as [string, Buffer]
-    const type = decoded[0]
-    const payload = decode(decoded[1])
+    const [type, payload] = decode(buffer) as [string, unknown]
     switch (type) {
         case "OpenNewTabReply": {
             return OpenNewTabReply.fromJS(payload)

@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="7.0.0" />
-    <PackageReference Include="MessagePack" Version="1.8.80" />
+    <PackageReference Include="MessagePack" Version="2.0.323" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
   </ItemGroup>
 
