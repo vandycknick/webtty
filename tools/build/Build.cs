@@ -85,7 +85,7 @@ class Build : NukeBuild
             var useFrozenLockfile = IsLocalBuild ? "" : " --frozen-lockfile";
             Yarn(
                 $"install{useFrozenLockfile}",
-                workingDirectory: Solution.GetProject(UI_PROJECT).Directory
+                workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client"
             );
         })
         .Triggers(Restore);
@@ -93,7 +93,7 @@ class Build : NukeBuild
     Target Clean => _ => _
         .Executes(() =>
         {
-            Yarn($"run clean", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
+            Yarn($"run clean", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
             EnsureCleanDirectory(ArtifactsDirectory);
             EnsureCleanDirectory(Solution.GetProject(UI_PROJECT).Directory / "wwwroot");
         });
@@ -109,7 +109,7 @@ class Build : NukeBuild
             DeleteDirectory(BuildOutputDirectory / "obj");
             DeleteDirectory(BuildOutputDirectory / "tools");
             DeleteDirectory(ArtifactsDirectory);
-            DeleteDirectory(Solution.GetProject(UI_PROJECT).Directory / "node_modules");
+            DeleteDirectory(Solution.GetProject(UI_PROJECT).Directory / "Client"/ "node_modules");
         });
 
     Target Check => _ => _
@@ -119,12 +119,12 @@ class Build : NukeBuild
 
     Target Lint => _ => _
         .Executes(() => {
-            Yarn($"run lint", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
+            Yarn($"run lint", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
         });
 
     Target CheckTypes => _ => _
         .Executes(() => {
-            Yarn($"tsc --noEmit", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
+            Yarn($"tsc --noEmit", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
         });
 
     Target Test => _ => _
@@ -163,7 +163,7 @@ class Build : NukeBuild
     Target WatchUI => _ => _
         .Executes(() =>
         {
-            Yarn("run watch", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
+            Yarn("run watch", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
         });
 
     Target WatchServer => _ => _
@@ -192,7 +192,7 @@ class Build : NukeBuild
     Target CompileUI => _ => _
         .Executes(() =>
         {
-            Yarn($"run build", workingDirectory: Solution.GetProject(UI_PROJECT).Directory);
+            Yarn($"run build", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
         });
 
     Target Package => _ => _

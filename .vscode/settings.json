@@ -1,9 +1,9 @@
 {
   "eslint.workingDirectories": [
     {
-      "directory": "src/WebTty.UI",
+      "directory": "src/WebTty.UI/Client",
       "changeProcessCWD": true
     }
   ],
-  "typescript.tsdk": "src/WebTty.UI/node_modules/typescript/lib"
+  "typescript.tsdk": "src/WebTty.UI/Client/node_modules/typescript/lib"
 }

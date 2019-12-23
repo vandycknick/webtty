@@ -12,7 +12,7 @@ namespace jsonschema
     {
         static void Main(string[] args)
         {
-            var root = "src/WebTty.UI/.tmp/messages";
+            var root = "src/WebTty.UI/Client/.tmp/messages";
             var settings = new JsonSchemaGeneratorSettings();
 
             var schema = new JsonSchema(); // the schema to write into
