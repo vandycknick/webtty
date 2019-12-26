@@ -3,21 +3,21 @@ import { produce } from "immer"
 import {
     TerminalActions,
     TERMINAL_SET_STATUS,
-    TERMINAL_NEW_TAB,
+    TERMINAL_TAB_CREATED,
 } from "./terminalActions"
 
-type TerminalState = {
+type State = {
     status: "idle" | "connecting" | "connected"
     tabs: string[]
     selectedTab?: string
 }
 
-const initialState: TerminalState = {
+const initialState: State = {
     status: "idle",
     tabs: [],
 }
 
-const terminal: Reducer<TerminalState, TerminalActions> = (
+const terminal: Reducer<State, TerminalActions> = (
     state = initialState,
     action,
 ) =>
@@ -27,11 +27,14 @@ const terminal: Reducer<TerminalState, TerminalActions> = (
                 draft.status = action.payload
                 break
 
-            case TERMINAL_NEW_TAB:
+            case TERMINAL_TAB_CREATED:
                 draft.tabs.push(action.payload.id)
                 draft.selectedTab = action.payload.id
                 break
         }
     })
 
+type TerminalState = { terminal: ReturnType<typeof terminal> }
+
+export { TerminalState, initialState }
 export default terminal

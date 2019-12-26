@@ -1,13 +1,17 @@
 import { Terminal as Xterm } from "xterm"
 import { FitAddon } from "xterm-addon-fit"
 import { WebglAddon } from "xterm-addon-webgl"
+import detectWebgl2Support from "common/utils/detectWebgl2Support"
 
 class Term {
+    private static hasWebgl2Support: boolean = detectWebgl2Support()
+
     public terminal: Xterm
     public ref: HTMLDivElement
+    private isOpened = false
     private readonly fit = new FitAddon()
     private readonly webgl = new WebglAddon()
-    private isOpened = false
+    private readonly _writeDelay: number = 10
 
     constructor() {
         this.terminal = new Xterm()
@@ -25,15 +29,29 @@ class Term {
 
     public loadAddons(): void {
         this.terminal.loadAddon(this.fit)
-        this.terminal.loadAddon(this.webgl)
+
+        if (Term.hasWebgl2Support) {
+            this.terminal.loadAddon(this.webgl)
+        }
     }
 
-    resize(): void {
+    public resize(): void {
         this.fit.fit()
     }
 
-    write(data: string): void {
-        this.terminal.write(data)
+    private _buffer = ""
+    private _flush = (): void => {
+        this.terminal.write(this._buffer)
+        this._buffer = ""
+    }
+
+    public write(data: string): void {
+        if (this._buffer !== "") {
+            this._buffer += data
+        } else {
+            this._buffer = data
+            setTimeout(this._flush, this._writeDelay)
+        }
     }
 }
 

@@ -1,12 +1,13 @@
 import { decode } from "@msgpack/msgpack"
 
-import Messages from "./Messages"
-import BinaryMessageFormatter from "common/BinaryMessageFormatter"
+import { Messages } from "./types"
+import BinaryMessageFormatter from "common/utils/BinaryMessageFormatter"
 import { OpenNewTabReply, StdOutMessage } from "@webtty/messages"
+import { UnknownMessage } from "./types"
 
 function* deserializeMessages(
-    buffer: ArrayBuffer,
-): IterableIterator<Messages | undefined> {
+    buffer: ArrayBuffer | SharedArrayBuffer,
+): IterableIterator<Messages> {
     const messages = BinaryMessageFormatter.parse(buffer)
 
     for (const message of messages) {
@@ -14,7 +15,7 @@ function* deserializeMessages(
     }
 }
 
-const deserializeMessage = (buffer: Uint8Array): Messages | undefined => {
+const deserializeMessage = (buffer: Uint8Array): Messages => {
     const [type, payload] = decode(buffer) as [string, unknown]
     switch (type) {
         case "OpenNewTabReply": {
@@ -28,8 +29,8 @@ const deserializeMessage = (buffer: Uint8Array): Messages | undefined => {
         }
 
         default:
-            return undefined
+            return new UnknownMessage(type, payload)
     }
 }
 
-export { deserializeMessages }
+export default deserializeMessages

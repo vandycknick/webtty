@@ -1,5 +1,9 @@
-import { Middleware, Dispatch } from "redux"
+import { Middleware } from "redux"
 import { OpenNewTabReply, StdOutMessage } from "@webtty/messages"
+
+import { CancellationTokenSource } from "common/async/CancellationToken"
+import { IConnection } from "common/connection"
+import { consume } from "common/async/utils"
 import {
     TerminalActions,
     TERMINAL_SEND_MESSAGE,
@@ -8,44 +12,29 @@ import {
     newTab,
 } from "./terminalActions"
 import terminalManager, { Term } from "./terminalManager"
-import {
-    CancellationTokenSource,
-    CancellationToken,
-} from "common/CancellationToken"
-import { IConnection } from "common/connection"
-import { deserializeMessages } from "./serializers/deserializeMessage"
-import serializeMessage from "./serializers/serializeMessage"
+import { Messages } from "./protocol/types"
+import createMessageReader from "./protocol/createMessageReader"
+import createMessageWriter from "./protocol/createMessageWriter"
 
-const decoder = new TextDecoder()
+async function* mapMessageToAction(
+    messageStream: AsyncIterableIterator<Messages>,
+): AsyncIterableIterator<TerminalActions> {
+    const decoder = new TextDecoder()
 
-async function consumeMessages(
-    connection: IConnection,
-    dispatch: Dispatch,
-    token: CancellationToken,
-): Promise<void> {
-    const dataSource = connection[Symbol.asyncIterator]()
-    while (!token.isCancelled) {
-        const result = await Promise.race([dataSource.next(), token.promise])
-
-        if (result === undefined || result.done) {
-            return
+    for await (const message of messageStream) {
+        if (message instanceof OpenNewTabReply) {
+            terminalManager.set(message.id, new Term())
+            yield newTab(message.id)
         }
 
-        const buffer = result.value
-        if (typeof buffer === "string") continue
-
-        for (const message of deserializeMessages(buffer)) {
-            if (message === undefined) continue
-
-            if (message instanceof OpenNewTabReply) {
-                dispatch(newTab(message.id))
-                terminalManager.set(message.id, new Term())
+        if (message instanceof StdOutMessage) {
+            const payload = decoder.decode(Buffer.from(message.data))
+            const terminal = terminalManager.get(message.tabId)
+            if (terminal) {
+                terminal.write(payload)
             }
 
-            if (message instanceof StdOutMessage) {
-                const payload = decoder.decode(Buffer.from(message.data))
-                terminalManager.get(message.tabId)?.write(payload)
-            }
+            continue
         }
     }
 }
@@ -60,24 +49,31 @@ const createTerminalMiddleware = (
 ): Middleware => {
     const { connection } = options
     const tokenSource = new CancellationTokenSource()
+    const read = createMessageReader(connection)
+    const write = createMessageWriter(connection)
 
     return store => {
         if (options.connect) {
             connection.start().then(() => {
                 store.dispatch(setStatus("connected"))
                 store.dispatch(openNewTab())
+
+                consume(
+                    mapMessageToAction(read()),
+                    store.dispatch,
+                    tokenSource.token,
+                )
             })
-            consumeMessages(connection, store.dispatch, tokenSource.token)
         }
 
         return next => (action: TerminalActions) => {
             if (action.type == TERMINAL_SEND_MESSAGE) {
-                const data = serializeMessage(action.payload)
-                connection.send(data)
+                write(action.payload)
             }
             return next(action)
         }
     }
 }
 
+export { mapMessageToAction }
 export default createTerminalMiddleware

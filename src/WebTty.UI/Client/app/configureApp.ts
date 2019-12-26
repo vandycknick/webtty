@@ -1,5 +1,5 @@
 import configureStore from "app/configureStore"
-import ConfigBuilder from "common/ConfigBuilder"
+import ConfigBuilder from "common/utils/ConfigBuilder"
 import { ConnectionBuilder } from "common/connection"
 import { AppConfig, configValidator } from "features/config"
 import createTerminalMiddleware from "features/terminal/createTerminalMiddleware"

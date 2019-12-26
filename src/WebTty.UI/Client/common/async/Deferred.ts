@@ -5,10 +5,10 @@ type Rejector<T> = (reason?: T) => void
 class Deferred<T> implements Promise<T> {
     private _resolveSelf: Resolver<T> = Promise.resolve
     private _rejectSelf: Rejector<T> = Promise.reject
-    private promise: Promise<T>
+    private _promise: Promise<T>
 
     public constructor() {
-        this.promise = new Promise<T>((resolve, reject): void => {
+        this._promise = new Promise<T>((resolve, reject): void => {
             this._resolveSelf = resolve
             this._rejectSelf = reject
         })
@@ -24,7 +24,7 @@ class Deferred<T> implements Promise<T> {
             | undefined
             | null,
     ): Promise<TResult1 | TResult2> {
-        return this.promise.then(onfulfilled, onrejected)
+        return this._promise.then(onfulfilled, onrejected)
     }
 
     public catch<TResult = never>(
@@ -33,11 +33,11 @@ class Deferred<T> implements Promise<T> {
             | undefined
             | null,
     ): Promise<T | TResult> {
-        return this.promise.then(onrejected)
+        return this._promise.catch(onrejected)
     }
 
     public finally(onfinally?: (() => void) | null | undefined): Promise<T> {
-        return this.promise.finally(onfinally)
+        return this._promise.finally(onfinally)
     }
 
     public resolve(val: T): void {
@@ -48,7 +48,7 @@ class Deferred<T> implements Promise<T> {
         this._rejectSelf(reason)
     }
 
-    public [Symbol.toStringTag]: "Promise"
+    public [Symbol.toStringTag]: "Promise" = "Promise"
 }
 
 export default Deferred

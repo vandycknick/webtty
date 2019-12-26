@@ -79,7 +79,6 @@ namespace WebTty.Transport
                 // We're waiting on the websocket to close and there are 2 things it could be doing
                 // 1. Waiting for websocket data
                 // 2. Waiting on a flush to complete (backpressure being applied)
-
                 using (var delayCts = new CancellationTokenSource())
                 {
                     var resultTask = receiving;

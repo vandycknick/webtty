@@ -2,14 +2,13 @@ import Deferred from "./Deferred"
 import { IDisposable } from "common/types"
 
 const isCancelledInternal = Symbol.for("isCancelled")
+const tokenPromiseInternal = Symbol.for("tokenPromise")
 
 export class CancellationToken {
     private [isCancelledInternal] = false
-    public readonly promise: Promise<void>
+    private [tokenPromiseInternal]: Promise<void>
 
-    constructor(promise: Promise<void>) {
-        this.promise = promise
-    }
+    public promise = (): Promise<void> => this[tokenPromiseInternal]
 
     public get isCancelled(): boolean {
         return this[isCancelledInternal]
@@ -22,7 +21,9 @@ export class CancellationTokenSource implements IDisposable {
 
     constructor() {
         this._deferred = new Deferred()
-        this._token = new CancellationToken(this._deferred)
+        this._token = new CancellationToken()
+        this._token[isCancelledInternal] = false
+        this._token[tokenPromiseInternal] = this._deferred
 
         this._deferred.then(() => (this._token[isCancelledInternal] = true))
     }
@@ -36,10 +37,5 @@ export class CancellationTokenSource implements IDisposable {
     }
 
     public cancel = (): void => this._deferred.resolve()
-    public promise = (): Promise<void> => this._deferred
-    public dispose(): void {
-        if (!this._token.isCancelled) {
-            this.cancel()
-        }
-    }
+    public dispose = (): void => this.cancel()
 }

@@ -3,6 +3,7 @@
 wwwroot
 .build
 artifacts
+coverage
 
 # Created by https://www.gitignore.io/api/csharp,windows,visualstudiocode,macos
 # Edit at https://www.gitignore.io/?templates=csharp,windows,visualstudiocode,macos

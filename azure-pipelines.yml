@@ -36,7 +36,7 @@ stages:
 
           - task: CacheBeta@0
             inputs:
-              key: 'yarn | "$(Agent.OS)" | $(Build.SourcesDirectory)/src/WebTty.UI/yarn.lock'
+              key: 'yarn | "$(Agent.OS)" | $(Build.SourcesDirectory)/src/WebTty.UI/Client/yarn.lock'
               path: $(YARN_CACHE_FOLDER)
             displayName: Cache packages
 
@@ -73,7 +73,7 @@ stages:
               key: |
                 yarn
                 $(Agent.OS)
-                $(Build.SourcesDirectory)/src/WebTty.UI/yarn.lock
+                $(Build.SourcesDirectory)/src/WebTty.UI/Client/yarn.lock
               path: $(YARN_CACHE_FOLDER)
             displayName: Cache packages
 

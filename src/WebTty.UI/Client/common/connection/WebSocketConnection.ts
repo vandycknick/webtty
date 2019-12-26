@@ -1,12 +1,13 @@
-import AsyncQueue from "common/AsyncQueue"
+import AsyncQueue from "common/async/AsyncQueue"
 import { IDisposable } from "common/types"
-import IConnection from "./IConnection"
+import IConnection, { ConnectionState } from "./IConnection"
 
 class WebSocketConnection implements IConnection, IDisposable {
-    private queue = new AsyncQueue<MessageEvent>()
+    private readonly queue = new AsyncQueue<MessageEvent>()
     private socket: WebSocket | undefined = undefined
     private url = ""
     private binaryType: BinaryType | undefined = undefined
+    public state: ConnectionState = ConnectionState.CLOSED
 
     constructor(url: string, binaryType?: BinaryType) {
         this.url = url
@@ -21,13 +22,14 @@ class WebSocketConnection implements IConnection, IDisposable {
 
     public start(): Promise<void> {
         this.socket = new WebSocket(this.url)
+        this.state = ConnectionState.CONNECTING
 
         if (this.binaryType !== undefined) {
             this.socket.binaryType = this.binaryType
         }
 
-        this.socket.addEventListener("message", this.queue.push)
-        this.socket.addEventListener("error", this.errorListener)
+        this.socket.addEventListener("message", this.queue.enqueue)
+        this.socket.addEventListener("error", this.dispose)
         this.socket.addEventListener("close", this.dispose)
 
         return new Promise((res, rej) => {
@@ -36,6 +38,7 @@ class WebSocketConnection implements IConnection, IDisposable {
             }
 
             if (this.socket?.readyState == this.socket?.OPEN) {
+                this.state = ConnectionState.OPEN
                 res()
                 return
             }
@@ -45,6 +48,7 @@ class WebSocketConnection implements IConnection, IDisposable {
                 this.socket?.removeEventListener("close", onError)
             }
             const onOpen = (): void => {
+                this.state = ConnectionState.OPEN
                 res()
                 remove()
             }
@@ -57,27 +61,31 @@ class WebSocketConnection implements IConnection, IDisposable {
         })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private errorListener(...args: any[]): void {
-        this.queue.throw(args[0])
-        this.dispose()
-    }
-
-    public dispose(): void {
-        this.queue.dispose()
+    public dispose = (): void => {
+        this.queue?.dispose()
         this.socket?.close()
-        this.socket?.removeEventListener("message", this.queue.push)
-        this.socket?.removeEventListener("error", this.errorListener)
+        this.socket?.removeEventListener("message", this.queue.enqueue)
+        this.socket?.removeEventListener("error", this.dispose)
         this.socket?.removeEventListener("close", this.dispose)
 
         this.socket = undefined
+        this.state = ConnectionState.CLOSED
     }
 
-    public async *[Symbol.asyncIterator](): AsyncIterableIterator<string> {
-        for await (const output of this.queue) {
-            yield output.data
+    public async next(): Promise<
+        IteratorResult<string | ArrayBuffer, undefined>
+    > {
+        const result = await this.queue.next()
+
+        return {
+            ...result,
+            value: result.value?.data,
         }
     }
+
+    public [Symbol.asyncIterator] = (): AsyncIterableIterator<
+        string | ArrayBuffer
+    > => this
 }
 
 export default WebSocketConnection
