@@ -127,7 +127,14 @@ class Build : NukeBuild
             Yarn($"tsc --noEmit", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
         });
 
+    Target TestJS => _ => _
+        .Executes(() =>
+        {
+            Yarn("test", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
+        });
+
     Target Test => _ => _
+        .Triggers(TestJS)
         .Executes(() =>
         {
             DotNetTest(s => s

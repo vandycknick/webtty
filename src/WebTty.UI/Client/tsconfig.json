@@ -5,13 +5,26 @@
     "declaration": false,
     "jsx": "react",
     "jsxFactory": "h",
-    "lib": ["dom", "es2015", "es2018.promise"],
+    "lib": [
+      "dom",
+      "es2015",
+      "es2018.promise"
+    ],
     "outDir": "./dist/",
     "target": "es5",
     "downlevelIteration": true,
     "paths": {
       "@webtty/*": [
         ".tmp/*"
+      ],
+      "app/*": [
+        "app/*"
+      ],
+      "common/*": [
+        "common/*"
+      ],
+      "features/*": [
+        "features/*"
       ]
     }
   }

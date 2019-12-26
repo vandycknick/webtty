@@ -1,8 +1,6 @@
-import terminal from "./terminalReducer"
+import { TerminalState } from "./terminalReducer"
 
-type State = { terminal: ReturnType<typeof terminal> }
-
-const getSelectedTab = (state: State): string =>
+const getSelectedTab = (state: TerminalState): string =>
     state.terminal.selectedTab ?? ""
 
 export { getSelectedTab }
