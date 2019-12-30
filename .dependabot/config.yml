@@ -1,7 +1,7 @@
 version: 1
 update_configs:
   - package_manager: "javascript"
-    directory: "/src/WebTty.UI"
+    directory: "/src/WebTty.UI/Client"
     update_schedule: "weekly"
 
   - package_manager: "dotnet:nuget"
