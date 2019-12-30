@@ -11,7 +11,7 @@
     "watch": "webpack-dev-server"
   },
   "dependencies": {
-    "@msgpack/msgpack": "1.9.3",
+    "@msgpack/msgpack": "1.10.0",
     "immer": "5.0.1",
     "preact": "10.1.1",
     "react-redux": "7.1.3",
