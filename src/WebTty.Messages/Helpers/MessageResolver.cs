@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using WebTty.Messages.Internal;
+using System.Runtime.Serialization;
 
 namespace WebTty.Messages.Helpers
 {
@@ -15,7 +15,7 @@ namespace WebTty.Messages.Helpers
             var types =
                 from t in assembly.GetTypes()
                 where t.IsClass && !string.IsNullOrEmpty(t.Namespace)
-                let attributes = t.GetCustomAttributes(typeof(MessageAttribute), true)
+                let attributes = t.GetCustomAttributes(typeof(DataContractAttribute), true)
                 where attributes != null && attributes.Length > 0
                 select t;
 

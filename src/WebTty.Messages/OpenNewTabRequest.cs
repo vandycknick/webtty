@@ -1,15 +1,17 @@
 using MediatR;
-using System;
-using System.ComponentModel.DataAnnotations;
-using WebTty.Messages.Internal;
+using System.Runtime.Serialization;
 
 namespace WebTty.Messages
 {
-    [Message]
-    [Serializable]
+    [DataContract]
     public class OpenNewTabRequest : IRequest<OpenNewTabReply>
     {
-        [Required]
-        public string Title { get; set; }
+        [DataMember]
+        public readonly string Title;
+
+        public OpenNewTabRequest(string title)
+        {
+            Title = title;
+        }
     }
 }

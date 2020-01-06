@@ -68,11 +68,10 @@ namespace WebTty.Terminal
 
                         var bytesWritten = Encoding.UTF8.GetBytes(buffer.AsSpan(0, read), byteBuffer);
                         var byteSegment = new ArraySegment<byte>(byteBuffer, 0, bytesWritten);
-                        var stdOut = new StdOutMessage
-                        {
-                            TabId = terminal.Id.ToString(),
-                            Data = byteSegment,
-                        };
+                        var stdOut = new StdOutMessage(
+                            tabId: terminal.Id.ToString(),
+                            data: byteSegment
+                        );
 
                         await _handler.WriteAsync(stdOut);
                     }

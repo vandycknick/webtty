@@ -1,18 +1,22 @@
 using MediatR;
 using System;
-using System.ComponentModel.DataAnnotations;
-using WebTty.Messages.Internal;
+using System.Runtime.Serialization;
 
 namespace WebTty.Messages
 {
-    [Message]
-    [Serializable]
+    [DataContract]
     public class StdErrorMessage : INotification
     {
-        [Required]
-        public string TabId { get; set; }
+        [DataMember]
+        public readonly string TabId;
 
-        [Required]
-        public ArraySegment<byte> Data { get; set; }
+        [DataMember]
+        public readonly ArraySegment<byte> Data;
+
+        public StdErrorMessage(string tabId, ArraySegment<byte> data)
+        {
+            TabId = tabId;
+            Data = data;
+        }
     }
 }

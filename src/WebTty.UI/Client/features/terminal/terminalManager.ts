@@ -7,8 +7,8 @@ class Term {
     private static hasWebgl2Support: boolean = detectWebgl2Support()
 
     public terminal: Xterm
-    public ref: HTMLDivElement
     private isOpened = false
+    private readonly ref: HTMLDivElement
     private readonly fit = new FitAddon()
     private readonly webgl = new WebglAddon()
     private readonly _writeDelay: number = 10
@@ -20,14 +20,22 @@ class Term {
         this.ref.style.height = "100%"
     }
 
-    public open(): void {
+    public open(parent: HTMLElement): void {
+        parent.appendChild(this.ref)
+
         if (this.isOpened === false) {
             this.terminal.open(this.ref)
+            this.loadAddons()
         }
         this.isOpened = true
     }
 
-    public loadAddons(): void {
+    public detach(): void {
+        const wrapper = this.ref.parentNode
+        wrapper?.removeChild(this.ref)
+    }
+
+    private loadAddons(): void {
         this.terminal.loadAddon(this.fit)
 
         if (Term.hasWebgl2Support) {
@@ -36,7 +44,7 @@ class Term {
     }
 
     public resize(): void {
-        this.fit.fit()
+        if (this.ref.parentElement) this.fit.fit()
     }
 
     private _buffer = ""

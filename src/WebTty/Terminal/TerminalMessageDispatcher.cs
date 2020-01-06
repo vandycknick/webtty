@@ -22,7 +22,7 @@ namespace WebTty.Terminal
                 interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>))
             )
             {
-                var reply = await _mediator.Send((dynamic)message);
+                var reply = await _mediator.Send(message);
                 return reply;
             }
             else if(interfaces.Contains(typeof(INotification)))

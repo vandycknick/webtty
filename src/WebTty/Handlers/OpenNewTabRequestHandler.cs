@@ -25,10 +25,7 @@ namespace WebTty.Handlers
 
             _manager.ProcessOutput(terminal, _connection.Token);
 
-            return new OpenNewTabReply
-            {
-                Id = terminal.Id.ToString()
-            };
+            return new OpenNewTabReply(id: terminal.Id.ToString());
         }
     }
 }

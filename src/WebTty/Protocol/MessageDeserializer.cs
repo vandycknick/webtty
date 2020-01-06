@@ -14,6 +14,7 @@ namespace WebTty.Protocol
     {
         public override object Deserialize(ref MessagePackReader reader)
         {
+            // var t =MessagePackSerializer.Typeless.Deserialize(ref reader);
             return MessagePackSerializer.Deserialize<T>(ref reader);
         }
 

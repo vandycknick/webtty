@@ -1,14 +1,16 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using WebTty.Messages.Internal;
+using System.Runtime.Serialization;
 
 namespace WebTty.Messages
 {
-    [Message]
-    [Serializable]
+    [DataContract]
     public class OpenNewTabReply
     {
-        [Required]
-        public string Id { get; set; }
+        [DataMember]
+        public readonly string Id;
+
+        public OpenNewTabReply(string id)
+        {
+            Id = id;
+        }
     }
 }

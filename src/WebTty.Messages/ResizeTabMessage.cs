@@ -1,22 +1,25 @@
 ﻿using MediatR;
-using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using WebTty.Messages.Internal;
+using System.Runtime.Serialization;
 
 namespace WebTty.Messages
 {
-    [Message]
-    [Serializable]
+    [DataContract]
     public class ResizeTabMessage : INotification
     {
-        [Required]
-        public string TabId { get; set; }
+        [DataMember]
+        public readonly string TabId;
 
-        [DefaultValue(80)]
-        public int Cols { get; set; }
+        [DataMember]
+        public readonly int Cols;
 
-        [DefaultValue(24)]
-        public int Rows { get; set; }
+        [DataMember]
+        public readonly int Rows;
+
+        public ResizeTabMessage(string tabId, int cols = 80, int rows = 24)
+        {
+            TabId = tabId;
+            Cols = cols;
+            Rows = rows;
+        }
     }
 }

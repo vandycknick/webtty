@@ -32,36 +32,33 @@ const Terminal: FunctionComponent<TerminalProps> = ({
         const disposables: IDisposable[] = []
         const wrapper = wrapperRef.current
 
-        if (wrapper) {
-            wrapper.appendChild(xterm.ref)
-            xterm.open()
+        if (wrapper == undefined) return
 
-            xterm.loadAddons()
+        xterm.open(wrapper)
 
-            if (onInput) {
-                disposables.push(xterm.terminal.onData(onInput))
-            }
-
-            if (onResize) {
-                disposables.push(xterm.terminal.onResize(onResize))
-            }
-
-            if (onTitle) {
-                xterm.terminal.onTitleChange(onTitle)
-            }
-
-            if (theme) {
-                xterm.terminal.setOption("theme", theme)
-            }
-
-            xterm.terminal.focus()
+        if (onInput) {
+            disposables.push(xterm.terminal.onData(onInput))
         }
+
+        if (onResize) {
+            disposables.push(xterm.terminal.onResize(onResize))
+        }
+
+        if (onTitle) {
+            xterm.terminal.onTitleChange(onTitle)
+        }
+
+        if (theme) {
+            xterm.terminal.setOption("theme", theme)
+        }
+
+        xterm.terminal.focus()
 
         return (): void => {
             disposables.forEach(disposable => disposable.dispose())
-            wrapper?.removeChild(xterm.ref)
+            xterm.detach()
         }
-    })
+    }, [xterm, onInput, onResize, onTitle, theme])
 
     return (
         <ResizeObserver onChange={onFit}>

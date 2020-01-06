@@ -1,17 +1,21 @@
 using MediatR;
-using System;
-using System.ComponentModel.DataAnnotations;
-using WebTty.Messages.Internal;
+using System.Runtime.Serialization;
 
 namespace WebTty.Messages
 {
-    [Message]
-    [Serializable]
+    [DataContract]
     public class StdInputRequest : IRequest
     {
-        [Required]
-        public string TabId { get; set; }
+        [DataMember]
+        public readonly string TabId;
 
-        public string Payload { get; set; }
+        [DataMember]
+        public readonly string Payload;
+
+        public StdInputRequest(string tabId, string payload)
+        {
+            TabId = tabId;
+            Payload = payload;
+        }
     }
 }
