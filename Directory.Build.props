@@ -1,6 +1,5 @@
 <Project>
 
-  <Import Project="Version.props" />
   <Import Project="BuildOutput.props" />
 
   <PropertyGroup>
@@ -18,14 +17,21 @@
     <RepositoryType>git</RepositoryType>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <LangVersion>Latest</LangVersion>
-
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateFullPaths Condition="'$(VSCODE_CWD)' != ''">true</GenerateFullPaths>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)assets\logo-256x256.png" Pack="true" PackagePath="/"/>
-    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" Visible="false" PackagePath="/"/>
+    <None Include="$(MSBuildThisFileDirectory)assets\logo-256x256.png" Pack="true" PackagePath="/" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" Visible="false" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(IsPackable) == 'true'">
+    <PackageReference Include="Nerdbank.GitVersioning">
+      <Version>3.0.28</Version>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

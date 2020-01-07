@@ -8,11 +8,8 @@ using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.Git.GitTasks;
 using System.Runtime.InteropServices;
 using System.Linq;
-using System.IO;
-using System.Xml.Linq;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -21,12 +18,13 @@ class Build : NukeBuild
     public static int Main() => Execute<Build>(build => build.Default);
 
     [PathExecutable("yarn")]
-    readonly Tool Yarn;
+    private readonly Tool Yarn;
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [Solution] readonly Solution Solution;
+    [Solution]
+    private readonly Solution Solution;
 
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "test";
@@ -47,24 +45,12 @@ class Build : NukeBuild
     Target Install => _ => _
         .Executes(() =>
         {
-            var buildNumber = GitRevListHeadCount();
-            var versionSuffix = $"build.{buildNumber}";
-
-            var fileName = "Version.props";
-            var currentDirectory = Directory.GetCurrentDirectory();
-            var versionPropsFilePath = Path.Combine(currentDirectory, fileName);
-
-            var versionProps = XElement.Load(versionPropsFilePath);
-            var query = from props in versionProps.Elements("PropertyGroup")
-                        from v in props.Elements("VersionPrefix")
-                        select v.Value;
-
-            var version = query.ToList().FirstOrDefault();
+            var version = DotNet("nbgv get-version -v NuGetPackageVersion").FirstOrDefault();
 
             DotNetToolInstall(s => s
                 .AddSources(ArtifactsDirectory)
                 .SetGlobal(true)
-                .SetVersion($"{version}-{versionSuffix}")
+                .SetVersion(version.Text)
                 .SetPackageName(CliToolName));
         });
 
@@ -159,11 +145,9 @@ class Build : NukeBuild
         .DependsOn(CompileUI)
         .Executes(() =>
         {
-            var ext = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ps1" : "sh";
-            var usePwsh = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "pwsh " : "";
             Parallel.Run(
-                $"{usePwsh}./build.{ext} {nameof(WatchUI)} --no-logo ",
-                $"{usePwsh}./build.{ext} {nameof(WatchServer)} --no-logo"
+                $"dotnet nuke {nameof(WatchUI)}",
+                $"dotnet nuke {nameof(WatchServer)}"
             );
         });
 
@@ -212,15 +196,10 @@ class Build : NukeBuild
             DotNetRestore(s => s
                 .SetForceEvaluate(true));
 
-            var buildNumber = GitRevListHeadCount();
-            var sourceRevisionId = GitRevParseHead();
-
             DotNetPack(s => s
                 .SetProject(Solution.GetProject(CLI_PROJECT))
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetVersionSuffix($"build.{buildNumber}")
-                .SetProperty("SourceRevisionId", sourceRevisionId)
                 .SetProperty("IsPackaging", true));
         });
 
@@ -237,11 +216,4 @@ class Build : NukeBuild
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetVersionSuffix(suffix));
         });
-
-    public static string GitRevListHeadCount() =>
-        Git("rev-list --count HEAD").FirstOrDefault().Text.Trim();
-
-    public static string GitRevParseHead() =>
-        Git("rev-parse HEAD").FirstOrDefault().Text.Trim();
-
 }

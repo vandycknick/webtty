@@ -28,7 +28,7 @@ namespace jsonschema
             var tsSettings = new TypeScriptGeneratorSettings
             {
                 TypeStyle = TypeScriptTypeStyle.Class,
-                TypeScriptVersion = 3.5m,
+                TypeScriptVersion = 3.7m,
             };
 
             var mainModule = "";
