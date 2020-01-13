@@ -32,7 +32,7 @@ stages:
           - task: NodeTool@0
             displayName: Install Node
             inputs:
-              versionSpec: '10.16.0'
+              versionSpec: '12.14.1'
 
           - task: CacheBeta@0
             inputs:
@@ -40,13 +40,16 @@ stages:
               path: $(YARN_CACHE_FOLDER)
             displayName: Cache packages
 
-          - script: ./build.sh setup
+          - script: dotnet tool restore
+            displayName: Restore tools
+
+          - script: dotnet nuke setup
             displayName: Install dependencies
 
-          - script: ./build.sh lint
+          - script: dotnet nuke lint
             displayName: Lint
 
-          - script: ./build.sh checktypes
+          - script: dotnet nuke checktypes
             displayName: Check Types
 
   - stage: test_and_build
@@ -66,7 +69,7 @@ stages:
           - task: NodeTool@0
             displayName: Install Node
             inputs:
-              versionSpec: '10.16.0'
+              versionSpec: '12.14.1'
 
           - task: CacheBeta@0
             inputs:
@@ -77,13 +80,16 @@ stages:
               path: $(YARN_CACHE_FOLDER)
             displayName: Cache packages
 
-          - script: ./build.sh setup
+          - script: dotnet tool restore
+            displayName: Restore tools
+
+          - script: dotnet nuke setup
             displayName: Install dependencies
 
-          - script: ./build.sh compile
+          - script: dotnet nuke compile
             displayName: Initial build
 
-          - script: ./build.sh test
+          - script: dotnet nuke test
             displayName: Run Unit Tests
 
           - task: PublishTestResults@2
@@ -94,7 +100,7 @@ stages:
               testResultsFormat: VSTest
               testResultsFiles: artifacts/TestResults/*.trx
 
-          - script: ./build.sh
+          - script: dotnet nuke
             displayName: Package
 
           - publish: artifacts
@@ -119,7 +125,10 @@ stages:
               artifact: webtty
               path: $(Build.SourcesDirectory)/artifacts
 
-          - script: ./build.sh install
+          - script: dotnet tool restore
+            displayName: Restore tools
+
+          - script: dotnet nuke install
             displayName: Install Tool
 
       - job: macOS
@@ -138,7 +147,10 @@ stages:
               artifact: webtty
               path: $(Build.SourcesDirectory)/artifacts
 
-          - script: ./build.sh install
+          - script: dotnet tool restore
+            displayName: Restore tools
+
+          - script: dotnet nuke install
             displayName: Install Tool
 
       - job: Windows
@@ -157,5 +169,8 @@ stages:
               artifact: webtty
               path: $(Build.SourcesDirectory)/artifacts
 
-          - powershell: ./build.ps1 install
+          - script: dotnet tool restore
+            displayName: Restore tools
+
+          - script: dotnet nuke install
             displayName: Install Tool

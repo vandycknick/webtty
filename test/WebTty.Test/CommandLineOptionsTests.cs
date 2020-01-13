@@ -76,7 +76,7 @@ namespace WebTty.Test
         }
 
         [Fact]
-        public void CommandLineOptions_Build_SetsPathToTtyByDefault()
+        public void CommandLineOptions_Build_SetsPathToPtyByDefault()
         {
             // Given
             var args = new string[] { };
@@ -85,7 +85,7 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(args);
 
             // Then
-            Assert.Equal(expected: "/tty", options.Path);
+            Assert.Equal(expected: "/pty", options.Path);
         }
 
         [Fact]

@@ -2,10 +2,12 @@
 using System.IO;
 using System.Text;
 using jsonschema.FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
 using NJsonSchema;
 using NJsonSchema.CodeGeneration.TypeScript;
 using NJsonSchema.Generation;
-using WebTty.Messages.Helpers;
+using WebTty.Application;
+using WebTty.Infrastructure.Protocol;
 
 namespace jsonschema
 {
@@ -15,7 +17,12 @@ namespace jsonschema
         {
             var root = "src/WebTty.UI/Client/.tmp/messages";
 
-            var validatorFactory = new ValidatorFactory(typeof(IMessageResolver).Assembly);
+            var services = new ServiceCollection();
+            services.AddPty();
+            var provider = services.BuildServiceProvider();
+
+            var messageResolver = provider.GetRequiredService<IMessageResolver>();
+            var validatorFactory = new ValidatorFactory(messageResolver.GetType().Assembly);
             var schemaProcessor = new FluentValidationSchemaProcessor(validatorFactory);
 
             var settings = new JsonSchemaGeneratorSettings();
@@ -32,9 +39,7 @@ namespace jsonschema
             };
 
             var mainModule = "";
-            var messages = new MessageResolver();
-
-            foreach (var type in messages.GetMessages())
+            foreach (var type in messageResolver.GetMessages())
             {
                 var schemaForType = generator.Generate(type, resolver);
                 schemaForType.Title = type.Name;

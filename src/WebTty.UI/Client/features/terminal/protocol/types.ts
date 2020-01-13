@@ -1,9 +1,10 @@
 import {
-    StdInputRequest,
-    ResizeTabMessage,
-    OpenNewTabReply,
     OpenNewTabRequest,
-    StdOutMessage,
+    OpenNewTabReply,
+    ResizeTabRequest,
+    SendInputRequest,
+    OpenOutputRequest,
+    OutputEvent,
 } from "@webtty/messages"
 
 class UnknownMessage {
@@ -21,11 +22,12 @@ class UnknownMessage {
 }
 
 type Messages =
-    | StdOutMessage
     | OpenNewTabRequest
     | OpenNewTabReply
-    | ResizeTabMessage
-    | StdInputRequest
+    | ResizeTabRequest
+    | SendInputRequest
+    | OpenOutputRequest
+    | OutputEvent
     | UnknownMessage
 
 export { UnknownMessage, Messages }

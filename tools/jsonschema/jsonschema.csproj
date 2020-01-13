@@ -2,19 +2,19 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="8.6.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.0" />
-    <PackageReference Include="NJsonSchema" Version="10.1.2" />
-    <PackageReference Include="NJsonSchema.CodeGeneration.TypeScript" Version="10.1.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.1" />
+    <PackageReference Include="NJsonSchema" Version="10.1.3" />
+    <PackageReference Include="NJsonSchema.CodeGeneration.TypeScript" Version="10.1.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WebTty.Messages\WebTty.Messages.csproj" />
+    <ProjectReference Include="..\..\src\WebTty.Application\WebTty.Application.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,9 @@
 import { Action } from "redux"
 import {
     OpenNewTabRequest,
-    StdInputRequest,
-    ResizeTabMessage,
+    ResizeTabRequest,
+    SendInputRequest,
+    OpenOutputRequest,
 } from "@webtty/messages"
 
 const TERMINAL_SET_STATUS = "@webtty/TERMINAL_SET_STATUS"
@@ -14,7 +15,11 @@ type SetStatusAction = Action<typeof TERMINAL_SET_STATUS> & {
 }
 
 type SendMessageAction = Action<typeof TERMINAL_SEND_MESSAGE> & {
-    payload: OpenNewTabRequest | StdInputRequest | ResizeTabMessage
+    payload:
+        | OpenNewTabRequest
+        | ResizeTabRequest
+        | SendInputRequest
+        | OpenOutputRequest
 }
 
 type TabCreatedAction = Action<typeof TERMINAL_TAB_CREATED> & {
@@ -54,16 +59,23 @@ const resizeTab = (
     cols: number,
     rows: number,
 ): SendMessageAction => {
-    const message = new ResizeTabMessage({
+    const request = new ResizeTabRequest({
         tabId,
         cols,
         rows,
     })
-    return sendMessage(message)
+    return sendMessage(request)
+}
+
+const openStdout = (id: string): SendMessageAction => {
+    const request = new OpenOutputRequest({
+        tabId: id,
+    })
+    return sendMessage(request)
 }
 
 const writeStdIn = (tabId: string, message: string): SendMessageAction => {
-    const input = new StdInputRequest({
+    const input = new SendInputRequest({
         tabId,
         payload: message,
     })
@@ -72,4 +84,12 @@ const writeStdIn = (tabId: string, message: string): SendMessageAction => {
 
 export { TERMINAL_SET_STATUS, TERMINAL_SEND_MESSAGE, TERMINAL_TAB_CREATED }
 export { TerminalActions }
-export { setStatus, sendMessage, openNewTab, newTab, resizeTab, writeStdIn }
+export {
+    setStatus,
+    sendMessage,
+    openNewTab,
+    newTab,
+    resizeTab,
+    writeStdIn,
+    openStdout,
+}
