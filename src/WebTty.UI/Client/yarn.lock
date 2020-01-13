@@ -293,10 +293,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@msgpack/msgpack@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-1.10.0.tgz#f120822e641deef03aa0d2cfa2f257becd48d149"
-  integrity sha512-ts34h525mRgQkVZXOI+iWWwxumf2ewAkkYdTRWkb6mfmSaqXNBXBfJhPyERb7Rg/dJ4lsuAjC1U52ibob2GS0A==
+"@msgpack/msgpack@1.10.1":
+  version "1.10.1"
+  resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-1.10.1.tgz#b44e64a64b8925b4eb187426724c0b5db0642790"
+  integrity sha512-q3SRtlfaqym7Evvmz7R0PK7l2RG+23uLt+NfxwFVu58SC/cwd2xAGQX5jErwWCD7MXm6HipdTXa5ZFdX8YIrdQ==
 
 "@nodelib/fs.scandir@2.1.3":
   version "2.1.3"
