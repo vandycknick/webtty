@@ -16,7 +16,7 @@ namespace WebTty
         public IPAddress Address { get; private set; } = IPAddress.Loopback;
         public string UnixSocket { get; private set; }
         public int Port { get; private set; } = 5000;
-        public string Path { get; private set; } = "/tty";
+        public string Path { get; private set; } = "/pty";
         public string Theme { get; set; } = "default";
         public string Version => GetVersion();
         public string Name => GetName();
@@ -49,8 +49,8 @@ namespace WebTty
                 },
                 {
                     "path=",
-                    "Path to use, defaults to /tty",
-                    path => Path = string.IsNullOrEmpty(path) ? "/tty" : path
+                    "Path to use, defaults to /pty",
+                    path => Path = string.IsNullOrEmpty(path) ? "/pty" : path
                 },
                 {
                     "theme=",

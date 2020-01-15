@@ -46,6 +46,6 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.0-alpine as runtime
 ENV ASPNETCORE_URLS=""
 WORKDIR /webtty
 
-COPY --from=build /app/.build/bin/WebTty/Release/netcoreapp3.0/ .
+COPY --from=build /app/.build/bin/WebTty/Release/netcoreapp3.1/ .
 
 ENTRYPOINT ["dotnet", "webtty.dll", "-a", "any"]

@@ -10,7 +10,7 @@ const configureApp = (): ReturnType<typeof configureStore> => {
         .addFromDom("config")
         .addVariable("ttyHost", `ws://${window.location.host}`)
         .addVariableDevelopment("ttyHost", `ws://localhost:5000`)
-        .addVariableDevelopment("ttyPath", "/tty")
+        .addVariableDevelopment("ttyPath", "/pty")
         .addVariableDevelopment("theme", "default")
         .build(configValidator)
 

@@ -2,7 +2,7 @@ import { decode } from "@msgpack/msgpack"
 
 import { Messages } from "./types"
 import BinaryMessageFormatter from "common/utils/BinaryMessageFormatter"
-import { OpenNewTabReply, StdOutMessage } from "@webtty/messages"
+import { OpenNewTabReply, OutputEvent } from "@webtty/messages"
 import { UnknownMessage } from "./types"
 
 function* deserializeMessages(
@@ -22,8 +22,8 @@ const deserializeMessage = (buffer: Uint8Array): Messages => {
             return OpenNewTabReply.fromJS(payload)
         }
 
-        case "StdOutMessage": {
-            const message = StdOutMessage.fromJS(payload)
+        case "OutputEvent": {
+            const message = OutputEvent.fromJS(payload)
             message.data = Array.from((payload as { Data: number[] })["Data"])
             return message
         }

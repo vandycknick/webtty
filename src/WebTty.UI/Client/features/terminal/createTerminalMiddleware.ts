@@ -1,5 +1,5 @@
 import { Middleware } from "redux"
-import { OpenNewTabReply, StdOutMessage } from "@webtty/messages"
+import { OpenNewTabReply, OutputEvent } from "@webtty/messages"
 
 import { CancellationTokenSource } from "common/async/CancellationToken"
 import { IConnection } from "common/connection"
@@ -10,6 +10,7 @@ import {
     setStatus,
     openNewTab,
     newTab,
+    openStdout,
 } from "./terminalActions"
 import terminalManager, { Term } from "./terminalManager"
 import { Messages } from "./protocol/types"
@@ -25,9 +26,10 @@ async function* mapMessageToAction(
         if (message instanceof OpenNewTabReply) {
             terminalManager.set(message.id, new Term())
             yield newTab(message.id)
+            yield openStdout(message.id)
         }
 
-        if (message instanceof StdOutMessage) {
+        if (message instanceof OutputEvent) {
             const payload = decoder.decode(Buffer.from(message.data))
             const terminal = terminalManager.get(message.tabId)
             if (terminal) {

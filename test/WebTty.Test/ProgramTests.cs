@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
-using WebTty.Common;
 using WebTty.Test.Mocks;
 using Xunit;
 

@@ -1,6 +1,6 @@
 import createMessageReader from "./createMessageReader"
 import AsyncQueue from "common/async/AsyncQueue"
-import { OpenNewTabReply, StdOutMessage } from "@webtty/messages"
+import { OpenNewTabReply, OutputEvent } from "@webtty/messages"
 import { UnknownMessage } from "./types"
 
 describe("createMessageReader", () => {
@@ -33,22 +33,20 @@ describe("createMessageReader", () => {
         51,
     ])
     const stdout = new Uint8Array([
-        37,
+        35,
         146,
-        173,
-        83,
-        116,
-        100,
+        171,
         79,
         117,
         116,
-        77,
+        112,
+        117,
+        116,
+        69,
+        118,
         101,
-        115,
-        115,
-        97,
-        103,
-        101,
+        110,
+        116,
         130,
         165,
         84,
@@ -92,9 +90,9 @@ describe("createMessageReader", () => {
         // Then
         const results = [
             OpenNewTabReply,
-            StdOutMessage,
+            OutputEvent,
             UnknownMessage,
-            StdOutMessage,
+            OutputEvent,
             OpenNewTabReply,
         ]
         let cnt = 0

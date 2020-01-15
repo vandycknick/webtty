@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
-using WebTty.Common;
 using WebTty.IO;
 
 namespace WebTty

@@ -1,5 +1,4 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,12 +7,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using WebTty.IO;
-using WebTty.Common;
-using WebTty.Messages.Helpers;
-using WebTty.Protocol;
-using WebTty.Transport;
-using WebTty.Terminal;
 using WebTty.UI.Common;
+using WebTty.Application;
 
 namespace WebTty
 {
@@ -32,21 +27,9 @@ namespace WebTty
 
         private void ConfigureServices(IServiceCollection services)
         {
-            services.AddMediatR(config => config.AsScoped(), GetType());
-
-            services.AddSingleton(_options);
-            services.AddSingleton<IMessageResolver, MessageResolver>();
-            services.AddSingleton<BinaryDeserializerMap>();
-            services.AddSingleton<IProtocol, BinaryProtocol>();
-            services.AddScoped<ITransport, WebSocketsTransport>();
-            services.AddScoped<IConnection, HttpConnection>();
-            services.AddScoped<IConnectionHandler, TerminalConnectionHandler>();
-            services.AddScoped<IMessageDispatcher, TerminalMessageDispatcher>();
-
-            services.AddScoped<TerminalManager>();
-
+            services.AddPty();
             services.AddWebClient(config => {
-                config.TtyPath = _options.Path;
+                config.PtyPath = _options.Path;
                 config.Theme = _options.Theme;
             });
             services.AddResponseCompression();
@@ -72,10 +55,8 @@ namespace WebTty
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapPty(_options.Path);
             });
-
-            app.UseWebSockets();
-            app.UseWebTerminal(_options.Path);
         }
 
         private string GetCurrentAssemblyRootPath()
@@ -103,6 +84,7 @@ namespace WebTty
                         kestrel.ListenUnixSocket(_options.UnixSocket);
                     }
                 })
+                .UseStartup<Program>()
                 .ConfigureServices(ConfigureServices)
                 .Configure(Configure)
                 .Build();

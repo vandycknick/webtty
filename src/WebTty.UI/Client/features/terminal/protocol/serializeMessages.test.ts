@@ -2,10 +2,11 @@ import serializeMessage from "./serializeMessage"
 import { Messages } from "./types"
 import {
     OpenNewTabRequest,
-    ResizeTabMessage,
-    StdInputRequest,
     OpenNewTabReply,
-    StdOutMessage,
+    ResizeTabRequest,
+    SendInputRequest,
+    OpenOutputRequest,
+    OutputEvent,
 } from "@webtty/messages"
 
 describe("serializeMessage", () => {
@@ -13,9 +14,10 @@ describe("serializeMessage", () => {
         message
         ${new OpenNewTabRequest()}
         ${new OpenNewTabReply({ id: "123" })}
-        ${new ResizeTabMessage({ tabId: "1", cols: 1, rows: 1 })}
-        ${new StdInputRequest({ tabId: "1", payload: "h" })}
-        ${new StdOutMessage({ tabId: "123", data: [1, 2, 3] })}
+        ${new ResizeTabRequest({ tabId: "1", cols: 1, rows: 1 })}
+        ${new SendInputRequest({ tabId: "1", payload: "h" })}
+        ${new OpenOutputRequest({ tabId: "123" })}
+        ${new OutputEvent({ tabId: "123", data: [1, 2, 3] })}
     `(
         "serializes a message into an array buffer",
         ({ message }: { message: Messages; expected: ArrayBuffer }): void => {

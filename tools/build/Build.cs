@@ -125,8 +125,8 @@ class Build : NukeBuild
         {
             DotNetTest(s => s
                 .SetProjectFile(Solution.GetProject("WebTty.Test"))
-                .When(!IsLocalBuild, s =>
-                    s.SetNoBuild(true)
+                .When(!IsLocalBuild, w =>
+                    w.SetNoBuild(true)
                     .SetResultsDirectory(ArtifactsDirectory / "TestResults")
                     .SetLogger("trx")
                 )
@@ -201,6 +201,13 @@ class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetProperty("IsPackaging", true));
+
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(CLI_PROJECT))
+                .SetConfiguration(Configuration)
+                .SetRuntime("osx-x64")
+                .SetOutput(ArtifactsDirectory / "osx")
+                .SetProperty("PublishTrimmed", true));
         });
 
     Target PackageNative => _ => _

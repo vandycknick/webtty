@@ -10,8 +10,8 @@ import {
 } from "./terminalActions"
 import {
     OpenNewTabRequest,
-    ResizeTabMessage,
-    StdInputRequest,
+    ResizeTabRequest,
+    SendInputRequest,
 } from "@webtty/messages"
 
 describe("setStatus", () => {
@@ -71,7 +71,7 @@ describe("resizeTab", () => {
         // Then
         expect(action).toEqual({
             type: TERMINAL_SEND_MESSAGE,
-            payload: new ResizeTabMessage({ tabId, cols, rows }),
+            payload: new ResizeTabRequest({ tabId, cols, rows }),
         })
     })
 })
@@ -88,7 +88,7 @@ describe("writeStdIn", () => {
         // Then
         expect(action).toEqual({
             type: TERMINAL_SEND_MESSAGE,
-            payload: new StdInputRequest({ tabId, payload }),
+            payload: new SendInputRequest({ tabId, payload }),
         })
     })
 })
