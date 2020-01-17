@@ -20,7 +20,6 @@ const configureApp = (): ReturnType<typeof configureStore> => {
         .build()
 
     const terminal = createTerminalMiddleware({
-        connect: true,
         connection,
     })
 

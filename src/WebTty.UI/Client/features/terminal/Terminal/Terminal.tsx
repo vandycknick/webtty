@@ -1,64 +1,50 @@
 import { h, FunctionComponent } from "preact"
-import { useRef, useEffect, useCallback } from "preact/hooks"
+import { useEffect, useCallback, useRef } from "preact/hooks"
 import { ITheme } from "xterm"
 
 import "xterm/css/xterm.css"
 import "./Terminal.css"
 
-import { IDisposable } from "common/types"
 import ResizeObserver from "common/components/ResizeObserver/ResizeObserver"
-import { Term } from "../terminalManager"
+import { ITerminal } from "../types"
 
 type TerminalProps = {
-    term: Term
+    terminal: ITerminal
     theme?: ITheme
     onInput?: (data: string) => void
     onResize?: (data: { cols: number; rows: number }) => void
     onTitle?: (title: string) => void
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const noop = (): void => {}
+
 const Terminal: FunctionComponent<TerminalProps> = ({
-    term: xterm,
-    onInput,
-    onResize,
-    onTitle,
+    terminal,
+    onInput = noop,
+    onResize = noop,
+    onTitle = noop,
     theme,
 }) => {
     const wrapperRef = useRef<HTMLDivElement>()
-
-    const onFit = useCallback(() => xterm.resize(), [xterm])
+    const onFit = useCallback(terminal.resize, [terminal])
 
     useEffect(() => {
-        const disposables: IDisposable[] = []
         const wrapper = wrapperRef.current
 
         if (wrapper == undefined) return
 
-        xterm.open(wrapper)
+        terminal.open(wrapper)
 
-        if (onInput) {
-            disposables.push(xterm.terminal.onData(onInput))
-        }
+        terminal.onData(onInput)
+        terminal.onResize(onResize)
+        terminal.onTitleChange(onTitle)
+        terminal.setTheme(theme)
 
-        if (onResize) {
-            disposables.push(xterm.terminal.onResize(onResize))
-        }
+        terminal.focus()
 
-        if (onTitle) {
-            xterm.terminal.onTitleChange(onTitle)
-        }
-
-        if (theme) {
-            xterm.terminal.setOption("theme", theme)
-        }
-
-        xterm.terminal.focus()
-
-        return (): void => {
-            disposables.forEach(disposable => disposable.dispose())
-            xterm.detach()
-        }
-    }, [xterm, onInput, onResize, onTitle, theme])
+        return terminal.detach
+    }, [onInput, onResize, onTitle, terminal, theme])
 
     return (
         <ResizeObserver onChange={onFit}>

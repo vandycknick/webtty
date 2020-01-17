@@ -11,38 +11,34 @@ import {
     openNewTab,
     newTab,
     openStdout,
-} from "./terminalActions"
-import terminalManager, { Term } from "./terminalManager"
-import { Messages } from "./protocol/types"
-import createMessageReader from "./protocol/createMessageReader"
-import createMessageWriter from "./protocol/createMessageWriter"
+} from "features/terminal/terminalActions"
+import {
+    Messages,
+    createMessageReader,
+    createMessageWriter,
+} from "features/terminal/protocol"
+import { termManager } from "features/terminal/XTerm"
 
-async function* mapMessageToAction(
+async function* mapMessagesToActions(
     messageStream: AsyncIterableIterator<Messages>,
 ): AsyncIterableIterator<TerminalActions> {
     const decoder = new TextDecoder()
 
     for await (const message of messageStream) {
         if (message instanceof OpenNewTabReply) {
-            terminalManager.set(message.id, new Term())
             yield newTab(message.id)
             yield openStdout(message.id)
         }
 
         if (message instanceof OutputEvent) {
             const payload = decoder.decode(Buffer.from(message.data))
-            const terminal = terminalManager.get(message.tabId)
-            if (terminal) {
-                terminal.write(payload)
-            }
-
+            termManager.write(message.tabId, payload)
             continue
         }
     }
 }
 
 interface TerminalMiddlewareOptions {
-    connect: boolean
     connection: IConnection
 }
 
@@ -55,18 +51,16 @@ const createTerminalMiddleware = (
     const write = createMessageWriter(connection)
 
     return store => {
-        if (options.connect) {
-            connection.start().then(() => {
-                store.dispatch(setStatus("connected"))
-                store.dispatch(openNewTab())
+        connection.start().then(() => {
+            store.dispatch(setStatus("connected"))
+            store.dispatch(openNewTab())
 
-                consume(
-                    mapMessageToAction(read()),
-                    store.dispatch,
-                    tokenSource.token,
-                )
-            })
-        }
+            consume(
+                mapMessagesToActions(read()),
+                store.dispatch,
+                tokenSource.token,
+            )
+        })
 
         return next => (action: TerminalActions) => {
             if (action.type == TERMINAL_SEND_MESSAGE) {
@@ -77,5 +71,5 @@ const createTerminalMiddleware = (
     }
 }
 
-export { mapMessageToAction }
+export { mapMessagesToActions }
 export default createTerminalMiddleware

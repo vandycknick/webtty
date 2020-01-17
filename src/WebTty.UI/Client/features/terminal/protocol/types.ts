@@ -16,8 +16,11 @@ class UnknownMessage {
         this.payload = payload
     }
 
-    public toJSON(): unknown {
-        return {}
+    public toJSON(): { type: string; payload: unknown } {
+        return {
+            type: this.type,
+            payload: this.payload,
+        }
     }
 }
 
