@@ -2,16 +2,16 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "nbgv": {
-      "version": "3.0.28",
-      "commands": [
-        "nbgv"
-      ]
-    },
     "nuke.globaltool": {
       "version": "0.23.6",
       "commands": [
         "nuke"
+      ]
+    },
+    "minver-cli": {
+      "version": "2.0.0",
+      "commands": [
+        "minver"
       ]
     }
   }

@@ -15,10 +15,16 @@
     <RepositoryUrl>https://github.com/nickvdyck/webtty.git</RepositoryUrl>
     <PackageReleaseNotes>See $(PackageProjectUrl)/blob/master/CHANGELOG.md for release notes.</PackageReleaseNotes>
     <RepositoryType>git</RepositoryType>
-    <NoPackageAnalysis>true</NoPackageAnalysis>
+
     <LangVersion>Latest</LangVersion>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
     <GenerateFullPaths Condition="'$(VSCODE_CWD)' != ''">true</GenerateFullPaths>
+
+    <MinVerAutoIncrement>minor</MinVerAutoIncrement>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,11 +33,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(IsPackable) == 'true'">
-    <PackageReference Include="Nerdbank.GitVersioning">
-      <Version>3.0.50</Version>
+    <PackageReference Include="MinVer" Version="2.0.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

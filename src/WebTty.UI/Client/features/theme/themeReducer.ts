@@ -4,24 +4,21 @@ import { Reducer } from "redux"
 import { ThemeActions, THEME_SELECTED } from "./themeActions"
 import themes, { ITheme } from "./themes"
 
-type ThemeState = {
+type State = {
     selected: string
     themes: {
         [theme: string]: ITheme
     }
 }
 
-const initialState: ThemeState = {
+const initialState: State = {
     selected: "default",
     themes: {
         ...themes,
     },
 }
 
-const theme: Reducer<ThemeState, ThemeActions> = (
-    state = initialState,
-    action,
-) =>
+const theme: Reducer<State, ThemeActions> = (state = initialState, action) =>
     produce(state, draft => {
         switch (action.type) {
             case THEME_SELECTED:
@@ -30,4 +27,7 @@ const theme: Reducer<ThemeState, ThemeActions> = (
         }
     })
 
+type ThemeState = { theme: ReturnType<typeof theme> }
+
+export { ThemeState, initialState }
 export default theme

@@ -9,10 +9,10 @@ describe("getSelectedTab", () => {
         state: DeepPartial<TerminalState> = {},
     ): TerminalState => {
         return merge(
-            state,
             cloneDeep({
                 terminal: initialState,
             }),
+            state,
         )
     }
 

@@ -45,7 +45,7 @@ class Build : NukeBuild
     Target Install => _ => _
         .Executes(() =>
         {
-            var version = DotNet("nbgv get-version -v NuGetPackageVersion").FirstOrDefault();
+            var version = DotNet("minver -t v -a minor -v e").FirstOrDefault();
 
             DotNetToolInstall(s => s
                 .AddSources(ArtifactsDirectory)
@@ -120,7 +120,6 @@ class Build : NukeBuild
         });
 
     Target Test => _ => _
-        .Triggers(TestJS)
         .Executes(() =>
         {
             DotNetTest(s => s
@@ -200,7 +199,8 @@ class Build : NukeBuild
                 .SetProject(Solution.GetProject(CLI_PROJECT))
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetProperty("IsPackaging", true));
+                .SetProperty("IsPackaging", true)
+                .EnableIncludeSymbols());
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(CLI_PROJECT))
