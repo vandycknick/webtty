@@ -42,7 +42,7 @@ COPY . .
 RUN ./build.sh setup
 RUN ./build.sh compile --configuration Release
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.0-alpine as runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.1-alpine as runtime
 ENV ASPNETCORE_URLS=""
 WORKDIR /webtty
 
