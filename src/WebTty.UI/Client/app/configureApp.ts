@@ -8,14 +8,14 @@ import themes from "features/theme/themes"
 const configureApp = (): ReturnType<typeof configureStore> => {
     const config = new ConfigBuilder<AppConfig>()
         .addFromDom("config")
-        .addVariable("ttyHost", `ws://${window.location.host}`)
-        .addVariableDevelopment("ttyHost", `ws://localhost:5000`)
-        .addVariableDevelopment("ttyPath", "/pty")
+        .addVariable("ptyHost", `ws://${window.location.host}`)
+        .addVariableDevelopment("ptyHost", `ws://localhost:5000`)
+        .addVariableDevelopment("ptyPath", "/pty")
         .addVariableDevelopment("theme", "default")
         .build(configValidator)
 
     const connection = new ConnectionBuilder()
-        .withUrl(`${config.ttyHost}${config.ttyPath}`)
+        .withUrl(`${config.ptyHost}${config.ptyPath}`)
         .useWebSocket("arraybuffer")
         .build()
 
