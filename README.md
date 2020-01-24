@@ -6,8 +6,9 @@
 
 > Terminal emulator build on top of WebSockets
 
-[![Build Status][azure-ci-badge]][azure-ci-url]
+[![Build status][ci-badge]][ci-url]
 [![NuGet][nuget-package-badge]][nuget-package-url]
+[![feedz.io][feedz-package-badge]][feedz-package-url]
 
 
 ## Introduction
@@ -42,9 +43,11 @@ Options:
   -?, -h, --help             Show help information
 ```
 
-[azure-ci-badge]: https://dev.azure.com/vandycknick/webtty/_apis/build/status/nickvdyck.webtty?branchName=master
-[azure-ci-url]: https://dev.azure.com/vandycknick/webtty/_build/latest?definitionId=15&branchName=master
+[ci-url]: https://github.com/nickvdyck/webtty
+[ci-badge]: https://github.com/nickvdyck/webtty/workflows/CI/badge.svg
 
 [nuget-package-url]: https://www.nuget.org/packages/webtty/
 [nuget-package-badge]: https://img.shields.io/nuget/v/webtty.svg?style=flat-square&label=nuget
 
+[feedz-package-url]: https://f.feedz.io/nvd/webtty/packages/webtty/latest/download
+[feedz-package-badge]: https://img.shields.io/badge/endpoint.svg?url=https%3A%2F%2Ff.feedz.io%2Fnvd%2Fwebtty%2Fshield%2Fwebtty%2Flatest&label=webtty

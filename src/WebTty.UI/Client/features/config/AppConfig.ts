@@ -1,6 +1,6 @@
 interface AppConfig {
-    ttyHost: string
-    ttyPath: string
+    ptyHost: string
+    ptyPath: string
     theme: string
 }
 
