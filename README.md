@@ -9,6 +9,7 @@
 [![Build status][ci-badge]][ci-url]
 [![NuGet][nuget-package-badge]][nuget-package-url]
 [![feedz.io][feedz-package-badge]][feedz-package-url]
+[![coverage][coverage-badge]][coverage-url]
 
 
 ## Introduction
@@ -51,3 +52,6 @@ Options:
 
 [feedz-package-url]: https://f.feedz.io/nvd/webtty/packages/webtty/latest/download
 [feedz-package-badge]: https://img.shields.io/badge/endpoint.svg?url=https%3A%2F%2Ff.feedz.io%2Fnvd%2Fwebtty%2Fshield%2Fwebtty%2Flatest&label=webtty
+
+[coverage-url]: https://codecov.io/gh/nickvdyck/webtty
+[coverage-badge]: https://codecov.io/gh/nickvdyck/webtty/branch/master/graph/badge.svg
