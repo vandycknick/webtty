@@ -40,10 +40,16 @@ jobs:
       run: dotnet nuke
 
     - name: Unit Test Client
-      run: yarn --cwd src/WebTty.UI/Client/ test --coverage
+      run: yarn --cwd src/WebTty.UI/Client/ test --coverage --coverageDirectory ../../../.tmp/client
 
     - name: Unit Test Server
-      run: dotnet test --configuration Release
+      run: dotnet nuke test
+
+    - name: Codecov Upload Coverage
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        flags: unittests
 
     - name: Push packages
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'

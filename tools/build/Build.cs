@@ -30,6 +30,7 @@ class Build : NukeBuild
     AbsolutePath TestsDirectory => RootDirectory / "test";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath BuildOutputDirectory => RootDirectory / ".build";
+    AbsolutePath TempDirectory => RootDirectory / ".tmp";
 
     private const string CLI_PROJECT = "WebTty";
     private const string EXEC_PROJECT = "WebTty.Exec";
@@ -123,20 +124,13 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetTest(s => s
+                .SetConfiguration("Release")
                 .SetProjectFile(Solution.GetProject("WebTty.Test"))
-                .When(!IsLocalBuild, w =>
-                    w.SetNoBuild(true)
-                    .SetResultsDirectory(ArtifactsDirectory / "TestResults")
-                    .SetLogger("trx")
-                )
+                // .When(!IsLocalBuild, w => w.SetNoBuild(true))
+                .SetProperty("CollectCoverage", true)
+                .SetProperty("CoverletOutputFormat", "lcov")
+                .SetProperty("CoverletOutput", TempDirectory / "server/lcov.info")
             );
-
-            // Temporary removed until I have a better plan to run integration tests in ci
-            // DotNetTest(s => s
-            //     .SetProjectFile(Solution.GetProject("WebTty.Integration.Test"))
-            //     .SetNoBuild(true)
-            //     .SetResultsDirectory(ArtifactsDirectory / "TestResults")
-            //     .SetLogger("trx"));
         });
 
     Target Watch => _ => _
@@ -145,8 +139,8 @@ class Build : NukeBuild
         .Executes(() =>
         {
             Parallel.Run(
-                $"dotnet nuke {nameof(WatchUI)}",
-                $"dotnet nuke {nameof(WatchServer)}"
+                $"dotnet nuke {nameof(WatchUI)} --no-logo",
+                $"dotnet nuke {nameof(WatchServer)} --no-logo"
             );
         });
 
