@@ -1,4 +1,4 @@
-import { Action } from "redux"
+import { Action, AnyAction } from "redux"
 import {
     OpenNewTabRequest,
     ResizeTabRequest,
@@ -28,7 +28,11 @@ type TabCreatedAction = Action<typeof TERMINAL_TAB_CREATED> & {
     }
 }
 
-type TerminalActions = SetStatusAction | SendMessageAction | TabCreatedAction
+type TerminalActions =
+    | SetStatusAction
+    | SendMessageAction
+    | TabCreatedAction
+    | AnyAction
 
 const setStatus = (status: SetStatusAction["payload"]): SetStatusAction => ({
     type: TERMINAL_SET_STATUS,

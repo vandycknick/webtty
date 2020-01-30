@@ -2,15 +2,25 @@ import AsyncQueue from "common/async/AsyncQueue"
 import { IDisposable } from "common/types"
 import IConnection, { ConnectionState } from "./IConnection"
 
+interface WebSocketFactory {
+    new (url: string, protocols?: string | string[]): WebSocket
+}
+
 class WebSocketConnection implements IConnection, IDisposable {
     private readonly queue = new AsyncQueue<MessageEvent>()
+    private readonly url: string = ""
+    private readonly binaryType: BinaryType
+    private readonly WebSocketConstructor: WebSocketFactory
     private socket: WebSocket | undefined = undefined
-    private url = ""
-    private binaryType: BinaryType | undefined = undefined
     public state: ConnectionState = ConnectionState.CLOSED
 
-    constructor(url: string, binaryType?: BinaryType) {
+    constructor(
+        url: string,
+        webSocketConstructor: WebSocketFactory,
+        binaryType: BinaryType = "blob",
+    ) {
         this.url = url
+        this.WebSocketConstructor = webSocketConstructor
         this.binaryType = binaryType
     }
 
@@ -21,52 +31,46 @@ class WebSocketConnection implements IConnection, IDisposable {
     }
 
     public start(): Promise<void> {
-        this.socket = new WebSocket(this.url)
+        const socket = new this.WebSocketConstructor(this.url)
+        this.socket = socket
         this.state = ConnectionState.CONNECTING
 
-        if (this.binaryType !== undefined) {
-            this.socket.binaryType = this.binaryType
-        }
-
-        this.socket.addEventListener("message", this.queue.enqueue)
-        this.socket.addEventListener("error", this.dispose)
-        this.socket.addEventListener("close", this.dispose)
+        socket.binaryType = this.binaryType
+        socket.onmessage = this.queue.enqueue
 
         return new Promise((res, rej) => {
-            if (this.socket === undefined) {
-                rej(new Error("Unknown error, socket is undefined"))
-            }
-
-            if (this.socket?.readyState == this.socket?.OPEN) {
+            if (socket.readyState == socket.OPEN) {
                 this.state = ConnectionState.OPEN
+                socket.onerror = this.dispose
+                socket.onclose = this.dispose
                 res()
                 return
             }
 
-            const remove = (): void => {
-                this.socket?.removeEventListener("open", onOpen)
-                this.socket?.removeEventListener("close", onError)
-            }
             const onOpen = (): void => {
+                socket.onerror = this.dispose
+                socket.onclose = this.dispose
                 this.state = ConnectionState.OPEN
                 res()
-                remove()
             }
             const onError = (err: CloseEvent): void => {
+                this.dispose()
                 rej(err)
-                remove
             }
-            this.socket?.addEventListener("open", onOpen)
-            this.socket?.addEventListener("close", onError)
+            socket.onopen = onOpen
+            socket.onclose = onError
         })
     }
 
     public dispose = (): void => {
-        this.queue?.dispose()
-        this.socket?.close()
-        this.socket?.removeEventListener("message", this.queue.enqueue)
-        this.socket?.removeEventListener("error", this.dispose)
-        this.socket?.removeEventListener("close", this.dispose)
+        this.queue.dispose()
+
+        if (this.socket) {
+            this.socket.close()
+            this.socket.onmessage = null
+            this.socket.onerror = null
+            this.socket.onclose = null
+        }
 
         this.socket = undefined
         this.state = ConnectionState.CLOSED
@@ -88,4 +92,5 @@ class WebSocketConnection implements IConnection, IDisposable {
     > => this
 }
 
+export { WebSocketFactory }
 export default WebSocketConnection

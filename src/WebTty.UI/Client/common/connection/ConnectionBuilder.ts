@@ -12,9 +12,9 @@ class ConnectionBuilder {
         return this
     }
 
-    public useWebSocket(binaryType: BinaryType): this {
+    public useWebSocket(binaryType?: BinaryType): this {
         this.connectionFactory = (url: string) =>
-            new WebSocketConnection(url, binaryType)
+            new WebSocketConnection(url, WebSocket, binaryType)
         return this
     }
 
