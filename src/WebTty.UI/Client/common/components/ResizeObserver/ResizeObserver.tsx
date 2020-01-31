@@ -7,24 +7,23 @@ type ResizeObserverProps = {
     children: ComponentChildren
 }
 
-const ResizeObserver: FunctionComponent<ResizeObserverProps> = (
-    props: ResizeObserverProps,
-) => {
+const ResizeObserver: FunctionComponent<ResizeObserverProps> = ({
+    onChange,
+    children,
+}: ResizeObserverProps) => {
     const wrapperRef = useRef<HTMLDivElement>()
 
     useEffect(() => {
         if (wrapperRef.current == undefined) return
 
-        const observer = new SizeObserver((entries): void =>
-            props.onChange(entries),
-        )
+        const observer = new SizeObserver((entries): void => onChange(entries))
 
         observer.observe(wrapperRef.current)
 
         return (): void => observer.disconnect()
-    }, [props])
+    }, [onChange])
 
-    return <div ref={wrapperRef}>{props.children}</div>
+    return <div ref={wrapperRef}>{children}</div>
 }
 
 export default ResizeObserver
