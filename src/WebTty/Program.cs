@@ -1,85 +1,58 @@
-using System;
+using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using WebTty.IO;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace WebTty
 {
     public class Program
     {
-        private readonly IConsole _console;
-        private readonly IServer _server;
-        private readonly CommandLineOptions _options;
-
-        public Program(IConsole console, IServer server, CommandLineOptions options)
+        static async Task<int> Main(string[] args)
         {
-            _console = console;
-            _server = server;
-            _options = options;
-        }
-
-        private void WriteHelp()
-        {
-            _console.WriteLine($"{_options.Name}: {_options.Version}");
-            _console.WriteLine();
-            _console.WriteLine("🔌 WebSocket based terminal emulator");
-            _console.WriteLine();
-            _console.WriteLine($"Usage: {_options.Name} [options] -- [command] [<arguments...>]");
-            _console.WriteLine();
-            _console.WriteLine("Options:");
-            _options.WriteOptions(_console.Out);
-        }
-
-        private void WriteErrorMessage(string message)
-        {
-            _console.WriteLine("Error:");
-            _console.WriteLine(message);
-            _console.WriteLine();
-            _console.WriteLine($"Try '{_options.Name} --help' for more information.");
-        }
-
-        public async Task<int> ExecuteAsync(CancellationToken token = default)
-        {
-            try
-            {
-                if (_options.TryGetInvalidOptions(out var message))
-                {
-                    WriteErrorMessage(message);
-                    return 1;
-                }
-
-                if (_options.ShowHelp)
-                {
-                    WriteHelp();
-                    return 0;
-                }
-
-                if (_options.ShowVersion)
-                {
-                    _console.WriteLine($"{_options.Version}");
-                    return 0;
-                }
-
-                await _server.RunAsync(token);
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                WriteErrorMessage(ex.Message);
-                return 1;
-            }
-        }
-
-        static Task<int> Main(string[] args)
-        {
-            var console = NetConsole.Instance;
             var options = CommandLineOptions.Build(args);
-            var hostBuilder = WebHost.CreateDefaultBuilder();
-            var server = new WebTtyServer(options, console, hostBuilder);
 
-            using var cts = new CancellationTokenSource();
-            return new Program(console, server, options).ExecuteAsync(cts.Token);
+            using (var cts = new CancellationTokenSource())
+            using (var host = CreateHostBuilder(options).Build())
+            {
+                var command = new RootCommand(options, host.StartAsync, host.WaitForShutdownAsync);
+                var result = await command.ExecuteAsync(cts.Token);
+                return result;
+            }
+        }
+
+        private static IHostBuilder CreateHostBuilder(CommandLineOptions options)
+        {
+            var contentRoot = GetCurrentAssemblyRootPath();
+
+            return Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder => builder.Add(new CommandLineOptionsConfigSource(options)))
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .UseStaticWebAssets()
+                        .UseContentRoot(contentRoot)
+                        .PreferHostingUrls(false)
+                        .SuppressStatusMessages(true)
+                        .UseKestrel(kestrel =>
+                        {
+                            kestrel.Listen(options.Address, options.Port);
+
+                            if (!string.IsNullOrEmpty(options.UnixSocket))
+                            {
+                                kestrel.ListenUnixSocket(options.UnixSocket);
+                            }
+                        })
+                        .UseStartup<Startup>();
+                });
+        }
+
+        private static string GetCurrentAssemblyRootPath()
+        {
+            var root = Assembly.GetExecutingAssembly().Location;
+            var rootDirectory = Path.GetDirectoryName(root);
+            return rootDirectory;
         }
     }
 }
