@@ -6,23 +6,23 @@ namespace WebTty.Infrastructure.Connection
 {
     internal class HttpConnectionManager
     {
-        private readonly ConcurrentDictionary<string, IConnectionContext> _connections = new ConcurrentDictionary<string, IConnectionContext>();
+        private readonly ConcurrentDictionary<string, ConnectionContext> _connections = new ConcurrentDictionary<string, ConnectionContext>();
         private readonly IServiceProvider _provider;
         public HttpConnectionManager(IServiceProvider provider)
         {
             _provider = provider;
         }
 
-        public bool TryGet(string id, out IConnectionContext context)
+        public bool TryGet(string id, out ConnectionContext context)
         {
             return _connections.TryGetValue(id, out context);
         }
 
-        internal IConnectionContext GetOrCreate(string id)
+        internal ConnectionContext GetOrCreate(string id)
         {
-            if (!TryGet(id, out IConnectionContext context))
+            if (!TryGet(id, out var context))
             {
-                context = _provider.GetRequiredService<IConnectionContext>();
+                context = _provider.GetRequiredService<ConnectionContext>();
                 _connections.TryAdd(id, context);
             }
 

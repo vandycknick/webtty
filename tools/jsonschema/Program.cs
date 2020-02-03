@@ -7,7 +7,7 @@ using NJsonSchema;
 using NJsonSchema.CodeGeneration.TypeScript;
 using NJsonSchema.Generation;
 using WebTty.Application;
-using WebTty.Infrastructure.Protocol;
+using WebTty.Infrastructure;
 
 namespace jsonschema
 {

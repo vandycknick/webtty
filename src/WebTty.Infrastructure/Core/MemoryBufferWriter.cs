@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebTty.Infrastructure.Common
+namespace WebTty.Infrastructure.Core
 {
     internal sealed class MemoryBufferWriter : Stream, IBufferWriter<byte>
     {

@@ -7,7 +7,7 @@ using WebTty.Application.Entities;
 using WebTty.Application.Events;
 using WebTty.Application.Requests;
 using WebTty.Infrastructure.Connection;
-using WebTty.Infrastructure.Dispatcher;
+using WebTty.Infrastructure;
 
 namespace WebTty.Application
 {
@@ -21,7 +21,7 @@ namespace WebTty.Application
             _engine = engine;
         }
 
-        public async ValueTask<object> Handle(object message, IConnectionContext context, CancellationToken token = default)
+        public async ValueTask<object> Handle(object message, ConnectionContext context, CancellationToken token = default)
         {
             switch (message)
             {

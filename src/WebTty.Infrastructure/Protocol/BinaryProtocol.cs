@@ -1,6 +1,7 @@
+using System;
 using System.Buffers;
 using MessagePack;
-using WebTty.Infrastructure.Common;
+using WebTty.Infrastructure.Core;
 
 namespace WebTty.Infrastructure.Protocol
 {
@@ -12,7 +13,7 @@ namespace WebTty.Infrastructure.Protocol
             _messageResolver = messageResolver;
         }
 
-        public bool TryParseMessage(ref ReadOnlySequence<byte> input, out object message)
+        public bool TryReadMessage(ref ReadOnlySequence<byte> input, out object message)
         {
             if (!BinaryMessageHelpers.TryParseMessage(ref input, out var payload))
             {

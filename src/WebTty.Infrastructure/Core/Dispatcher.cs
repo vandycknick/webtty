@@ -2,17 +2,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using WebTty.Infrastructure.Connection;
 
-namespace WebTty.Infrastructure.Dispatcher
+namespace WebTty.Infrastructure.Core
 {
-    internal class DefaultMessageDispatcher : IMessageDispatcher
+    internal sealed class Dispatcher
     {
         private readonly IMessageHandler _handler;
-        public DefaultMessageDispatcher(IMessageHandler handler)
+        public Dispatcher(IMessageHandler handler)
         {
             _handler = handler;
         }
 
-        public async Task ProcessAsync(TtyConnectionContext context, CancellationToken token)
+        public async Task ProcessAsync(ConnectionContext context, CancellationToken token)
         {
             await foreach (var message in context.ReadMessages().WithCancellation(token))
             {

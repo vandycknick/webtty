@@ -4,7 +4,7 @@ using System.IO.Pipelines;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using WebTty.Infrastructure.Common;
+using WebTty.Infrastructure.Core;
 
 namespace WebTty.Infrastructure.Transport
 {

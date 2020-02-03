@@ -12,14 +12,12 @@ namespace WebTty
         static async Task<int> Main(string[] args)
         {
             var options = CommandLineOptions.Build(args);
+            using var cts = new CancellationTokenSource();
+            using var host = CreateHostBuilder(options).Build();
 
-            using (var cts = new CancellationTokenSource())
-            using (var host = CreateHostBuilder(options).Build())
-            {
-                var command = new RootCommand(options, host.StartAsync, host.WaitForShutdownAsync);
-                var result = await command.ExecuteAsync(cts.Token);
-                return result;
-            }
+            var command = new RootCommand(options, host.StartAsync, host.WaitForShutdownAsync);
+            var result = await command.ExecuteAsync(cts.Token);
+            return result;
         }
 
         private static IHostBuilder CreateHostBuilder(CommandLineOptions options)

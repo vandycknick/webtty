@@ -1,15 +1,14 @@
-using System;
+﻿using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using WebTty.Infrastructure.Connection;
-using WebTty.Infrastructure.Dispatcher;
 
 namespace WebTty.Infrastructure
 {
-    public static class TtyEndpointRouteBuilderExtensions
+    public static class MessagingEndpointRouteBuilderExtensions
     {
-        public static IEndpointConventionBuilder MapMessageHandler<TMessageHandler>(this IEndpointRouteBuilder endpoints, string route = "/tty") where TMessageHandler : IMessageHandler
+        public static IEndpointConventionBuilder MapMessageHandler<TMessageHandler>(this IEndpointRouteBuilder endpoints, string route) where TMessageHandler : IMessageHandler
         {
             if (endpoints == null)
             {
