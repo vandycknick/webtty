@@ -1,18 +1,17 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using WebTty.Application.Common;
 using WebTty.Infrastructure;
 using WebTty.Infrastructure.Protocol;
 
 namespace WebTty.Application
 {
-    public static class ServiceCollectionExtensions
+    public static class PtyServiceCollectionExtensions
     {
         public static IServiceCollection AddPty(this IServiceCollection services)
         {
-            var resolver = new MessageResolver();
-            services.AddMessaging(resolver);
+            services.AddMessaging(typeof(PtyMessageHandler));
             services.AddTransient<TerminalEngine>();
-            services.AddSingleton<IMessageResolver>(_ => resolver);
+
             return services;
         }
     }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace WebTty.Infrastructure.Protocol
+namespace WebTty.Infrastructure
 {
     public interface IMessageResolver
     {

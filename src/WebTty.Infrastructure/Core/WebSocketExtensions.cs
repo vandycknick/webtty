@@ -3,7 +3,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WebTty.Infrastructure.Common
+namespace WebTty.Infrastructure.Core
 {
     internal static class WebSocketExtensions
     {

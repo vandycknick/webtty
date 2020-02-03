@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using WebTty.Infrastructure.Dispatcher;
+using WebTty.Infrastructure.Core;
 using WebTty.Infrastructure.Transport;
 
 namespace WebTty.Infrastructure.Connection
@@ -36,9 +36,9 @@ namespace WebTty.Infrastructure.Connection
             if (httpContext.WebSockets.IsWebSocketRequest)
             {
                 var guid = Guid.NewGuid();
-                var context = (TtyConnectionContext)_connections.GetOrCreate(guid.ToString());
+                var context = _connections.GetOrCreate(guid.ToString());
                 var socket = new WebSocketsTransport();
-                var dispatcher = new DefaultMessageDispatcher(handler);
+                var dispatcher = new Dispatcher(handler);
 
                 using (var source = new CancellationTokenSource())
                 {

@@ -1,20 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization;
-using WebTty.Infrastructure.Protocol;
 
-namespace WebTty.Application.Common
+namespace WebTty.Infrastructure.Core
 {
-    public class MessageResolver : IMessageResolver
+    internal class MessageResolver : IMessageResolver
     {
         private readonly Dictionary<string, Type> _names = new Dictionary<string, Type>();
         private readonly Dictionary<Type, string> _types;
 
-        public MessageResolver()
+        public MessageResolver(MessagingOptions options)
         {
-            var assembly = Assembly.GetExecutingAssembly();
+            var assembly = options.MessageSource;
 
             var types =
                 from t in assembly.GetTypes()
@@ -29,7 +27,7 @@ namespace WebTty.Application.Common
                 _names.Add(type.Name, type);
             }
 
-            _types = _names.ToDictionary(x => x.Value, x=> x.Key);
+            _types = _names.ToDictionary(x => x.Value, x => x.Key);
         }
 
         public IReadOnlyCollection<Type> GetMessages() =>

@@ -18,7 +18,6 @@ namespace WebTty
 
         public void ConfigureServices(IServiceCollection services)
         {
-            Configuration["Logging.LogLevel.Default"] = "Error";
             services.AddPty();
             services.AddWebClient(config =>
             {
