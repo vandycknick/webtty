@@ -8,6 +8,8 @@ using WebTty.Application.Events;
 using WebTty.Application.Requests;
 using WebTty.Infrastructure.Connection;
 using WebTty.Infrastructure;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace WebTty.Application
 {
@@ -38,13 +40,7 @@ namespace WebTty.Application
                     return Unit.Value;
 
                 case OpenOutputRequest request:
-                    _ = Task.Factory.StartNew(
-                        function: () => OpenOutputRequestHandler(request, context.WriteMessageAsync, _tokenSource.Token).ConfigureAwait(false),
-                        cancellationToken: _tokenSource.Token,
-                        creationOptions: TaskCreationOptions.LongRunning,
-                        scheduler: TaskScheduler.Default
-                    );
-                    return Unit.Value;
+                    return ConsumeOutput(request, token);
 
                 default:
                     return new UnknownMessageEvent(nameof(message));
@@ -80,7 +76,10 @@ namespace WebTty.Application
             );
         }
 
-        public async Task OpenOutputRequestHandler(OpenOutputRequest request, Func<object, Task> writeMessageAsync, CancellationToken token)
+        public async IAsyncEnumerable<object> ConsumeOutput(
+            OpenOutputRequest request,
+            [EnumeratorCancellation]
+            CancellationToken token)
         {
             var terminalId = request.TabId;
             if (_engine.TryGetTerminalProc(terminalId, out var process))
@@ -92,6 +91,7 @@ namespace WebTty.Application
 
                 while (!process.Stdout.EndOfStream && !token.IsCancellationRequested)
                 {
+                    OutputEvent stdOut;
                     try
                     {
                         var read = await process.Stdout.ReadAsync(buffer.AsMemory(), token);
@@ -100,18 +100,19 @@ namespace WebTty.Application
 
                         var bytesWritten = Encoding.UTF8.GetBytes(buffer.AsSpan(0, read), byteBuffer);
                         var byteSegment = new ArraySegment<byte>(byteBuffer, 0, bytesWritten);
-                        var stdOut = new OutputEvent(
+                        stdOut = new OutputEvent(
                             tabId: terminalId,
                             data: byteSegment
                         );
 
-                        await writeMessageAsync(stdOut);
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex);
                         break;
                     }
+
+                    yield return stdOut;
                 }
             }
         }
