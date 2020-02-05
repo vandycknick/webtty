@@ -8,14 +8,9 @@ namespace WebTty.Infrastructure.Protocol
     public class JsonProtocol : IMessageReader, IMessageWriter
     {
         private readonly IMessageResolver _messageResolver;
-        private readonly JsonWriterOptions _options;
         public JsonProtocol(IMessageResolver messageResolver)
         {
             _messageResolver = messageResolver;
-            _options = new JsonWriterOptions
-            {
-
-            };
         }
 
         public bool TryReadMessage(ref ReadOnlySequence<byte> input, out object message)
@@ -55,8 +50,9 @@ namespace WebTty.Infrastructure.Protocol
         {
             if (_messageResolver.TryGetMessageId(message.GetType(), out var id))
             {
+                var options = new JsonWriterOptions();
                 var memory = MemoryBufferWriter.Get();
-                using var writer = new Utf8JsonWriter((IBufferWriter<byte>)memory, _options);
+                using var writer = new Utf8JsonWriter((IBufferWriter<byte>)memory, options);
 
                 writer.WriteStartObject();
                 writer.WritePropertyName("$type");

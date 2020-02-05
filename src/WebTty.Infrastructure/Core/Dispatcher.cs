@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using WebTty.Infrastructure.Connection;
@@ -18,7 +19,32 @@ namespace WebTty.Infrastructure.Core
             {
                 var reply = await _handler.Handle(message, context, context.Token);
 
-                if (reply != null) await context.WriteMessageAsync(reply);
+                if (reply == null) continue;
+
+                if (ReflectionHelpers.IsIAsyncEnumerable(reply.GetType()))
+                {
+                    _ = Task.Factory.StartNew(
+                        function: () => ConsumeEnumerable((IAsyncEnumerable<object>)reply, context, token).ConfigureAwait(false),
+                        cancellationToken: context.Token,
+                        creationOptions: TaskCreationOptions.LongRunning,
+                        scheduler: TaskScheduler.Default
+                    );
+                }
+                else
+                {
+                    await context.WriteMessageAsync(reply);
+                }
+            }
+        }
+
+        private async Task ConsumeEnumerable(IAsyncEnumerable<object> messages, ConnectionContext context, CancellationToken token)
+        {
+            await foreach (var message in messages.WithCancellation(token))
+            {
+                if (message != null)
+                {
+                    await context.WriteMessageAsync(message);
+                }
             }
         }
     }
