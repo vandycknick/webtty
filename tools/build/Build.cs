@@ -96,7 +96,7 @@ class Build : NukeBuild
             DeleteDirectory(BuildOutputDirectory / "obj");
             DeleteDirectory(BuildOutputDirectory / "tools");
             DeleteDirectory(ArtifactsDirectory);
-            DeleteDirectory(Solution.GetProject(UI_PROJECT).Directory / "Client"/ "node_modules");
+            DeleteDirectory(Solution.GetProject(UI_PROJECT).Directory / "Client" / "node_modules");
         });
 
     Target Check => _ => _
@@ -105,31 +105,42 @@ class Build : NukeBuild
         .Triggers(CheckTypes);
 
     Target Lint => _ => _
-        .Executes(() => {
+        .Executes(() =>
+        {
             Yarn($"run lint", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
         });
 
     Target CheckTypes => _ => _
-        .Executes(() => {
+        .Executes(() =>
+        {
             Yarn($"tsc --noEmit", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
         });
 
-    Target TestJS => _ => _
+    Target TestClient => _ => _
         .Executes(() =>
         {
-            Yarn("test", workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
+            Yarn(
+                $"test --coverage --coverageDirectory {TempDirectory / "webtty.ui/client"}",
+                workingDirectory: Solution.GetProject(UI_PROJECT).Directory / "Client");
         });
 
     Target Test => _ => _
         .Executes(() =>
         {
             DotNetTest(s => s
-                .SetConfiguration("Release")
                 .SetProjectFile(Solution.GetProject("WebTty.Test"))
-                // .When(!IsLocalBuild, w => w.SetNoBuild(true))
+                .SetConfiguration("Release")
                 .SetProperty("CollectCoverage", true)
                 .SetProperty("CoverletOutputFormat", "lcov")
-                .SetProperty("CoverletOutput", TempDirectory / "server/lcov.info")
+                .SetProperty("CoverletOutput", TempDirectory / "webtty.test/lcov.info")
+            );
+
+            DotNetTest(s => s
+                .SetProjectFile(Solution.GetProject("WebTty.Integration.Test"))
+                .SetConfiguration("Release")
+                .SetProperty("CollectCoverage", true)
+                .SetProperty("CoverletOutputFormat", "lcov")
+                .SetProperty("CoverletOutput", TempDirectory / "webtty.integration.test/lcov.info")
             );
         });
 

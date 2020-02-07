@@ -7,12 +7,9 @@ namespace WebTty.Application.Common
     {
         public static async ValueTask WaitUntilReady(this IProcess proc)
         {
-            if (!proc.IsRunning)
+            while (!proc.IsRunning)
             {
-                while (!proc.IsRunning)
-                {
-                    await Task.Delay(1);
-                }
+                await Task.Delay(1);
             }
         }
     }

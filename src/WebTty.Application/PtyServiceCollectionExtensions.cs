@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using WebTty.Application.Common;
 using WebTty.Infrastructure;
-using WebTty.Infrastructure.Protocol;
 
 namespace WebTty.Application
 {
@@ -10,7 +9,7 @@ namespace WebTty.Application
         public static IServiceCollection AddPty(this IServiceCollection services)
         {
             services.AddMessaging(typeof(PtyMessageHandler));
-            services.AddTransient<TerminalEngine>();
+            services.AddTransient<IEngine, TerminalEngine>();
 
             return services;
         }
