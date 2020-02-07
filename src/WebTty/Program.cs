@@ -26,7 +26,7 @@ namespace WebTty
 
             return Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration(builder => builder.Add(new CommandLineOptionsConfigSource(options)))
-                .ConfigureWebHostDefaults(webBuilder =>
+                .ConfigureWebHost(webBuilder =>
                 {
                     webBuilder
                         .UseStaticWebAssets()

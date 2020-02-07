@@ -8,7 +8,7 @@ using WebTty.Exec;
 
 namespace WebTty.Application.Common
 {
-    public class TerminalEngine
+    public class TerminalEngine : IEngine
     {
         class TerminalProcess
         {
@@ -51,9 +51,9 @@ namespace WebTty.Application.Common
             return terminal;
         }
 
-        public bool TryGetTerminalProc(Terminal terminal, out IProcess proc) => TryGetTerminalProc(terminal.Id, out proc);
+        public bool TryGetProcess(Terminal terminal, out IProcess proc) => TryGetProcess(terminal.Id, out proc);
 
-        public bool TryGetTerminalProc(string id, out IProcess proc)
+        public bool TryGetProcess(string id, out IProcess proc)
         {
             if (_terminals.TryGetValue(id, out var term))
             {
@@ -74,17 +74,15 @@ namespace WebTty.Application.Common
             }
         }
 
-        public async Task KillAllAsync()
+        public void KillAll()
         {
-            await Task.Delay(0);
-
             foreach (var key in _terminals.Keys)
             {
-                KillAsync(key);
+                Kill(key);
             }
         }
 
-        public void KillAsync(string id)
+        public void Kill(string id)
         {
             if (_terminals.TryRemove(id, out var term))
             {

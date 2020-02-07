@@ -48,7 +48,15 @@ namespace WebTty.Infrastructure.Connection
                     await Task.WhenAny(applicationTask, transportTask);
                 }
 
-                await handler.DisposeAsync();
+                if (handler is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+                else if (handler is IAsyncDisposable asyncDisposable)
+                {
+                    await asyncDisposable.DisposeAsync();
+                }
+
                 _connections.Remove(guid.ToString());
             }
             else

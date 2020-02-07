@@ -13,12 +13,12 @@ using System.Runtime.CompilerServices;
 
 namespace WebTty.Application
 {
-    public class PtyMessageHandler : IMessageHandler
+    public class PtyMessageHandler : IMessageHandler, IDisposable
     {
-        private readonly TerminalEngine _engine;
+        private readonly IEngine _engine;
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
 
-        public PtyMessageHandler(TerminalEngine engine)
+        public PtyMessageHandler(IEngine engine)
         {
             _engine = engine;
         }
@@ -51,7 +51,7 @@ namespace WebTty.Application
         {
             var terminal = _engine.StartNew();
 
-            if (_engine.TryGetTerminalProc(terminal, out var process))
+            if (_engine.TryGetProcess(terminal, out var process))
             {
                 await process.WaitUntilReady();
             }
@@ -61,7 +61,7 @@ namespace WebTty.Application
 
         public void ResizeTabHandler(ResizeTabRequest request)
         {
-            if (_engine.TryGetTerminalProc(request.TabId, out var process))
+            if (_engine.TryGetProcess(request.TabId, out var process))
             {
                 process.SetWindowSize(request.Rows, request.Cols);
             }
@@ -82,7 +82,7 @@ namespace WebTty.Application
             CancellationToken token)
         {
             var terminalId = request.TabId;
-            if (_engine.TryGetTerminalProc(terminalId, out var process))
+            if (_engine.TryGetProcess(terminalId, out var process))
             {
                 const int maxReadSize = 1024;
                 const int maxBufferSize = maxReadSize * sizeof(char);
@@ -117,10 +117,10 @@ namespace WebTty.Application
             }
         }
 
-        public async ValueTask DisposeAsync()
+        public void Dispose()
         {
             _tokenSource.Dispose();
-            await _engine.KillAllAsync();
+            _engine.KillAll();
         }
     }
 }

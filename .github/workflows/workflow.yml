@@ -40,7 +40,7 @@ jobs:
       run: dotnet nuke
 
     - name: Unit Test Client
-      run: yarn --cwd src/WebTty.UI/Client/ test --coverage --coverageDirectory ../../../.tmp/client
+      run: yarn --cwd src/WebTty.UI/Client/ test --coverage --coverageDirectory ../../../.tmp/webtty.ui/client
 
     - name: Unit Test Server
       run: dotnet nuke test
