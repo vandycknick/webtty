@@ -30,7 +30,7 @@ jobs:
       uses: actions/checkout@v1
 
     - name: Package app
-      run: make package-public
+      run: dotnet nuke
 
     - name: Get the version
       id: get_version
