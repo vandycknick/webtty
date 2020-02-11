@@ -6,8 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using NJsonSchema;
 using NJsonSchema.CodeGeneration.TypeScript;
 using NJsonSchema.Generation;
-using WebTty.Application;
-using WebTty.Infrastructure;
+using WebTty.Api;
+using WebTty.Api.Infrastructure;
 
 namespace jsonschema
 {
@@ -15,7 +15,7 @@ namespace jsonschema
     {
         static void Main(string[] args)
         {
-            var root = "src/WebTty.UI/Client/.tmp/messages";
+            var root = "src/WebTty.Hosting/Client/.tmp/messages";
 
             var services = new ServiceCollection();
             services.AddPty();

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="FluentValidation" Version="8.6.1" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+    <PackageReference Include="MessagePack" Version="2.1.90" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsPackaging)' == 'true'">
+    <PackageReference Include="WebTty.Exec" Version="0.1.0-build.*" Pack="true" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsPackaging)' == 'false'">
+    <ProjectReference Include="..\WebTty.Exec\WebTty.Exec.csproj" />
+  </ItemGroup>
+
+</Project>

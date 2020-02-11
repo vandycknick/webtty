@@ -1,0 +1,35 @@
+﻿using System;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using WebTty.Api.Common;
+using WebTty.Api.Infrastructure;
+
+namespace WebTty.Api
+{
+    public static class WebTtyHostingExtensions
+    {
+        public static IServiceCollection AddPty(this IServiceCollection services)
+        {
+            services.AddMessaging();
+            services.AddTransient<IEngine, TerminalEngine>();
+
+            return services;
+        }
+
+        public static IEndpointConventionBuilder MapPty(this IEndpointRouteBuilder endpoints, string route = "/pty")
+        {
+            if (endpoints == null)
+            {
+                throw new ArgumentNullException(nameof(endpoints));
+            }
+
+            if (route == null)
+            {
+                throw new ArgumentNullException(nameof(route));
+            }
+
+            return endpoints.MapMessageHandler<PtyMessageHandler>(route);
+        }
+    }
+}
