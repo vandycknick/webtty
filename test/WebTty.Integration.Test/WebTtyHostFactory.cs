@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,35 +8,40 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
-using WebTty.Application.Common;
+using WebTty.Api.Common;
+using WebTty.Hosting;
 using Xunit;
 
 namespace WebTty.Integration.Test
 {
     public class WebTtyHostFactory : IAsyncLifetime
     {
-        private readonly IHostBuilder hostBuilder;
-        private IHost host;
+        private readonly IHostBuilder _hostBuilder;
+        private IHost _host;
         public TestServer Server;
         public Mock<IEngine> MockEngine;
+
+        public IHostBuilder ConfigureTestHostBuilder(CommandLineOptions options)
+        {
+            var configSource = new CommandLineOptionsConfigSource(options);
+            return WebTtyHost.CreateEmptyBuilder()
+                 .ConfigureAppConfiguration(builder => builder.Add(configSource))
+                 .ConfigureWebHost(webHost =>
+                 {
+                     webHost.UseTestServer();
+                     webHost.ConfigureTestServices(services =>
+                     {
+                         services.AddSingleton(MockEngine.Object);
+                     });
+                 });
+        }
 
         public WebTtyHostFactory()
         {
             MockEngine = new Mock<IEngine>();
 
             var options = CommandLineOptions.Build(new string[] { });
-            var configSource = new CommandLineOptionsConfigSource(options);
-            hostBuilder = new HostBuilder()
-                .ConfigureAppConfiguration(builder => builder.Add(configSource))
-                .ConfigureWebHost(webHost =>
-                {
-                    webHost.UseStartup<Startup>();
-                    webHost.UseTestServer();
-                    webHost.ConfigureTestServices(services =>
-                    {
-                        services.AddSingleton(MockEngine.Object);
-                    });
-                });
+            _hostBuilder = ConfigureTestHostBuilder(options);
         }
 
         public async Task<WebSocket> OpenWebSocket(string path)
@@ -46,18 +52,20 @@ namespace WebTty.Integration.Test
             return socket;
         }
 
+        public HttpClient GetTestClient() => _host.GetTestClient();
+
         public T GetRequiredService<T>() => Server.Services.GetRequiredService<T>();
 
         public async Task InitializeAsync()
         {
-            host = await hostBuilder.StartAsync();
-            Server = host.GetTestServer();
+            _host = await _hostBuilder.StartAsync();
+            Server = _host.GetTestServer();
         }
 
         public async Task DisposeAsync()
         {
-            await host?.StopAsync();
-            host?.Dispose();
+            await _host?.StopAsync();
+            _host?.Dispose();
             Server?.Dispose();
         }
     }

@@ -23,6 +23,11 @@
 
     <GenerateFullPaths Condition="'$(VSCODE_CWD)' != ''">true</GenerateFullPaths>
 
+    <IsPackaging>false</IsPackaging>
+    <RestoreSources Condition="'$(IsPackaging)' == 'true'">
+      $(RestoreSources);../../artifacts;https://api.nuget.org/v3/index.json
+    </RestoreSources>
+
     <MinVerAutoIncrement>minor</MinVerAutoIncrement>
     <MinVerTagPrefix>v</MinVerTagPrefix>
   </PropertyGroup>

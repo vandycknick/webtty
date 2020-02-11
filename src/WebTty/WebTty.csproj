@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,10 +9,6 @@
 
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <IsPackaging>false</IsPackaging>
-    <RestoreSources Condition="'$(IsPackaging)' == 'true'">
-      $(RestoreSources);../../artifacts;https://api.nuget.org/v3/index.json
-    </RestoreSources>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,9 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebTty.Application\WebTty.Application.csproj" />
-    <ProjectReference Include="..\WebTty.Infrastructure\WebTty.Infrastructure.csproj" />
-    <ProjectReference Include="..\WebTty.UI\WebTty.UI.csproj" />
+    <ProjectReference Include="..\WebTty.Hosting\WebTty.Hosting.csproj" />
   </ItemGroup>
 
   <ItemGroup>

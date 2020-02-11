@@ -17,12 +17,11 @@ COPY Directory.Build.props .
 # COPY src
 COPY src/WebTty/*.csproj src/WebTty/
 COPY src/WebTty.Exec/*.csproj src/WebTty.Exec/
-COPY src/WebTty.Application/*.csproj src/WebTty.Application/
-COPY src/WebTty.Infrastructure/*.csproj src/WebTty.Infrastructure/
+COPY src/WebTty.Api/*.csproj src/WebTty.Api/
 
-COPY src/WebTty.UI/Client/package.json src/WebTty.UI/Client
-COPY src/WebTty.UI/Client/yarn.lock src/WebTty.UI/Client
-COPY src/WebTty.UI/*.csproj src/WebTty.UI/
+COPY src/WebTty.Hosting/Client/package.json src/WebTty.Hosting/Client
+COPY src/WebTty.Hosting/Client/yarn.lock src/WebTty.Hosting/Client
+COPY src/WebTty.Hosting/*.csproj src/WebTty.Hosting/
 
 # COPY test
 COPY test/WebTty.Test/*.csproj test/WebTty.Test/

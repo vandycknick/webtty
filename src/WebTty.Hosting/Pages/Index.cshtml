@@ -1,0 +1,17 @@
+﻿@page
+@model WebTty.Hosting.Pages.IndexModel
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>WebTty</title>
+</head>
+<body>
+    <script id="config" type="text/json">@Html.Raw(Model.Config)</script>
+    <script defer src="@Model.ScriptPath"></script>
+</body>
+</html>
+

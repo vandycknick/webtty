@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using WebTty.Infrastructure.Protocol;
+using WebTty.Api.Infrastructure.Protocol;
 
 namespace WebTty.Integration.Test.Helpers
 {
