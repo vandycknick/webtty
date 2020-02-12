@@ -93,11 +93,11 @@ namespace WebTty.Integration.Test
                 .Callback(() => reset.Set());
 
             // When
-            using var cts = new CancellationTokenSource(timeOut);
             var request = new ResizeTabRequest(terminal.Id, 100, 300);
 
+            using var cts = new CancellationTokenSource(timeOut);
             await socket.SendBinaryMessageAsync(writer, request, cts.Token);
-            reset.WaitOne(TimeSpan.FromSeconds(1));
+            reset.WaitOne(TimeSpan.FromSeconds(5));
 
             // Then
             mockProcess.Verify(
