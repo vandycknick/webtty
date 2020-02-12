@@ -82,6 +82,7 @@ namespace WebTty.Integration.Test
                 Id = Guid.NewGuid().ToString(),
                 Command = "bash",
             };
+            var request = new ResizeTabRequest(terminal.Id, 100, 300);
 
             var mockProcess = new Mock<IProcess>();
             var process = mockProcess.Object;
@@ -89,17 +90,23 @@ namespace WebTty.Integration.Test
             var reset = new AutoResetEvent(false);
             mockEngine
                 .Setup(engine => engine.TryGetProcess(terminal.Id, out process))
-                .Returns(true)
-                .Callback(() => reset.Set());
+                .Returns(true);
+
+            mockProcess
+                .Setup(process => process.SetWindowSize(request.Rows, request.Cols))
+                .Callback(() =>
+                {
+                    Console.WriteLine("-- SetWindowSize Called (TODO: remove this log when tests are stable again)");
+                    reset.Set();
+                });
 
             // When
-            var request = new ResizeTabRequest(terminal.Id, 100, 300);
-
             using var cts = new CancellationTokenSource(timeOut);
             await socket.SendBinaryMessageAsync(writer, request, cts.Token);
             reset.WaitOne(TimeSpan.FromSeconds(5));
 
             // Then
+            Console.WriteLine("-- Going to verify. (TODO: remove this log)");
             mockProcess.Verify(
                 process => process.SetWindowSize(request.Rows, request.Cols),
                 Times.Once()
