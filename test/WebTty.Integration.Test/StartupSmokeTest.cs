@@ -11,6 +11,7 @@ using System.Threading;
 using System.Net;
 using System.Net.WebSockets;
 using WebTty.Hosting;
+using Serilog;
 
 namespace WebTty.Integration.Test
 {
@@ -24,7 +25,7 @@ namespace WebTty.Integration.Test
 
             var options = CommandLineOptions.Build(new string[] { });
             var configSource = new CommandLineOptionsConfigSource(options);
-            var builder = WebTtyHost.CreateEmptyBuilder()
+            var builder = WebTtyHost.CreateHostBuilder()
                  .ConfigureAppConfiguration(builder => builder.Add(configSource))
                  .ConfigureWebHost(webHost =>
                  {
@@ -33,7 +34,8 @@ namespace WebTty.Integration.Test
                      {
                          services.AddSingleton(mockEngine.Object);
                      });
-                 });
+                 })
+                 .UseSerilog();
 
             var host = await builder.StartAsync();
             var server = host.GetTestServer();

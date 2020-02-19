@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,6 +18,12 @@ namespace WebTty.Api.Common
         }
 
         private readonly ConcurrentDictionary<string, TerminalProcess> _terminals = new ConcurrentDictionary<string, TerminalProcess>();
+        private readonly ILogger<TerminalEngine> _logger;
+
+        public TerminalEngine(ILogger<TerminalEngine> logger)
+        {
+            _logger = logger;
+        }
 
         public Terminal StartNew() => StartNew(Process.GetDefaultShell());
         public Terminal StartNew(string command) => StartNew(command, Array.Empty<string>());
@@ -86,7 +93,7 @@ namespace WebTty.Api.Common
         {
             if (_terminals.TryRemove(id, out var term))
             {
-                Console.WriteLine($"Killing terminal with id {id}");
+                _logger.LogInformation("Killing terminal with id {terminalId}", id);
                 term.Process.Kill();
                 term.Process.Wait();
                 term.Process.Dispose();

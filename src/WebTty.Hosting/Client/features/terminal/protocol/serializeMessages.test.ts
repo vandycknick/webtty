@@ -13,7 +13,7 @@ describe("serializeMessage", () => {
     it.each`
         message
         ${new OpenNewTabRequest()}
-        ${new OpenNewTabReply({ id: "123" })}
+        ${new OpenNewTabReply({ id: "123", parentId: "456" })}
         ${new ResizeTabRequest({ tabId: "1", cols: 1, rows: 1 })}
         ${new SendInputRequest({ tabId: "1", payload: "h" })}
         ${new OpenOutputRequest({ tabId: "123" })}

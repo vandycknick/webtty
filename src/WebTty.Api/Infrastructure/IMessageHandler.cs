@@ -6,6 +6,6 @@ namespace WebTty.Api.Infrastructure
 {
     public interface IMessageHandler
     {
-        ValueTask<object> Handle(object message, ConnectionContext context, CancellationToken token = default);
+        ValueTask<object> Handle(object message, CancellationToken token = default);
     }
 }

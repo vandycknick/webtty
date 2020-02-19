@@ -17,7 +17,7 @@ describe("createMessageWriter", () => {
         const writer = createMessageWriter(connection)
 
         // When
-        const msg = new OpenNewTabReply({ id: "123" })
+        const msg = new OpenNewTabReply({ id: "123", parentId: "456" })
         writer(msg)
 
         // Then

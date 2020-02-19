@@ -9,9 +9,9 @@ import {
     writeStdIn,
 } from "./terminalActions"
 import {
-    OpenNewTabRequest,
     ResizeTabRequest,
     SendInputRequest,
+    OpenNewTabRequest,
 } from "@webtty/messages"
 
 describe("setStatus", () => {
@@ -33,12 +33,12 @@ describe("setStatus", () => {
 describe("openNewTab", () => {
     it("creates a TERMINAL_SEND_MESSAGE action with an OpenNewTabRequest", () => {
         // Given, When
-        const action = openNewTab()
+        const action = openNewTab("123")
 
         // Then
         expect(action).toEqual({
             type: TERMINAL_SEND_MESSAGE,
-            payload: new OpenNewTabRequest(),
+            payload: new OpenNewTabRequest({ id: "123", title: "" }),
         })
     })
 })

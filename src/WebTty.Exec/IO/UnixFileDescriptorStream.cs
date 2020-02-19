@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Microsoft.Win32.SafeHandles;
 using WebTty.Exec.Native;
 using WebTty.Exec.Utils;
 
@@ -74,7 +73,7 @@ namespace WebTty.Exec.IO
                 {
                     Error.ThrowExceptionForLastError();
                 }
-                return (long)pos;
+                return pos;
             }
             set
             {

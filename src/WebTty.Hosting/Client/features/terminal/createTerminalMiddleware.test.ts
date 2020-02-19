@@ -22,7 +22,9 @@ describe("mapMessagesToActions", () => {
     it("returns the correct actions for a OpenNewTabReply message", async () => {
         // Given
         const messageStream = new AsyncQueue<Messages>()
-        messageStream.enqueue(new OpenNewTabReply({ id: "123" }))
+        messageStream.enqueue(
+            new OpenNewTabReply({ id: "123", parentId: "456" }),
+        )
         messageStream.dispose()
 
         // When
@@ -114,7 +116,8 @@ describe("createTerminalMiddleware", () => {
         await Promise.resolve() // await until the stubbed Promise from connection.start is resolved
 
         // Then
-        expect(dispatch).toHaveBeenCalledWith(openNewTab())
+        const message = openNewTab(expect.any(String))
+        expect(dispatch).toHaveBeenNthCalledWith(2, message)
     })
 
     it("starts consuming incoming messages", async () => {

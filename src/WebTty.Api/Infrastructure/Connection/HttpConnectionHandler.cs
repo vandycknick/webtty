@@ -37,7 +37,7 @@ namespace WebTty.Api.Infrastructure.Connection
             {
                 var guid = Guid.NewGuid();
                 var context = _connections.GetOrCreate(guid.ToString());
-                var socket = new WebSocketsTransport();
+                var socket = ActivatorUtilities.CreateInstance<WebSocketsTransport>(httpContext.RequestServices);
                 var dispatcher = new Dispatcher(handler);
 
                 using (var source = new CancellationTokenSource())

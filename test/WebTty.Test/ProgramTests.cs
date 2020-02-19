@@ -6,15 +6,18 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
+using Serilog;
 using Xunit;
 
 namespace WebTty.Test
 {
     public class ProgramTests : IDisposable
     {
-        public StringWriter MockedOut { get; set; }
-        public Mock<IHost> MockedHost { get; set; }
-        public IServiceCollection Services { get; set; }
+        private StringWriter MockedOut { get; set; }
+        private Mock<IHost> MockedHost { get; set; }
+        private Mock<ILogger> MockedLogger { get; set; }
+        private IServiceCollection Services { get; set; }
+
 
         public ProgramTests()
         {
@@ -30,6 +33,8 @@ namespace WebTty.Test
 
             MockedHost = new Mock<IHost>();
             MockedHost.SetupGet(h => h.Services).Returns(Services.BuildServiceProvider());
+
+            MockedLogger = new Mock<ILogger>();
         }
 
         public void Dispose()
@@ -44,7 +49,7 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(new string[] { "--help" });
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             await cmd.ExecuteAsync();
 
             var output = MockedOut.GetStringBuilder();
@@ -60,7 +65,7 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(new string[] { "--help" });
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             await cmd.ExecuteAsync();
 
             // Then
@@ -79,7 +84,7 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(new string[] { "--help" });
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             var result = await cmd.ExecuteAsync();
 
             // Then
@@ -93,7 +98,7 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(new string[] { "--version" });
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             var result = await cmd.ExecuteAsync();
 
             // Then
@@ -108,7 +113,7 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(new string[] { "--version" });
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             var result = await cmd.ExecuteAsync();
 
             // Then
@@ -122,7 +127,7 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(new string[] { });
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             var result = await cmd.ExecuteAsync();
 
             // Then
@@ -136,7 +141,7 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(new string[] { "--port" });
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             var result = await cmd.ExecuteAsync();
             var output = MockedOut.GetStringBuilder();
 
@@ -152,7 +157,7 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(new string[] { "--port" });
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             var result = await cmd.ExecuteAsync();
 
             // Then
@@ -169,7 +174,7 @@ namespace WebTty.Test
                 .ThrowsAsync(new Exception("some error"));
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             await cmd.ExecuteAsync();
 
             var output = MockedOut.GetStringBuilder();
@@ -189,7 +194,7 @@ namespace WebTty.Test
                 .ThrowsAsync(new Exception("some error"));
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             var result = await cmd.ExecuteAsync();
 
             //Then
@@ -207,7 +212,7 @@ namespace WebTty.Test
 
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             await cmd.ExecuteAsync();
             var output = MockedOut.GetStringBuilder();
 
@@ -226,7 +231,7 @@ namespace WebTty.Test
                 .ThrowsAsync(new Exception("some error"));
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             var result = await cmd.ExecuteAsync();
 
             // Then
@@ -240,13 +245,16 @@ namespace WebTty.Test
             var options = CommandLineOptions.Build(new string[] { });
 
             // When
-            var cmd = new Program(options, MockedHost.Object);
+            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
             await cmd.ExecuteAsync();
             var output = MockedOut.GetStringBuilder();
 
             // Then
-            Assert.Contains($"Listening on http://{options.Address.ToString()}:{options.Port}", output.ToString());
-            Assert.Contains("Press CTRL+C to exit", output.ToString());
+            MockedLogger.Verify(logger =>
+                logger.Information("Listening on: http://{address}:{port}", options.Address, options.Port));
+
+            MockedLogger.Verify(logger =>
+                logger.Information("Press CTRL+C to exit"));
         }
     }
 }

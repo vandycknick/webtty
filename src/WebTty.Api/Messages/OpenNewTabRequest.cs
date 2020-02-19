@@ -6,10 +6,14 @@ namespace WebTty.Api.Messages
     public struct OpenNewTabRequest
     {
         [DataMember]
+        public readonly string Id;
+
+        [DataMember]
         public readonly string Title;
 
-        public OpenNewTabRequest(string title)
+        public OpenNewTabRequest(string id, string title)
         {
+            Id = id;
             Title = title;
         }
     }
@@ -20,9 +24,13 @@ namespace WebTty.Api.Messages
         [DataMember]
         public readonly string Id;
 
-        public OpenNewTabReply(string id)
+        [DataMember]
+        public readonly string ParentId;
+
+        public OpenNewTabReply(string id, string parentId)
         {
             Id = id;
+            ParentId = parentId;
         }
     }
 }

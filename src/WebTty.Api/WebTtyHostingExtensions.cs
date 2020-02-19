@@ -13,6 +13,7 @@ namespace WebTty.Api
         {
             services.AddMessaging();
             services.AddTransient<IEngine, TerminalEngine>();
+            services.AddSingleton(typeof(ILoggerAdapter<>), typeof(LoggerAdapter<>));
 
             return services;
         }

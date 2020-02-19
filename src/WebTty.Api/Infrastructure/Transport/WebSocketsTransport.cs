@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO.Pipelines;
 using System.Net.WebSockets;
@@ -10,20 +11,25 @@ namespace WebTty.Api.Infrastructure.Transport
 {
     internal class WebSocketsTransport
     {
+        private readonly ILogger<WebSocketsTransport> _logger;
         private volatile bool _aborted;
+
+        public WebSocketsTransport(ILogger<WebSocketsTransport> logger)
+        {
+            _logger = logger;
+        }
 
         public async Task ProcessAsync(HttpContext context, IDuplexPipe application, CancellationToken token)
         {
-            using (var socket = await context.WebSockets.AcceptWebSocketAsync())
+            using var socket = await context.WebSockets.AcceptWebSocketAsync();
+
+            try
             {
-                try
-                {
-                    await ProcessSocketAsync(socket, application, token);
-                }
-                finally
-                {
-                    Console.WriteLine("Socket closed");
-                }
+                await ProcessSocketAsync(socket, application, token);
+            }
+            finally
+            {
+                _logger.LogDebug("Socket closed");
             }
         }
 
@@ -137,19 +143,15 @@ namespace WebTty.Api.Infrastructure.Transport
             catch (WebSocketException ex) when (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
             {
                 // Client has closed the WebSocket connection without completing the close handshake
-                // Log.ClosedPrematurely(_logger, ex);
-                Console.WriteLine(ex);
+                _logger.LogDebug("Client closed connection prematurely", ex);
             }
             catch (OperationCanceledException)
             {
-                // Ignore aborts, don't treat them like transport errors
-                Console.WriteLine("OperationCanceledException");
+                _logger.LogDebug("Receive loop canceled.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Unknown exception:");
-                Console.WriteLine(ex);
-                Console.WriteLine("---");
+                _logger.LogError("Websockets unknown exception", ex);
                 if (!_aborted && !token.IsCancellationRequested)
                 {
                     application.Output.Complete(ex);
@@ -186,7 +188,7 @@ namespace WebTty.Api.Infrastructure.Transport
                         {
                             try
                             {
-                                // Log.SendPayload(_logger, buffer.Length);
+                                _logger.LogDebug("Received message from application. Payload size: {Count}.", buffer.Length);
                                 if (socket.IsOpen())
                                 {
                                     await socket.SendAsync(buffer, WebSocketMessageType.Binary);
@@ -200,8 +202,7 @@ namespace WebTty.Api.Infrastructure.Transport
                             {
                                 if (!_aborted)
                                 {
-                                    Console.WriteLine(ex);
-                                    // Log.ErrorWritingFrame(_logger, ex);
+                                    _logger.LogError("Error writing frame", ex);
                                 }
                                 break;
                             }
@@ -233,12 +234,12 @@ namespace WebTty.Api.Infrastructure.Transport
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
-                        // Log.ClosingWebSocketFailed(_logger, ex);
+                        _logger.LogDebug("Closing webSocket failed.", ex);
                     }
                 }
 
                 application.Input.Complete();
+                _logger.LogDebug("Sending stopped");
             }
         }
     }

@@ -136,6 +136,14 @@ class Build : NukeBuild
             );
 
             DotNetTest(s => s
+                .SetProjectFile(Solution.GetProject("WebTty.Api.Test"))
+                .SetConfiguration("Release")
+                .SetProperty("CollectCoverage", true)
+                .SetProperty("CoverletOutputFormat", "lcov")
+                .SetProperty("CoverletOutput", TempDirectory / "webtty.api.test/lcov.info")
+            );
+
+            DotNetTest(s => s
                 .SetProjectFile(Solution.GetProject("WebTty.Integration.Test"))
                 .SetConfiguration("Release")
                 .SetProperty("CollectCoverage", true)
@@ -212,7 +220,8 @@ class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .SetRuntime("osx-x64")
                 .SetOutput(ArtifactsDirectory / "osx")
-                .SetProperty("PublishTrimmed", true));
+                .SetProperty("PublishTrimmed", true)
+                .SetProperty("PublishSingleFile", true));
         });
 
     Target PackageNative => _ => _

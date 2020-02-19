@@ -5,6 +5,7 @@ import {
     SendInputRequest,
     OpenOutputRequest,
 } from "@webtty/messages"
+import uuidv4 from "uuid/v4"
 
 const TERMINAL_SET_STATUS = "@webtty/TERMINAL_SET_STATUS"
 const TERMINAL_SEND_MESSAGE = "@webtty/TERMINAL_SEND_MESSAGE"
@@ -46,8 +47,8 @@ const sendMessage = (
     payload: message,
 })
 
-const openNewTab = (): SendMessageAction => {
-    const tab = new OpenNewTabRequest()
+const openNewTab = (id: string = uuidv4()): SendMessageAction => {
+    const tab = new OpenNewTabRequest({ id, title: "" })
     return sendMessage(tab)
 }
 

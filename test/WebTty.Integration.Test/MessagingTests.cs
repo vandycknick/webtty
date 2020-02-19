@@ -52,15 +52,19 @@ namespace WebTty.Integration.Test
 
             mockEngine
                 .Setup(engine => engine.StartNew()).Returns(terminal);
+
+            var mockProcess = new Mock<IProcess>();
+            var process = mockProcess.Object;
+
+            mockProcess.SetupGet(p => p.IsRunning).Returns(true);
+
             mockEngine
-                .Setup(engine => engine.StartNew(It.IsAny<string>())).Returns(terminal);
-            mockEngine
-                .Setup(engine => engine.StartNew(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>()))
-                .Returns(terminal);
+                .Setup(engine => engine.TryGetProcess(terminal, out process))
+                .Returns(true);
 
             // When
             using var cts = new CancellationTokenSource(timeOut);
-            var request = new OpenNewTabRequest("title");
+            var request = new OpenNewTabRequest(id: "456", title: "title");
             await socket.SendBinaryMessageAsync(writer, request, cts.Token);
 
             var response = await socket.ReceiveMessageAsync(reader, cts.Token);
@@ -68,6 +72,7 @@ namespace WebTty.Integration.Test
             // Then
             var newTab = Assert.IsType<OpenNewTabReply>(response);
             Assert.Equal(terminal.Id, newTab.Id);
+            Assert.Equal(request.Id, newTab.ParentId);
             mockEngine.Verify(engine => engine.StartNew());
         }
 
@@ -167,16 +172,18 @@ namespace WebTty.Integration.Test
             };
             var streamReader = new StreamReader(memory);
 
+            mockProcess.SetupSequence(proc => proc.IsRunning).Returns(true).Returns(false);
             mockProcess.SetupGet(proc => proc.Stdout).Returns(streamReader);
             mockEngine.Setup(engine => engine.TryGetProcess(terminal.Id, out process)).Returns(true);
 
             // When
+            await streamWriter.WriteLineAsync("hello");
+            memory.Seek(0, SeekOrigin.Begin);
+            streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
+
             using var cts = new CancellationTokenSource(timeOut);
             var request = new OpenOutputRequest(terminal.Id);
             await socket.SendBinaryMessageAsync(writer, request, cts.Token);
-
-            await streamWriter.WriteLineAsync("hello");
-            memory.Seek(0, SeekOrigin.Begin);
 
             var response = await socket.ReceiveMessageAsync(reader, cts.Token);
 

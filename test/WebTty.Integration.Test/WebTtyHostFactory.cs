@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
+using Serilog;
 using WebTty.Api.Common;
 using WebTty.Hosting;
 using Xunit;
@@ -24,7 +25,7 @@ namespace WebTty.Integration.Test
         public IHostBuilder ConfigureTestHostBuilder(CommandLineOptions options)
         {
             var configSource = new CommandLineOptionsConfigSource(options);
-            return WebTtyHost.CreateEmptyBuilder()
+            return WebTtyHost.CreateHostBuilder()
                  .ConfigureAppConfiguration(builder => builder.Add(configSource))
                  .ConfigureWebHost(webHost =>
                  {
@@ -33,7 +34,8 @@ namespace WebTty.Integration.Test
                      {
                          services.AddSingleton(MockEngine.Object);
                      });
-                 });
+                 })
+                 .UseSerilog();
         }
 
         public WebTtyHostFactory()

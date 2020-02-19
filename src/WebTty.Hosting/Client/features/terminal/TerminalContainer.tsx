@@ -24,8 +24,11 @@ const TerminalContainer: FunctionComponent<TerminalContainerProps> = () => {
     )
 
     const onResize = useCallback(
-        ({ cols, rows }: { cols: number; rows: number }) =>
-            dispatch(resizeTab(selectedTab, cols, rows)),
+        ({ cols, rows }: { cols: number; rows: number }) => {
+            if (selectedTab !== "") {
+                dispatch(resizeTab(selectedTab, cols, rows))
+            }
+        },
         [selectedTab, dispatch],
     )
     const onResizeDebounced = useDebounce(onResize, 300)

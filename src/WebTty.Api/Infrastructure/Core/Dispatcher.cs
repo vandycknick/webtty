@@ -17,7 +17,7 @@ namespace WebTty.Api.Infrastructure.Core
         {
             await foreach (var message in context.ReadMessages().WithCancellation(token))
             {
-                var reply = await _handler.Handle(message, context, context.Token);
+                var reply = await _handler.Handle(message, context.Token);
 
                 if (reply == null) continue;
 

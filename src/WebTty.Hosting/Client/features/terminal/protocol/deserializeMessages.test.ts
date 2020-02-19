@@ -5,77 +5,32 @@ import deserializeMessages from "./deserializeMessages"
 import { UnknownMessage } from "./types"
 
 describe("deserializeMessages", () => {
+    function hexStringToByte(input: string): Uint8Array {
+        if (!input) {
+            return new Uint8Array()
+        }
+
+        const a = []
+        for (let i = 0, len = input.length; i < len; i += 2) {
+            a.push(parseInt(input.substr(i, 2), 16))
+        }
+
+        return new Uint8Array(a)
+    }
+
     it("deserializes multiple varint encoded messages", () => {
         // Given
-        // OpenNewTabReply { id: "123" }
-        const newTabReply = new Uint8Array([
-            25,
-            146,
-            175,
-            79,
-            112,
-            101,
-            110,
-            78,
-            101,
-            119,
-            84,
-            97,
-            98,
-            82,
-            101,
-            112,
-            108,
-            121,
-            129,
-            162,
-            73,
-            100,
-            163,
-            49,
-            50,
-            51,
-        ])
+        // OpenNewTabReply { id: "7042d4d6-2530-4b4a-a16a-678ace6300c5", parentId: "59014e12-1597-41ea-b29a-8874fe7eb4cf" }
+        const openNewTabReplyHex =
+            "6a92af4f70656e4e65775461625265706c7982a24964d92437303432643464362d323533302d346234612d613136612d363738616365363330306335a8506172656e744964d92435393031346531322d313539372d343165612d623239612d383837346665376562346366"
+        const newTabReply = hexStringToByte(openNewTabReplyHex)
 
-        // StdOutMessage { tabId: "123", data: "Hello" }
-        const stdout = new Uint8Array([
-            35,
-            146,
-            171,
-            79,
-            117,
-            116,
-            112,
-            117,
-            116,
-            69,
-            118,
-            101,
-            110,
-            116,
-            130,
-            165,
-            84,
-            97,
-            98,
-            73,
-            100,
-            163,
-            49,
-            50,
-            51,
-            164,
-            68,
-            97,
-            116,
-            97,
-            149,
-            72,
-            101,
-            108,
-            108,
-            111,
-        ])
+        // StdOutMessage { tabId: "7042d4d6-2530-4b4a-a16a-678ace6300c5", data: "" }
+        // StdOutMessage { tabId: "7042d4d6-2530-4b4a-a16a-678ace6300c5", data: "Hello\n" }
+        const stdoutHex =
+            "4392ab4f75747075744576656e7482a55461624964d92437303432643464362d323533302d346234612d613136612d363738616365363330306335a444617461c4020d0a4892ab4f75747075744576656e7482a55461624964d92437303432643464362d323533302d346234612d613136612d363738616365363330306335a444617461c40768656c6c6f0d0a"
+        const stdout = hexStringToByte(stdoutHex)
+
         const view = new Uint8Array(newTabReply.byteLength + stdout.byteLength)
         view.set(newTabReply, 0)
         view.set(stdout, newTabReply.byteLength)
@@ -86,14 +41,20 @@ describe("deserializeMessages", () => {
         // Then
         const first = iterator.next()
         const second = iterator.next()
+        const third = iterator.next()
         const end = iterator.next()
 
-        expect(first.value).toEqual(new OpenNewTabReply({ id: "123" }))
+        expect(first.value).toEqual(
+            new OpenNewTabReply({
+                id: "7042d4d6-2530-4b4a-a16a-678ace6300c5",
+                parentId: "59014e12-1597-41ea-b29a-8874fe7eb4cf",
+            }),
+        )
 
-        expect(second.value.tabId).toBe("123")
+        expect(second.value.tabId).toBe("7042d4d6-2530-4b4a-a16a-678ace6300c5")
         const decoder = new TextDecoder()
-        expect(decoder.decode(new Uint8Array(second.value.data))).toEqual(
-            "Hello",
+        expect(decoder.decode(new Uint8Array(third.value.data))).toContain(
+            "hello",
         )
 
         expect(end).toEqual({

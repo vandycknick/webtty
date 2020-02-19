@@ -2,7 +2,7 @@
 
 exports[`serializeMessage serializes a message into an array buffer 1`] = `
 Uint8Array [
-  27,
+  31,
   146,
   177,
   79,
@@ -22,7 +22,11 @@ Uint8Array [
   101,
   115,
   116,
-  129,
+  130,
+  162,
+  73,
+  100,
+  192,
   165,
   84,
   105,
@@ -35,7 +39,7 @@ Uint8Array [
 
 exports[`serializeMessage serializes a message into an array buffer 2`] = `
 Uint8Array [
-  25,
+  38,
   146,
   175,
   79,
@@ -53,7 +57,7 @@ Uint8Array [
   112,
   108,
   121,
-  129,
+  130,
   162,
   73,
   100,
@@ -61,6 +65,19 @@ Uint8Array [
   49,
   50,
   51,
+  168,
+  80,
+  97,
+  114,
+  101,
+  110,
+  116,
+  73,
+  100,
+  163,
+  52,
+  53,
+  54,
 ]
 `;
 
