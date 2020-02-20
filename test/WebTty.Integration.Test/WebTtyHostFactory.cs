@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,11 +21,9 @@ namespace WebTty.Integration.Test
         public TestServer Server;
         public Mock<IEngine> MockEngine;
 
-        public IHostBuilder ConfigureTestHostBuilder(CommandLineOptions options)
+        public IHostBuilder ConfigureTestHostBuilder()
         {
-            var configSource = new CommandLineOptionsConfigSource(options);
             return WebTtyHost.CreateHostBuilder()
-                 .ConfigureAppConfiguration(builder => builder.Add(configSource))
                  .ConfigureWebHost(webHost =>
                  {
                      webHost.UseTestServer();
@@ -34,16 +31,13 @@ namespace WebTty.Integration.Test
                      {
                          services.AddSingleton(MockEngine.Object);
                      });
-                 })
-                 .UseSerilog();
+                 });
         }
 
         public WebTtyHostFactory()
         {
             MockEngine = new Mock<IEngine>();
-
-            var options = CommandLineOptions.Build(new string[] { });
-            _hostBuilder = ConfigureTestHostBuilder(options);
+            _hostBuilder = ConfigureTestHostBuilder();
         }
 
         public async Task<WebSocket> OpenWebSocket(string path)

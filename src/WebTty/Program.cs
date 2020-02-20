@@ -1,9 +1,12 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using System;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using WebTty.Hosting;
@@ -12,130 +15,135 @@ namespace WebTty
 {
     public class Program
     {
-        private static IHostBuilder CreateHostBuilder(CommandLineOptions options)
+        public static Task<int> Main(string[] args)
         {
-            return WebTtyHost.CreateHostBuilder()
-                .ConfigureAppConfiguration(builder => builder.Add(new CommandLineOptionsConfigSource(options)))
-                .ConfigureWebHostDefaults(webBuilder =>
+            var command = RootCommand();
+
+            command.TreatUnmatchedTokensAsErrors = false;
+            command.Handler = CommandHandler.Create<WebTtyHostOptions, ParseResult, CancellationToken>((options, parseResult, token) =>
+            {
+                options.Command = parseResult.UnparsedTokens.FirstOrDefault();
+                options.Args = parseResult.UnparsedTokens.Skip(1).ToList();
+
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Information()
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                    .MinimumLevel.Override("WebTty.Program", LogEventLevel.Information)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .CreateLogger();
+
+                return new Program(
+                    hostBuilder: WebTtyHost.CreateHostBuilder(options),
+                    options: options,
+                    logger: Log.Logger
+                ).RunAsync(token);
+
+            });
+            return command.InvokeAsync(args);
+        }
+
+        public static Command RootCommand() =>
+            new RootCommand("🔌 Simple command-line tool for sharing a terminal over the web.")
+            {
+               new Option(
+                    new string[] { "-a", "--address" },
+                    "IP address to use [localhost]. Use any to listen to any available address. Ex (0.0.0.0, any, 192.168.2.3, ...).")
                 {
-                    webBuilder
-                        .UseStaticWebAssets()
-                        .PreferHostingUrls(false)
-                        .SuppressStatusMessages(true)
-                        .UseKestrel(kestrel =>
-                        {
-                            kestrel.Listen(options.Address, options.Port);
+                    Argument = new Argument<IPAddress>(ArgumentExtensions.TryConvertIPAddress, () => IPAddress.Loopback)
+                    {
+                        Name = "address",
+                        Arity = ArgumentArity.ZeroOrOne,
+                    },
+                    Required = false,
+                },
+                new Option(
+                    new string[] { "-s", "--unix-socket" },
+                    "Use the given Unix domain socket path for the server to listen to"
+                )
+                {
+                    Argument = new Argument<string>(() => string.Empty)
+                    {
+                        Name = "filepath",
+                        Arity = ArgumentArity.ZeroOrOne
+                    },
+                    Required = false,
+                },
+                new Option(
+                    new string[] { "-p", "--port" },
+                    "Port to use [5000]. Use 0 for a dynamic port."
+                )
+                {
+                    Argument = new Argument<int>(() => 5000)
+                    {
+                        Name = "port",
+                    }.Between(0, 65535),
+                    Required = false,
+                },
+                new Option(
+                    new string[] { "--path" },
+                    "Path to use, defaults to /pty"
+                )
+                {
+                    Argument = new Argument<string>(() => "/pty")
+                    {
+                        Arity = ArgumentArity.ZeroOrOne,
+                    }.StartsWith('/'),
+                    Required = false,
+                },
+                new Option(
+                    new string[] { "--theme" },
+                    "Theme to use, uses a simple black theme by default"
+                )
+                {
+                    Argument = new Argument<string>(() => "default")
+                    {
+                        Arity = ArgumentArity.ZeroOrOne,
+                    },
+                    Required = false
+                },
+            };
 
-                            if (!string.IsNullOrEmpty(options.UnixSocket))
-                            {
-                                kestrel.ListenUnixSocket(options.UnixSocket);
-                            }
-                        });
-                })
-                .UseSerilog();
-        }
-        public static async Task<int> Main(string[] args)
-        {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("WebTty.Program", LogEventLevel.Information)
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .CreateLogger();
-
-            try
-            {
-                var options = CommandLineOptions.Build(args);
-                using var cts = new CancellationTokenSource();
-                using var host = CreateHostBuilder(options).Build();
-
-                var result = await new Program(options, host, Log.Logger.ForContext<Program>()).ExecuteAsync(cts.Token);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "Host terminated unexpectedly");
-                return 1;
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
-
-        private readonly CommandLineOptions _options;
-        private readonly IHost _host;
+        private readonly IHostBuilder _hostBuilder;
         private readonly ILogger _logger;
+        private readonly WebTtyHostOptions _options;
 
-        public Program(CommandLineOptions options, IHost host, ILogger logger)
+        public Program(IHostBuilder hostBuilder, WebTtyHostOptions options, ILogger logger)
         {
+            _hostBuilder = hostBuilder;
             _options = options;
-            _host = host;
             _logger = logger;
         }
 
-        private void WriteHelp()
-        {
-            Console.WriteLine($"{_options.Name}: {_options.Version}");
-            Console.WriteLine();
-            Console.WriteLine("🔌 WebSocket based terminal emulator");
-            Console.WriteLine();
-            Console.WriteLine($"Usage: {_options.Name} [options] -- [command] [<arguments...>]");
-            Console.WriteLine();
-            Console.WriteLine("Options:");
-            _options.WriteOptions(Console.Out);
-        }
-
-        private void WriteErrorMessage(string message)
-        {
-            Console.WriteLine("Error:");
-            Console.WriteLine(message);
-            Console.WriteLine();
-            Console.WriteLine($"Try '{_options.Name} --help' for more information.");
-        }
-
-        public async Task<int> ExecuteAsync(CancellationToken token = default)
+        public async Task<int> RunAsync(CancellationToken token)
         {
             try
             {
-                if (_options.TryGetInvalidOptions(out var message))
-                {
-                    WriteErrorMessage(message);
-                    return 1;
-                }
+                using var host = _hostBuilder.Build();
 
-                if (_options.ShowHelp)
-                {
-                    WriteHelp();
-                    return 0;
-                }
-
-                if (_options.ShowVersion)
-                {
-                    Console.WriteLine($"{_options.Version}");
-                    return 0;
-                }
-
-                await _host.StartAsync(token);
+                await host.StartAsync(token);
                 _logger.Information("Listening on: http://{address}:{port}", _options.Address, _options.Port);
                 _logger.Information("Press CTRL+C to exit");
 
-                var lifetime = _host.Services.GetRequiredService<IHostApplicationLifetime>();
                 var waitForStop = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-                lifetime.ApplicationStopping.Register(_ => waitForStop.TrySetResult(null), null);
+                token.Register(_ => waitForStop.TrySetResult(null), null);
 
                 await waitForStop.Task;
 
                 _logger.Information("Application is shutting down...");
-                await _host.StopAsync();
+                await host.StopAsync();
 
                 return 0;
             }
             catch (Exception ex)
             {
-                WriteErrorMessage(ex.Message);
+                _logger.Fatal(ex, "Host terminated unexpectedly");
                 return 1;
+            }
+            finally
+            {
+                _logger.Information("Goodbye. 👋");
+                Log.CloseAndFlush();
             }
         }
     }

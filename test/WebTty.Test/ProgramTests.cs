@@ -1,253 +1,39 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using Serilog;
+using WebTty.Hosting;
 using Xunit;
 
 namespace WebTty.Test
 {
-    public class ProgramTests : IDisposable
+    public class ProgramTests
     {
-        private StringWriter MockedOut { get; set; }
+        private Mock<IHostBuilder> MockedHostBuilder { get; set; }
         private Mock<IHost> MockedHost { get; set; }
         private Mock<ILogger> MockedLogger { get; set; }
-        private IServiceCollection Services { get; set; }
 
 
         public ProgramTests()
         {
-            MockedOut = new StringWriter();
-            Console.SetOut(MockedOut);
-
-            Services = new ServiceCollection();
-
-            var lifetime = new Mock<IHostApplicationLifetime>();
-            lifetime.SetupGet(l => l.ApplicationStopping).Returns(new CancellationToken(true));
-
-            Services.AddSingleton(lifetime.Object);
-
+            MockedHostBuilder = new Mock<IHostBuilder>();
             MockedHost = new Mock<IHost>();
-            MockedHost.SetupGet(h => h.Services).Returns(Services.BuildServiceProvider());
+            MockedHostBuilder.Setup(b => b.Build()).Returns(MockedHost.Object);
 
             MockedLogger = new Mock<ILogger>();
         }
 
-        public void Dispose()
-        {
-            MockedOut.Dispose();
-        }
-
         [Fact]
-        public async Task Program_ExecuteAsync_PrintsCorrectHelpMessage()
+        public async Task Program_RunAsync_PrintsAMesssageWhenTheServerIsUpAndRunning()
         {
             // Given
-            var options = CommandLineOptions.Build(new string[] { "--help" });
+            var options = new WebTtyHostOptions();
 
             // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            await cmd.ExecuteAsync();
-
-            var output = MockedOut.GetStringBuilder();
-
-            // Then
-            Assert.Equal($"{options.Name}: {options.Version}", output.ToString().Split(Environment.NewLine).FirstOrDefault());
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_PrintsAllAvailableOptionsInHelpMessage()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { "--help" });
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            await cmd.ExecuteAsync();
-
-            // Then
-            var output = MockedOut.GetStringBuilder();
-            var optionsWriter = new StringWriter();
-            options.WriteOptions(optionsWriter);
-            var optionString = optionsWriter.GetStringBuilder().ToString();
-
-            Assert.Contains(optionString, output.ToString());
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_ReturnsZeroAfterPrintingHelpMessage()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { "--help" });
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            var result = await cmd.ExecuteAsync();
-
-            // Then
-            Assert.Equal(0, result);
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_PrintsTheCurrentVersion()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { "--version" });
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            var result = await cmd.ExecuteAsync();
-
-            // Then
-            var output = MockedOut.GetStringBuilder();
-            Assert.Equal($"{options.Version}\n", output.ToString());
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_ReturnsZeroAfterPrintingTheVersion()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { "--version" });
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            var result = await cmd.ExecuteAsync();
-
-            // Then
-            Assert.Equal(0, result);
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_ReturnsZeroWhenServerExitsGracefully()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { });
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            var result = await cmd.ExecuteAsync();
-
-            // Then
-            Assert.Equal(0, result);
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_WritesAnErrorMessageWhenGivenAnInvalidOption()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { "--port" });
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            var result = await cmd.ExecuteAsync();
-            var output = MockedOut.GetStringBuilder();
-
-            // Then
-            Assert.Contains("Missing required value for option '--port'.", output.ToString());
-            Assert.Contains($"Try '{options.Name} --help' for more information.", output.ToString());
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_ReturnsOneWhenGivenAnInvalidOption()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { "--port" });
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            var result = await cmd.ExecuteAsync();
-
-            // Then
-            Assert.Equal(1, result);
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_WritesAnErrorMessageWhenTheServerThrowsAnExceptionOnStartup()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { });
-            MockedHost
-                .Setup(host => host.StartAsync(CancellationToken.None))
-                .ThrowsAsync(new Exception("some error"));
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            await cmd.ExecuteAsync();
-
-            var output = MockedOut.GetStringBuilder();
-
-            // Then
-            Assert.Contains("some error", output.ToString());
-            Assert.Contains($"Try '{options.Name} --help' for more information.", output.ToString());
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_ReturnsOneWhenTheServerThrowsAnExceptionOnStartup()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { });
-            MockedHost
-                .Setup(host => host.StartAsync(CancellationToken.None))
-                .ThrowsAsync(new Exception("some error"));
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            var result = await cmd.ExecuteAsync();
-
-            //Then
-            Assert.Equal(1, result);
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_WritesAnErrorMessageWhenTheServerThrowsAnExceptionWhileShuttingDown()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { });
-            MockedHost
-                .Setup(host => host.StopAsync(CancellationToken.None))
-                .ThrowsAsync(new Exception("some error"));
-
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            await cmd.ExecuteAsync();
-            var output = MockedOut.GetStringBuilder();
-
-            // Then
-            Assert.Contains("some error", output.ToString());
-            Assert.Contains($"Try '{options.Name} --help' for more information.", output.ToString());
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_ReturnsOneWhenTheServerThrowsAnExceptionWhileShuttingDown()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { });
-            MockedHost
-                .Setup(host => host.StartAsync(CancellationToken.None))
-                .ThrowsAsync(new Exception("some error"));
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            var result = await cmd.ExecuteAsync();
-
-            // Then
-            Assert.Equal(1, result);
-        }
-
-        [Fact]
-        public async Task Program_ExecuteAsync_PrintsAMesssageWhenTheServerIsUpAndRunning()
-        {
-            // Given
-            var options = CommandLineOptions.Build(new string[] { });
-
-            // When
-            var cmd = new Program(options, MockedHost.Object, MockedLogger.Object);
-            await cmd.ExecuteAsync();
-            var output = MockedOut.GetStringBuilder();
+            var program = new Program(MockedHostBuilder.Object, options, MockedLogger.Object);
+            await program.RunAsync(new CancellationToken(true));
 
             // Then
             MockedLogger.Verify(logger =>
@@ -255,6 +41,78 @@ namespace WebTty.Test
 
             MockedLogger.Verify(logger =>
                 logger.Information("Press CTRL+C to exit"));
+        }
+
+        [Fact]
+        public async Task Program_RunAsync_WritesAnErrorMessageWhenTheServerThrowsAnExceptionOnStartup()
+        {
+            // Given
+            var options = new WebTtyHostOptions();
+            MockedHost
+                .Setup(host => host.StartAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new Exception("some error"));
+
+            // When
+            var program = new Program(MockedHostBuilder.Object, options, MockedLogger.Object);
+            var result = await program.RunAsync(new CancellationToken(true));
+
+            // Then
+            MockedLogger.Verify(logger =>
+                logger.Fatal(It.IsAny<Exception>(), "Host terminated unexpectedly"));
+        }
+
+        [Fact]
+        public async Task Program_RunAsync_ReturnsOneWhenTheServerThrowsAnExceptionOnStartup()
+        {
+            // Given
+            var options = new WebTtyHostOptions();
+            MockedHost
+                .Setup(host => host.StartAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new Exception("some error"));
+
+            // When
+            var program = new Program(MockedHostBuilder.Object, options, MockedLogger.Object);
+            var result = await program.RunAsync(new CancellationToken(true));
+
+            // Then
+            Assert.Equal(1, result);
+        }
+
+        [Fact]
+        public async Task Program_RunAsync_WritesAnErrorMessageWhenTheServerThrowsAnExceptionWhileShuttingDown()
+        {
+            // Given
+            var options = new WebTtyHostOptions();
+            MockedHost
+                .Setup(host => host.StopAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new Exception("some error"));
+
+
+            // When
+            var program = new Program(MockedHostBuilder.Object, options, MockedLogger.Object);
+            var result = await program.RunAsync(new CancellationToken(true));
+
+            // Then
+            MockedLogger.Verify(logger =>
+                logger.Fatal(It.IsAny<Exception>(), "Host terminated unexpectedly"),
+                Times.Once());
+        }
+
+        [Fact]
+        public async Task Program_RunAsync_ReturnsOneWhenTheServerThrowsAnExceptionWhileShuttingDown()
+        {
+            // Given
+            var options = new WebTtyHostOptions();
+            MockedHost
+                .Setup(host => host.StopAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new Exception("some error"));
+
+            // When
+            var program = new Program(MockedHostBuilder.Object, options, MockedLogger.Object);
+            var result = await program.RunAsync(new CancellationToken(true));
+
+            // Then
+            Assert.Equal(1, result);
         }
     }
 }

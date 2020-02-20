@@ -11,13 +11,32 @@ namespace WebTty.Hosting
 {
     public static class WebTtyHost
     {
-        public static IHostBuilder CreateHostBuilder()
+        public static IHostBuilder CreateHostBuilder() => CreateHostBuilder(new WebTtyHostOptions());
+
+        public static IHostBuilder CreateHostBuilder(WebTtyHostOptions options)
         {
             return new HostBuilder()
-                .ConfigureWebHost(webhost =>
-                    webhost
+                .ConfigureAppConfiguration(appConfig =>
+                    appConfig.AddInMemoryCollection(options.ToDictionary()))
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .UseStaticWebAssets()
+                        .PreferHostingUrls(false)
+                        .SuppressStatusMessages(true)
                         .ConfigureServices(ConfigureServices)
-                        .Configure(Configure));
+                        .Configure(Configure)
+                        .UseKestrel(kestrel =>
+                        {
+                            kestrel.Listen(options.Address, options.Port);
+
+                            if (!string.IsNullOrEmpty(options.UnixSocket))
+                            {
+                                kestrel.ListenUnixSocket(options.UnixSocket);
+                            }
+                        });
+                })
+                .UseSerilog();
         }
 
         private static void ConfigureServices(WebHostBuilderContext context, IServiceCollection services)
@@ -25,6 +44,7 @@ namespace WebTty.Hosting
             services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStatusMessages = true);
             services.AddOptions<StaticFileOptions>()
                 .Configure(options => options.FileProvider = new ManifestEmbeddedFileProvider(typeof(WebTtyHost).Assembly, "wwwroot"));
+
             services.AddPty();
             services.AddResponseCompression();
             services.AddRazorPages();

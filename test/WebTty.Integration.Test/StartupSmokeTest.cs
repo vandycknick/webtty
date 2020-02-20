@@ -23,10 +23,7 @@ namespace WebTty.Integration.Test
             //Given
             var mockEngine = new Mock<IEngine>();
 
-            var options = CommandLineOptions.Build(new string[] { });
-            var configSource = new CommandLineOptionsConfigSource(options);
             var builder = WebTtyHost.CreateHostBuilder()
-                 .ConfigureAppConfiguration(builder => builder.Add(configSource))
                  .ConfigureWebHost(webHost =>
                  {
                      webHost.UseTestServer();
@@ -34,8 +31,7 @@ namespace WebTty.Integration.Test
                      {
                          services.AddSingleton(mockEngine.Object);
                      });
-                 })
-                 .UseSerilog();
+                 });
 
             var host = await builder.StartAsync();
             var server = host.GetTestServer();
