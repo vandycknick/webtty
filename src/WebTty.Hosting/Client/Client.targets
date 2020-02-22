@@ -1,0 +1,27 @@
+<Project>
+
+  <!-- If yarn.lock has changed, perform an yarn install -->
+  <Target Name="YarnInstall"
+          Inputs="$(MSBuildThisFileDirectory)yarn.lock"
+          Outputs="$(BaseIntermediateOutputPath)yarn.lock">
+    <Message Importance="high" Text="Running yarn install..." />
+    <Exec Command="yarn" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)yarn.lock"
+          DestinationFolder="$(BaseIntermediateOutputPath)" />
+  </Target>
+
+  <!-- If any source file in this dir or below has changed, perform a Webpack build -->
+  <Target Name="TrackWebpackBuildConfig">
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)webpackconfig.txt" Lines="$(Configuration)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+  <Target Name="CleanWwwroot">
+    <RemoveDir Directories="$(MSBuildThisFileDirectory)../wwwroot" />
+  </Target>
+
+  <Target Name="ClientBuild" DependsOnTargets="YarnInstall; TrackWebpackBuildConfig; CleanWwwroot" BeforeTargets="BeforeBuild">
+    <Message Importance="high" Text="Building client..." />
+    <Exec Command="yarn build" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+  </Target>
+
+</Project>

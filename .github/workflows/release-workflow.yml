@@ -34,14 +34,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v1
 
-    - name: Restore Tools
-      run: dotnet tool restore
-
     - name: Install dependencies
-      run: dotnet nuke setup
+      run: make setup
 
-    - name: Package app
-      run: dotnet nuke
+    - name: Lint
+      run: make lint
+
+    - name: Build & Package
+      run: make
 
     - name: Get the version
       id: get_version

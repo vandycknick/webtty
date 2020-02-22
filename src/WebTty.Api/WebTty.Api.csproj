@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsPackaging)' == 'true'">
-    <PackageReference Include="WebTty.Exec" Version="0.1.0-build.*" Pack="true" />
+    <PackageReference Include="WebTty.Exec" Version="1.0.0-build.*" Pack="true" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsPackaging)' == 'false'">

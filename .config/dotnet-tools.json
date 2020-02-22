@@ -2,12 +2,6 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "nuke.globaltool": {
-      "version": "0.24.0",
-      "commands": [
-        "nuke"
-      ]
-    },
     "minver-cli": {
       "version": "2.0.0",
       "commands": [
