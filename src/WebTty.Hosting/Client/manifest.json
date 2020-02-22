@@ -1,0 +1,5 @@
+{
+  "name": "webtty",
+  "start_url": "/",
+  "display": "standalone"
+}

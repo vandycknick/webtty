@@ -1,5 +1,11 @@
 <Project>
 
+  <ItemGroup>
+    <WebpackBuildInputs Include="$(MSBuildThisFileDirectory)**" Exclude="$(MSBuildThisFileDirectory)node_modules\**" />
+    <WebpackBuildInputs Include="$(BaseIntermediateOutputPath)webpackconfig.txt" />
+    <UpToDateCheckInput Include="@(WebpackBuildInputs)" />
+  </ItemGroup>
+
   <!-- If yarn.lock has changed, perform an yarn install -->
   <Target Name="YarnInstall"
           Inputs="$(MSBuildThisFileDirectory)yarn.lock"
@@ -15,13 +21,28 @@
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)webpackconfig.txt" Lines="$(Configuration)" Overwrite="true" WriteOnlyWhenDifferent="true" />
   </Target>
 
-  <Target Name="CleanWwwroot">
+  <Target Name="CleanWwwroot"
+      DependsOnTargets="TrackWebpackBuildConfig"
+      Inputs="@(WebpackBuildInputs)"
+      Outputs="$(MSBuildThisFileDirectory)..\wwwroot\main.js">
     <RemoveDir Directories="$(MSBuildThisFileDirectory)../wwwroot" />
   </Target>
 
-  <Target Name="ClientBuild" DependsOnTargets="YarnInstall; TrackWebpackBuildConfig; CleanWwwroot" BeforeTargets="BeforeBuild">
+  <Target Name="ClientBuild" DependsOnTargets="YarnInstall; TrackWebpackBuildConfig; CleanWwwroot"
+      BeforeTargets="BeforeBuild"
+      Inputs="@(WebpackBuildInputs)"
+      Outputs="$(MSBuildThisFileDirectory)..\wwwroot\main.js">
     <Message Importance="high" Text="Building client..." />
     <Exec Command="yarn build" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)manifest.json"
+          DestinationFolder="$(MSBuildThisFileDirectory)..\wwwroot"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="EmbedWwwroot" AfterTargets="BeforeBuild">
+    <ItemGroup>
+      <EmbeddedResource Include="$(MSBuildThisFileDirectory)..\wwwroot\**" />
+    </ItemGroup>
   </Target>
 
 </Project>

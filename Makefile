@@ -24,8 +24,7 @@ restore:
 	dotnet restore
 	dotnet tool restore
 
-setup: restore
-	dotnet run --project tools/jsonschema/jsonschema.csproj
+setup: restore schema
 	dotnet build -c $(CONFIGURATION)
 
 default:
@@ -89,3 +88,18 @@ test:
 		/property:CollectCoverage=true \
 		/property:CoverletOutputFormat=lcov \
 		/property:CoverletOutput=$(TEMP)/webtty.integration.test/lcov.info
+
+dev:
+	$(MAKE) -j2 dev-server dev-client --ignore-errors
+
+dev-server:
+	yarn --cwd $(WEBTTY_CLIENT) watch
+
+dev-client:
+	dotnet watch -p $(CLI_PROJECT) run
+
+schema:
+	dotnet run -p tools/jsonschema/jsonschema.csproj -- \
+		--assembly $(shell pwd)/.build/bin/WebTty.Api/Debug/netcoreapp3.1/WebTty.Api.dll \
+		--namespace WebTty.Api.Messages \
+		--output $(shell pwd)/$(WEBTTY_CLIENT)/.tmp/messages

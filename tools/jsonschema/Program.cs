@@ -1,28 +1,72 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using jsonschema.FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
+﻿using jsonschema.FluentValidation;
+using McMaster.NETCore.Plugins;
 using NJsonSchema;
 using NJsonSchema.CodeGeneration.TypeScript;
 using NJsonSchema.Generation;
-using WebTty.Api;
-using WebTty.Api.Infrastructure;
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Runtime.Serialization;
+using System.CommandLine;
+using System.CommandLine.Invocation;
 
 namespace jsonschema
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            var root = "src/WebTty.Hosting/Client/.tmp/messages";
+            var command = new RootCommand("webtty-message-gen")
+            {
+                new Option(
+                    "--assembly",
+                    "Absolute path to assembly containing json schema messages"
+                )
+                {
+                    Argument = new Argument<string>(),
+                    Required = true,
+                },
+                new Option(
+                    "--namespace",
+                    "Namespace containing json schema messages"
+                )
+                {
+                    Argument = new Argument<string>(),
+                    Required = true,
+                },
+                new Option(
+                    "--output",
+                    "Output folder for generated ts messages"
+                )
+                {
+                    Argument = new Argument<string>(),
+                    Required = true,
+                }
+            };
 
-            var services = new ServiceCollection();
-            services.AddPty();
-            var provider = services.BuildServiceProvider();
+            command.Handler = CommandHandler.Create<string , string, string>(Generate);
 
-            var messageResolver = provider.GetRequiredService<IMessageResolver>();
-            var validatorFactory = new ValidatorFactory(messageResolver.GetType().Assembly);
+            return command.Invoke(args);
+        }
+
+        public static void Generate(string assembly, string @namespace, string output)
+        {
+            var dir = Directory.GetCurrentDirectory();
+
+            var loader = PluginLoader.CreateFromAssemblyFile(assembly);
+
+            var defaultAssembly = loader.LoadDefaultAssembly();
+            var messages =
+                from t in defaultAssembly.GetTypes()
+                where t.IsClass || t.IsValueType
+                where !t.IsPrimitive && !string.IsNullOrEmpty(t.Namespace)
+                where t.Namespace.StartsWith(@namespace)
+                let attributes = t.GetCustomAttributes(typeof(DataContractAttribute), true)
+                where attributes != null && attributes.Length > 0
+                select t;
+
+            var validatorFactory = new ValidatorFactory(defaultAssembly);
             var schemaProcessor = new FluentValidationSchemaProcessor(validatorFactory);
 
             var settings = new JsonSchemaGeneratorSettings();
@@ -39,7 +83,7 @@ namespace jsonschema
             };
 
             var mainModule = "";
-            foreach (var type in messageResolver.GetMessages())
+            foreach (var type in messages)
             {
                 var schemaForType = generator.Generate(type, resolver);
                 schemaForType.Title = type.Name;
@@ -47,9 +91,9 @@ namespace jsonschema
                 var codeGenerator = new TypeScriptGenerator(schemaForType, tsSettings);
                 var code = codeGenerator.GenerateFile();
 
-                Directory.CreateDirectory(root);
+                Directory.CreateDirectory(output);
 
-                using (var sourceFile = File.Open($"{root}/{type.Name}.ts", FileMode.Create))
+                using (var sourceFile = File.Open($"{output}/{type.Name}.ts", FileMode.Create))
                 {
                     sourceFile.Write(Encoding.UTF8.GetBytes(code));
                     sourceFile.Flush();
@@ -58,7 +102,7 @@ namespace jsonschema
                 mainModule += $"export * from './{type.Name}'\n";
             }
 
-            using (var mainFile = File.Open($"{root}/index.ts", FileMode.Create))
+            using (var mainFile = File.Open($"{output}/index.ts", FileMode.Create))
             {
                 mainFile.Write(Encoding.UTF8.GetBytes(mainModule));
                 mainFile.Flush();

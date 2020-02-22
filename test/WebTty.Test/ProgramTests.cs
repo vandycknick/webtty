@@ -15,7 +15,6 @@ namespace WebTty.Test
         private Mock<IHost> MockedHost { get; set; }
         private Mock<ILogger> MockedLogger { get; set; }
 
-
         public ProgramTests()
         {
             MockedHostBuilder = new Mock<IHostBuilder>();

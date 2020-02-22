@@ -26,7 +26,7 @@ module.exports = (_, argv) => {
 
         output: {
             path: path.join(__dirname, "..", "wwwroot"),
-            filename: isProduction ? "[name].[chunkhash].js" : "[name].[hash].js",
+            filename: "main.js",
         },
 
         resolve: {

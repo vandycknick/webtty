@@ -4,8 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using WebTty.Api;
+using Microsoft.Net.Http.Headers;
 using Serilog;
+using WebTty.Api;
+using WebTty.Hosting.Services;
 
 namespace WebTty.Hosting
 {
@@ -43,7 +45,19 @@ namespace WebTty.Hosting
         {
             services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStatusMessages = true);
             services.AddOptions<StaticFileOptions>()
-                .Configure(options => options.FileProvider = new ManifestEmbeddedFileProvider(typeof(WebTtyHost).Assembly, "wwwroot"));
+                .Configure(options =>
+                {
+                    options.FileProvider = new ManifestEmbeddedFileProvider(typeof(WebTtyHost).Assembly, "wwwroot");
+                    options.OnPrepareResponse = ctx =>
+                    {
+                        if (ctx.Context.Request.Query.ContainsKey("v")) // Contains hash
+                        {
+                            ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=31536000";
+                        }
+                    };
+                });
+
+            services.AddSingleton<StaticContentService>();
 
             services.AddPty();
             services.AddResponseCompression();

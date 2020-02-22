@@ -4,19 +4,20 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System.Linq;
 using System.Text.Json;
+using WebTty.Hosting.Services;
 
 namespace WebTty.Hosting.Pages
 {
     public class IndexModel : PageModel
     {
         private readonly IConfiguration _configuration;
+        private readonly StaticContentService _staticContent;
         private readonly JsonSerializerOptions _options;
-        private readonly StaticFileOptions _staticFileOptions;
 
-        public IndexModel(IConfiguration configuration, IOptions<StaticFileOptions> options)
+        public IndexModel(IConfiguration configuration, StaticContentService staticContent)
         {
             _configuration = configuration;
-            _staticFileOptions = options.Value;
+            _staticContent = staticContent;
             _options = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -39,13 +40,10 @@ namespace WebTty.Hosting.Pages
                 Theme = _configuration.GetValue<string>("Theme"),
             };
 
+            _staticContent.TryGetFile("main.js", out (string name, string hash) file);
+
             Config = JsonSerializer.Serialize(model, _options);
-            ScriptPath = _staticFileOptions.FileProvider
-                            .GetDirectoryContents(".")
-                            .Select(file => file.Name.ToLower())
-                            .Where(fileName =>
-                                fileName.StartsWith("main") && fileName.EndsWith(".js"))
-                            .FirstOrDefault();
+            ScriptPath = $"{file.name}?v={file.hash}";
         }
     }
 }
