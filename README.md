@@ -28,20 +28,24 @@ dotnet tool install -g webtty
 ```
 λ webtty --help
 
-🔌 WebSocket based terminal emulator
+webtty:
+  🔌 Simple command-line tool for sharing a terminal over the web.
 
-Usage: webtty [options] -- [command] [<arguments...>]
+Usage:
+  webtty [options] [[--] <additional arguments>...]]
 
 Options:
-  -a, --address=VALUE        IP address to use [localhost]. Use any to listen
-                               to any available address. Ex (0.0.0.0, any, 192.
-                               168.2.3, ...)
-  -s, --unix-socket=VALUE    Use the given Unix domain socket path for the
-                               server to listen to
-  -p, --port=VALUE           Port to use [5000]. Use 0 for a dynamic port.
-      --path=VALUE           Path to use, defaults to /tty
-      --version              Show current version
-  -?, -h, --help             Show help information
+  -a, --address <address>         IP address to use [localhost]. Use any to listen to any available
+                                  address. Ex (0.0.0.0, any, 192.168.2.3, ...).
+  -s, --unix-socket <filepath>    Use the given Unix domain socket path for the server to listen to
+  -p, --port <port>               Port to use [5000]. Use 0 for a dynamic port.
+  --path <path>                   Path to use, defaults to /pty
+  --theme <theme>                 Theme to use, uses a simple black theme by default
+  --version                       Show version information
+  -?, -h, --help                  Show help and usage information
+
+Additional Arguments:
+  Arguments passed to the application that is being run.
 ```
 
 [ci-url]: https://github.com/nickvdyck/webtty

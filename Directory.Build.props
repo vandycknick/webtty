@@ -1,6 +1,6 @@
 <Project>
 
-  <Import Project="BuildOutput.props" />
+  <Import Project="Common.props" />
 
   <PropertyGroup>
     <Authors>Nick Van Dyck</Authors>
@@ -25,7 +25,7 @@
 
     <IsPackaging>false</IsPackaging>
     <RestoreSources Condition="'$(IsPackaging)' == 'true'">
-      $(RestoreSources);../../artifacts;https://api.nuget.org/v3/index.json
+      $(MSBuildThisFileDirectory)artifacts;$(RestoreSources);https://api.nuget.org/v3/index.json
     </RestoreSources>
 
     <MinVerAutoIncrement>minor</MinVerAutoIncrement>

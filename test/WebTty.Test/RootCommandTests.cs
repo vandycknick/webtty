@@ -10,6 +10,54 @@ namespace WebTty.Test
 {
     public class RootCommandTests
     {
+        [Theory]
+        [InlineData("home")]
+        [InlineData("loopback")]
+        [InlineData("ff:ff:ff:ff")]
+        [InlineData("192.165.1.1.1")]
+        public async Task RootCommand_Invoke_ReturnsAnErrorWhenGivenAnInvalidIp(string value)
+        {
+            // Given
+            var command = Program.RootCommand();
+            var console = new TestConsole();
+            var args = new string[]
+            {
+                "-a", value
+            };
+
+            // When
+            var result = await command.InvokeAsync(args, console);
+
+            // Then
+            Assert.Equal($"Invalid: Option: -a {value}", console.Error.ToString().Trim('\n'));
+            Assert.Equal(1, result);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetValidIPAddressData))]
+        public async Task RootCommand_Invoke_CorrectlySetsAddressForValidIP(string value, IPAddress expected)
+        {
+            // Given
+            var command = Program.RootCommand();
+            var console = new TestConsole();
+            var args = new string[]
+            {
+                "-a", value
+            };
+            IPAddress address = null;
+            command.Handler = CommandHandler.Create<IPAddress>(a =>
+            {
+                address = a;
+            });
+
+            // When
+            var result = await command.InvokeAsync(args, console);
+
+            // Then
+            Assert.Equal(expected, address);
+            Assert.Equal(0, result);
+        }
+
 
         [Theory]
         [InlineData("65535")]
@@ -105,52 +153,92 @@ namespace WebTty.Test
         }
 
         [Theory]
-        [InlineData("home")]
-        [InlineData("loopback")]
-        [InlineData("fff:fff:fff:fff")]
-        [InlineData("192.165.1.1.1")]
-        public async Task RootCommand_Invoke_ReturnsAnErrorWhenGivenAnInvalidIp(string value)
+        [InlineData("\\pty")]
+        [InlineData("no-slash")]
+        public async Task RootCommand_Invoke_ReturnsErrorMessageWhenPathDoesNotStartWithAString(string value)
         {
             // Given
             var command = Program.RootCommand();
             var console = new TestConsole();
             var args = new string[]
             {
-                "-a", value
+                "--path", value
             };
 
             // When
             var result = await command.InvokeAsync(args, console);
 
             // Then
-            Assert.Equal($"Invalid: Option: -a {value}", console.Error.ToString().Trim('\n'));
+            Assert.Equal("Argument path should start with a /.", console.Error.ToString().Trim('\n'));
             Assert.Equal(1, result);
         }
 
-        [Theory]
-        [MemberData(nameof(GetValidIPAddressData))]
-        public async Task RootCommand_Invoke_CorrectlySetsAddressForValidIP(string value, IPAddress expected)
+        [Fact]
+        public async Task RootCommand_Invoke_CorrectlySetsPathValue()
         {
             // Given
             var command = Program.RootCommand();
             var console = new TestConsole();
             var args = new string[]
             {
-                "-a", value
+                "--path", "/world"
             };
-            IPAddress address = null;
-            command.Handler = CommandHandler.Create<IPAddress>(a =>
-            {
-                address = a;
-            });
+            command.Handler = CommandHandler.Create<string>(Assertion);
 
             // When
-            var result = await command.InvokeAsync(args, console);
+            await command.InvokeAsync(args, console);
 
             // Then
-            Assert.Equal(expected, address);
-            Assert.Equal(0, result);
+            static void Assertion(string path)
+            {
+                Assert.Equal("/world", path);
+            }
         }
+
+        [Fact]
+        public async Task RootCommand_Invoke_CorrectlySetsThemeValue()
+        {
+            // Given
+            var command = Program.RootCommand();
+            var console = new TestConsole();
+            var args = new string[]
+            {
+                "--theme", "hello"
+            };
+            command.Handler = CommandHandler.Create<string>(Assertion);
+
+            // When
+            await command.InvokeAsync(args, console);
+
+            // Then
+            static void Assertion(string theme)
+            {
+                Assert.Equal("hello", theme);
+            }
+        }
+
+        [Fact]
+        public async Task RootCommand_Invoke_CorrectlySetsUnixSocketValue()
+        {
+            // Given
+            var command = Program.RootCommand();
+            var console = new TestConsole();
+            var args = new string[]
+            {
+                "--unix-socket", "hello"
+            };
+            command.Handler = CommandHandler.Create<string>(Assertion);
+
+            // When
+            await command.InvokeAsync(args, console);
+
+            // Then
+            static void Assertion(string unixSocket)
+            {
+                Assert.Equal("hello", unixSocket);
+            }
+        }
+
 
         public static IEnumerable<object[]> GetValidIPAddressData()
         {
