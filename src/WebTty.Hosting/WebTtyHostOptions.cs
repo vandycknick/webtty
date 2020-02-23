@@ -18,10 +18,10 @@ namespace WebTty.Hosting
             return new Dictionary<string, string>
             {
                 { nameof(Address), Address.ToString() },
-                { "UnixSocket", UnixSocket },
-                { "Port", Port.ToString() },
-                { "Path", Path },
-                { "Theme", Theme },
+                { nameof(UnixSocket), UnixSocket },
+                { nameof(Port), Port.ToString() },
+                { nameof(Path), Path },
+                { nameof(Theme), Theme },
                 { nameof(Command), Command },
                 { nameof(Args), string.Join(' ', Args) },
             };

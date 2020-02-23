@@ -13,10 +13,7 @@
     <PackageReference Include="NJsonSchema" Version="10.1.5" />
     <PackageReference Include="NJsonSchema.CodeGeneration.TypeScript" Version="10.1.5" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20104.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\WebTty.Api\WebTty.Api.csproj" />
+    <PackageReference Include="System.IO.Pipelines" Version="4.7.0" />
   </ItemGroup>
 
 </Project>
