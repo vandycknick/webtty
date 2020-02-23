@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using WebTty.Api.Infrastructure.Connection;
@@ -25,23 +25,13 @@ namespace WebTty.Api.Infrastructure
             services.AddSingleton<JsonProtocol>();
             services.AddSingleton<BinaryProtocol>();
             services.AddSingleton<IMessageWriter>(provider =>
-            {
-                return options.Format == MessageFormat.Json ?
+                options.Format == MessageFormat.Json ?
                     (IMessageWriter)provider.GetRequiredService<JsonProtocol>() :
-                    provider.GetRequiredService<BinaryProtocol>();
-            });
-
-
-            if (options.Format == MessageFormat.Json)
-            {
-                services.AddSingleton<IMessageWriter, JsonProtocol>();
-                services.AddSingleton<IMessageReader, JsonProtocol>();
-            }
-            else
-            {
-                services.AddSingleton<IMessageWriter, BinaryProtocol>();
-                services.AddSingleton<IMessageReader, BinaryProtocol>();
-            }
+                    provider.GetRequiredService<BinaryProtocol>());
+            services.AddSingleton<IMessageReader>(provider =>
+                options.Format == MessageFormat.Json ?
+                    (IMessageReader)provider.GetRequiredService<JsonProtocol>() :
+                    provider.GetRequiredService<BinaryProtocol>());
 
             services.AddSingleton<HttpConnectionHandler>();
             services.AddSingleton<HttpConnectionManager>();

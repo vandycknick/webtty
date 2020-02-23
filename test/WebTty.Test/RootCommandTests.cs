@@ -29,7 +29,7 @@ namespace WebTty.Test
             var result = await command.InvokeAsync(args, console);
 
             // Then
-            Assert.Equal($"Invalid: Option: -a {value}", console.Error.ToString().Trim('\n'));
+            Assert.Equal($"Invalid: Option: -a {value}", console.Error.ToString().Trim('\n', '\r'));
             Assert.Equal(1, result);
         }
 
@@ -76,7 +76,7 @@ namespace WebTty.Test
             var result = await command.InvokeAsync(args, console);
 
             // Then
-            Assert.Equal("Argument port should be a value between 0 and 65535.", console.Error.ToString().Trim('\n'));
+            Assert.Equal("Argument port should be a value between 0 and 65535.", console.Error.ToString().Trim('\n', '\r'));
             Assert.Equal(1, result);
         }
 
@@ -98,7 +98,7 @@ namespace WebTty.Test
             var result = await command.InvokeAsync(args, console);
 
             // Then
-            Assert.Equal("Argument port should be a value between 0 and 65535.", console.Error.ToString().Trim('\n'));
+            Assert.Equal("Argument port should be a value between 0 and 65535.", console.Error.ToString().Trim('\n', '\r'));
             Assert.Equal(1, result);
         }
 
@@ -120,7 +120,7 @@ namespace WebTty.Test
             var result = await command.InvokeAsync(args, console);
 
             // Then
-            Assert.Equal("Argument port should be an integer.", console.Error.ToString().Trim('\n'));
+            Assert.Equal("Argument port should be an integer.", console.Error.ToString().Trim('\n', '\r'));
             Assert.Equal(1, result);
         }
 
@@ -169,7 +169,7 @@ namespace WebTty.Test
             var result = await command.InvokeAsync(args, console);
 
             // Then
-            Assert.Equal("Argument path should start with a /.", console.Error.ToString().Trim('\n'));
+            Assert.Equal("Argument path should start with a /.", console.Error.ToString().Trim('\n', '\r'));
             Assert.Equal(1, result);
         }
 

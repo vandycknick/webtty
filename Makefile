@@ -99,6 +99,7 @@ dev-client:
 	dotnet watch -p $(CLI_PROJECT) run
 
 schema:
+	dotnet build $(shell pwd)/src/WebTty.Api/WebTty.Api.csproj
 	dotnet run -p tools/jsonschema/jsonschema.csproj -- \
 		--assembly $(shell pwd)/.build/bin/WebTty.Api/Debug/netcoreapp3.1/WebTty.Api.dll \
 		--namespace WebTty.Api.Messages \

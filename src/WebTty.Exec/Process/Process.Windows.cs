@@ -82,6 +82,7 @@ namespace WebTty.Exec
             }
 
             Pid = processInfo.dwProcessId;
+            IsRunning = true;
         }
 
         private void KillCore()

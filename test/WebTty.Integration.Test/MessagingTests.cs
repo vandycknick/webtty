@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
@@ -191,7 +191,7 @@ namespace WebTty.Integration.Test
             var output = Assert.IsType<OutputEvent>(response);
             Assert.Equal(terminal.Id, output.TabId);
             var data = Encoding.UTF8.GetString(output.Data);
-            Assert.Equal("hello\n", data);
+            Assert.Equal("hello", data.Trim('\r', '\n'));
         }
     }
 }

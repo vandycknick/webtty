@@ -8,17 +8,20 @@ using WebTty.Api.Common;
 using WebTty.Api.Messages;
 using WebTty.Api.Infrastructure;
 using WebTty.Api.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace WebTty.Api
 {
     public class PtyMessageHandler : IMessageHandler, IDisposable
     {
         private readonly IEngine _engine;
+        private readonly IConfiguration _configuration;
         private readonly ILoggerAdapter<PtyMessageHandler> _logger;
 
-        public PtyMessageHandler(IEngine engine, ILoggerAdapter<PtyMessageHandler> logger)
+        public PtyMessageHandler(IEngine engine, IConfiguration configuration, ILoggerAdapter<PtyMessageHandler> logger)
         {
             _engine = engine;
+            _configuration = configuration;
             _logger = logger;
         }
 
@@ -76,9 +79,27 @@ namespace WebTty.Api
             }
         }
 
+        private bool TryGetCommandAndArgs(out (string Command, IReadOnlyList<string> Args) details)
+        {
+            if (string.IsNullOrEmpty(_configuration["Command"]))
+            {
+                details.Command = null;
+                details.Args = null;
+                return false;
+            }
+            else
+            {
+                details.Command = _configuration["Command"];
+                details.Args = _configuration["Args"]?.Split(' ');
+                return true;
+            }
+        }
+
         private async Task<MessageResult> OpenNewTabHandler(OpenNewTabRequest request)
         {
-            var terminal = _engine.StartNew();
+            var terminal = TryGetCommandAndArgs(out var details) ?
+                _engine.StartNew(details.Command, details.Args) :
+                _engine.StartNew();
 
             if (_engine.TryGetProcess(terminal, out var process))
             {
