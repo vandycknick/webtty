@@ -73,6 +73,11 @@ package-all: package
 	@cp $(BUILD)/publish/win-x64/$(CLI_TOOL).exe $(ARTIFACTS)/$(CLI_TOOL).win-x64.exe
 
 	@echo ""
+	@echo "\033[0;32mGenerate Checksums \033[0m"
+	@echo "\033[0;32m----------------- \033[0m"
+	$(MAKE) checksum
+
+	@echo ""
 	@echo "\033[0;32mOutput \033[0m"
 	@echo "\033[0;32m----------------- \033[0m"
 	@ls -lh $(ARTIFACTS)
@@ -136,8 +141,6 @@ schema:
 		--namespace WebTty.Api.Messages \
 		--output $(shell pwd)/$(WEBTTY_CLIENT)/.tmp/messages
 
-
-chilling:
-	@echo ""
-	@echo "\033[0;32m Packaging linux-x64 \033[0m"
-	@echo "\033[0;32m ------------------- \033[0m"
+checksum:
+	@rm -f $(ARTIFACTS)/SHA256SUMS.txt
+	@cd $(ARTIFACTS) && find . -type f ! -name "WebTty.Exec.*.nupkg" -print0 | xargs -0 sha256sum | tee SHA256SUMS.txt
