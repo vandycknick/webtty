@@ -1,5 +1,4 @@
 # Project specific
-.envrc_secrets
 wwwroot
 .build
 artifacts

@@ -10,6 +10,7 @@ WEBTTY_CLIENT	:= src/WebTty.Hosting/Client
 CLI_PROJECT		:= src/WebTty/WebTty.csproj
 CLI_TOOL		:= webtty
 RUNTIME 		:= linux-x64
+IS_PACKAGING	:= False
 
 purge:
 	rm -rf $(BUILD)
@@ -33,6 +34,10 @@ default:
 package: restore package-exec
 	dotnet restore --force-evaluate
 	dotnet build -c $(CONFIGURATION) /property:IsPackaging=True $(CLI_PROJECT)
+
+	@echo ""
+	@echo "\033[0;32mPackaging nuget \033[0m"
+	@echo "\033[0;32m------------------- \033[0m"
 	dotnet pack $(CLI_PROJECT) --configuration $(CONFIGURATION) \
 		--no-build \
 		--output $(ARTIFACTS) \
@@ -44,18 +49,44 @@ package-exec:
 		--output $(ARTIFACTS) \
 		--version-suffix build.$(shell date "+%Y%m%d%H%M%S")
 
+package-all: package
+	@echo ""
+	@echo "\033[0;32mPackaging osx-x64 \033[0m"
+	@echo "\033[0;32m----------------- \033[0m"
+	$(MAKE) package-native RUNTIME=osx-x64 IS_PACKAGING=True
+
+	@echo ""
+	@echo "\033[0;32mPackaging linux-x64 \033[0m"
+	@echo "\033[0;32m------------------- \033[0m"
+	$(MAKE) package-native RUNTIME=linux-x64 IS_PACKAGING=True
+
+	@echo ""
+	@echo "\033[0;32mPackaging win-x64 \033[0m"
+	@echo "\033[0;32m----------------- \033[0m"
+	dotnet publish $(CLI_PROJECT) -c $(CONFIGURATION) \
+		--output $(BUILD)/publish/win-x64 \
+		--runtime win-x64 \
+		/property:PublishTrimmed=true \
+		/property:PublishSingleFile=true
+
+	@mkdir -p $(ARTIFACTS)
+	@cp $(BUILD)/publish/win-x64/$(CLI_TOOL).exe $(ARTIFACTS)/$(CLI_TOOL).win-x64.exe
+
+	@echo ""
+	@echo "\033[0;32mOutput \033[0m"
+	@echo "\033[0;32m----------------- \033[0m"
+	@ls -lh $(ARTIFACTS)
+
 package-native:
 	dotnet publish $(CLI_PROJECT) -c $(CONFIGURATION) \
 		--output $(BUILD)/publish/$(RUNTIME) \
 		--runtime $(RUNTIME) \
+		/property:IsPackaging=$(IS_PACKAGING) \
 		/property:PublishTrimmed=true \
 		/property:PublishSingleFile=true
 
 	@mkdir -p $(ARTIFACTS)
 	@cp $(BUILD)/publish/$(RUNTIME)/$(CLI_TOOL) $(ARTIFACTS)/$(CLI_TOOL).$(RUNTIME)
-
-package-osx:
-	$(MAKE) package-native RUNTIME=osx-x64
 
 install:
 	dotnet tool install --global --add-source $(ARTIFACTS) \
@@ -104,3 +135,9 @@ schema:
 		--assembly $(shell pwd)/.build/bin/WebTty.Api/Debug/netcoreapp3.1/WebTty.Api.dll \
 		--namespace WebTty.Api.Messages \
 		--output $(shell pwd)/$(WEBTTY_CLIENT)/.tmp/messages
+
+
+chilling:
+	@echo ""
+	@echo "\033[0;32m Packaging linux-x64 \033[0m"
+	@echo "\033[0;32m ------------------- \033[0m"
