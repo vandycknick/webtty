@@ -90,7 +90,9 @@ namespace WebTty.Api
             else
             {
                 details.Command = _configuration["Command"];
-                details.Args = _configuration["Args"]?.Split(' ');
+                details.Args = string.IsNullOrEmpty(_configuration["Args"]) ?
+                                    Array.Empty<string>() :
+                                    _configuration["Args"].Split(' ');
                 return true;
             }
         }

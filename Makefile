@@ -53,12 +53,17 @@ package-all: package
 	@echo ""
 	@echo "\033[0;32mPackaging osx-x64 \033[0m"
 	@echo "\033[0;32m----------------- \033[0m"
-	$(MAKE) package-native RUNTIME=osx-x64 IS_PACKAGING=True
+	$(MAKE) package-native RUNTIME=osx-x64
 
 	@echo ""
 	@echo "\033[0;32mPackaging linux-x64 \033[0m"
 	@echo "\033[0;32m------------------- \033[0m"
-	$(MAKE) package-native RUNTIME=linux-x64 IS_PACKAGING=True
+	$(MAKE) package-native RUNTIME=linux-x64
+
+	@echo ""
+	@echo "\033[0;32mPackaging linux-musl-x64 \033[0m"
+	@echo "\033[0;32m------------------- \033[0m"
+	$(MAKE) package-native RUNTIME=linux-musl-x64
 
 	@echo ""
 	@echo "\033[0;32mPackaging win-x64 \033[0m"
@@ -66,6 +71,7 @@ package-all: package
 	dotnet publish $(CLI_PROJECT) -c $(CONFIGURATION) \
 		--output $(BUILD)/publish/win-x64 \
 		--runtime win-x64 \
+		/property:IsPackaging=True \
 		/property:PublishTrimmed=true \
 		/property:PublishSingleFile=true
 
@@ -86,7 +92,7 @@ package-native:
 	dotnet publish $(CLI_PROJECT) -c $(CONFIGURATION) \
 		--output $(BUILD)/publish/$(RUNTIME) \
 		--runtime $(RUNTIME) \
-		/property:IsPackaging=$(IS_PACKAGING) \
+		/property:IsPackaging=True \
 		/property:PublishTrimmed=true \
 		/property:PublishSingleFile=true
 

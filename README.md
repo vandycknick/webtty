@@ -24,6 +24,22 @@ Download [.NET Core 3.1](https://dotnet.microsoft.com/download) or newer. Once i
 dotnet tool install -g webtty
 ```
 
+### Native
+```
+curl -L -o /bin/webtty https://github.com/nickvdyck/webtty/releases/download/{VERSION}/webtty.{RUNTIME}
+```
+Where version is the version and runtime is the dotnet RID or platform you want to run on:
+- osx-x64
+- linux-x64
+- linux-musl-x64 (alpine)
+- win-x64
+
+#### Ubuntu dependencies
+```sh
+apt update
+apt install libicu60 libssl1.0.0
+```
+
 ### Local build (Unix)
 ```sh
 make setup

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -117,7 +116,7 @@ namespace WebTty.Api.Test
             var result = await handler.Handle(request);
 
             // Then
-            MockEngine.VerifyAll();
+            MockEngine.Verify(e => e.StartNew("hello", new List<string>()));
         }
 
         [Fact]
@@ -151,6 +150,38 @@ namespace WebTty.Api.Test
 
             // Then
             MockEngine.VerifyAll();
+        }
+
+        [Fact]
+        public async Task PtyMessageHandler_Handle_OpenNewCreatesANewTerminalWithTheGivenCommandAndEmptyArgs()
+        {
+            // Given
+            var terminal = new Terminal
+            {
+                Id = Guid.NewGuid().ToString(),
+                Command = "hello",
+            };
+            MockConfig.SetupGet(c => c["Command"]).Returns("hello");
+            MockConfig.SetupGet(c => c["Args"]).Returns("");
+
+            var mockProcess = new Mock<IProcess>();
+            var process = mockProcess.Object;
+
+            mockProcess.SetupGet(p => p.IsRunning).Returns(true);
+
+            MockEngine
+                .Setup(e => e.StartNew("hello", It.IsAny<IReadOnlyList<string>>())).Returns(terminal);
+
+            MockEngine
+                .Setup(e => e.TryGetProcess(terminal, out process)).Returns(true);
+
+            // When
+            var request = new OpenNewTabRequest();
+            var handler = new PtyMessageHandler(MockEngine.Object, MockConfig.Object, MockLogger.Object);
+            var result = await handler.Handle(request);
+
+            // Then
+            MockEngine.Verify(e => e.StartNew("hello", new List<string>()));
         }
 
         [Fact]

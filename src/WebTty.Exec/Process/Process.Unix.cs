@@ -4,6 +4,7 @@ using System.ComponentModel;
 using WebTty.Exec.Native;
 using WebTty.Exec.Utils;
 using WebTty.Exec.IO;
+using System.Linq;
 
 namespace WebTty.Exec
 {
@@ -17,7 +18,19 @@ namespace WebTty.Exec
                 filename,
             };
 
-            args.AddRange(_argv);
+            // TODO: figure out what best todo here
+            // Problem when first arg is an empty string stuff goes awfully wrong
+            // Some things to validate:
+            // - Check if this is only a problem for the first arg
+            // - Check if this is only a problem when there is just one arg
+            // - Is it better to just throw an error?
+            foreach (var arg in _argv)
+            {
+                if (!string.IsNullOrWhiteSpace(arg) && !string.IsNullOrEmpty(arg))
+                {
+                    args.Add(arg);
+                }
+            }
 
             Pid = ForkAndExec(
                 filename,
