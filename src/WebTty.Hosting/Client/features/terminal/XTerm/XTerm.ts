@@ -14,14 +14,14 @@ class XTerm implements ITerminal {
     private readonly _writeDelay: number = 10
     private _disposables: IDisposable[] = []
 
-    constructor() {
+    constructor(enableWebGL = true) {
         this._terminal = new Terminal()
         this.ref = document.createElement("div")
         this.ref.style.width = "100%"
         this.ref.style.height = "100%"
         this._addons = [this.fitAddon]
 
-        if (detectWebgl2Support()) {
+        if (enableWebGL && detectWebgl2Support()) {
             this._addons.push(new WebglAddon())
         }
     }

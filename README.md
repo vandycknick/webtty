@@ -1,31 +1,29 @@
-<h1 align="center">
-    <img src="assets/logo.png" width="200" alt="webtty logo" />
-    <br />
-    <br />
-</h1>
-
-> Terminal emulator for the web.
+# WebTty
 
 [![Build status][ci-badge]][ci-url]
 [![NuGet][nuget-package-badge]][nuget-package-url]
 [![feedz.io][feedz-package-badge]][feedz-package-url]
 [![coverage][coverage-badge]][coverage-url]
 
+> Terminal emulator for the web.
+
+![screencast](assets/screencast.gif)
+
 
 ## Introduction
-WebTTY is a cross-platform CLI tool allowing a user to get access to a terminal via any supported browser.
+WebTTY is a cross-platform CLI tool providing access to a terminal via a modern browser.
 
 ## Installation
 
 ### Dotnet tool
 Download [.NET Core 3.1](https://dotnet.microsoft.com/download) or newer. Once installed, run this command:
 
-```
+```sh
 dotnet tool install -g webtty
 ```
 
 ### Native
-```
+```sh
 curl -L -o /bin/webtty https://github.com/nickvdyck/webtty/releases/download/{VERSION}/webtty.{RUNTIME}
 ```
 Where version is the version and runtime is the dotnet RID or platform you want to run on:
