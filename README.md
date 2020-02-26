@@ -5,7 +5,7 @@
 [![feedz.io][feedz-package-badge]][feedz-package-url]
 [![coverage][coverage-badge]][coverage-url]
 
-> Terminal emulator for the web.
+> A TeleTYpewriter for the web.
 
 ![screencast](assets/screencast.gif)
 
@@ -24,9 +24,10 @@ dotnet tool install -g webtty
 
 ### Native
 ```sh
-curl -L -o /bin/webtty https://github.com/nickvdyck/webtty/releases/download/{VERSION}/webtty.{RUNTIME}
+curl -L -o /bin/webtty https://github.com/nickvdyck/webtty/releases/download/{VERSION}/webtty.{PLATFORM}
 ```
-Where version is the version and runtime is the dotnet RID or platform you want to run on:
+You can replace the version portion by one of the releases found on github.
+The platform can be replaced with a supported [dotnet RID](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog), this represents the platform you want the tool to run on. The following ones are supported:
 - osx-x64
 - linux-x64
 - linux-musl-x64 (alpine)
@@ -47,7 +48,7 @@ make install
 
 ## Usage
 
-```
+```sh
 λ webtty --help
 
 webtty:
@@ -79,7 +80,7 @@ Additional Arguments:
 
 ### Setup
 Before you can kick of a build you will need to run the following command. This will restore the projects dependencies and generate the required json schema messages.
-(This is necessary because not everything is fully integrated to msbuild yet.)
+(This is necessary because not everything is fully integrated into msbuild yet.)
 
 #### Unix (Linux/MacOs)
 ```sh
@@ -90,8 +91,7 @@ make setup
 ```sh
 ./setup.ps1
 ```
-
-You will need to run this command/script when making any changes to any of the messages.
+> This command/script needs to be ran after any changes to the json schema messages.
 
 ### Dev
 You should be able to open the project in your favourite editor and use any integrated build flows from within the editor (eg Visual Studio, VS for Mac, Rider, ...)
@@ -115,7 +115,7 @@ make package-linux # Publish self-contained binary tool for linux
 
 ### Installation
 ```sh
-make install # Globally install a local built ot the tool
+make install # Globally install a local build of the tool
 make uninstall # Uninstall any globally installed webtty tool
 ```
 
