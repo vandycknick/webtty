@@ -1,7 +1,13 @@
 import { ThemeState } from "./themeReducer"
-import { ITheme } from "./themes"
+import { ITheme, defaultTheme } from "./theme"
 
-const getCurrentTheme = (state: ThemeState): ITheme =>
-    state.theme.themes[state.theme.selected] || state.theme.themes["default"]
+const getSelectedTheme = (state: ThemeState): ITheme => {
+    const { installed, selected } = state.theme
+    const theme = installed.find(
+        theme =>
+            theme.name.toLocaleLowerCase() === selected.toLocaleLowerCase(),
+    )
+    return theme ?? defaultTheme
+}
 
-export { getCurrentTheme }
+export { getSelectedTheme }

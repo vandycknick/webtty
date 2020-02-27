@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { ITheme } from "xterm"
 
 import { useDebounce } from "common/hooks/useDebounce"
-import { getCurrentTheme } from "features/theme/themeSelectors"
+import { getSelectedTheme } from "features/theme/themeSelectors"
 import { getSelectedTab } from "./terminalSelectors"
 import { termManager } from "./XTerm"
 import { resizeTab, writeStdIn } from "./terminalActions"
@@ -16,7 +16,7 @@ interface TerminalContainerProps {
 
 const TerminalContainer: FunctionComponent<TerminalContainerProps> = () => {
     const selectedTab = useSelector(getSelectedTab)
-    const theme = useSelector(getCurrentTheme)
+    const theme = useSelector(getSelectedTheme)
     const dispatch = useDispatch()
     const writeInput = useCallback(
         (message: string) => dispatch(writeStdIn(selectedTab, message)),

@@ -11,7 +11,7 @@
 
 
 ## Introduction
-WebTTY is a cross-platform CLI tool providing access to a terminal via a modern browser.
+WebTty is a simple command-line tool that's inspired by GoTTY, mostly a learning experience about how terminals work internally. Built with ASP.NET and XTerm.js the tool allows turning any CLI tool into a web application. In short a TeleTYpewriter for the web that runs on any modern browser or platform..
 
 ## Installation
 
@@ -24,7 +24,7 @@ dotnet tool install -g webtty
 
 ### Native
 ```sh
-curl -L -o /bin/webtty https://github.com/nickvdyck/webtty/releases/download/{VERSION}/webtty.{PLATFORM}
+curl -L -o webtty{.exe} https://github.com/nickvdyck/webtty/releases/download/{VERSION}/webtty.{PLATFORM}
 ```
 You can replace the version portion by one of the releases found on github.
 The platform can be replaced with a supported [dotnet RID](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog), this represents the platform you want the tool to run on. The following ones are supported:
@@ -58,12 +58,12 @@ Usage:
   webtty [options] [[--] <additional arguments>...]]
 
 Options:
-  -a, --address <address>         IP address to use [localhost]. Use any to listen to any available
-                                  address. Ex (0.0.0.0, any, 192.168.2.3, ...).
+  -a, --address <address>         IP address to use [localhost]. Use any to listen to any available address. Ex (0.0.0.0, any, 192.168.2.3, ...).
   -s, --unix-socket <filepath>    Use the given Unix domain socket path for the server to listen to
   -p, --port <port>               Port to use [5000]. Use 0 for a dynamic port.
   --path <path>                   Path to use, defaults to /pty
   --theme <theme>                 Theme to use, uses a simple black theme by default
+  -c, --config <configFile>       Path to a json config file, cli arguments always take precedence
   --version                       Show version information
   -?, -h, --help                  Show help and usage information
 

@@ -5,11 +5,14 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using WebTty.Hosting;
+using WebTty.Hosting.Models;
 
 namespace WebTty
 {
@@ -20,10 +23,15 @@ namespace WebTty
             var command = RootCommand();
 
             command.TreatUnmatchedTokensAsErrors = false;
-            command.Handler = CommandHandler.Create<WebTtyHostOptions, ParseResult, CancellationToken>((options, parseResult, token) =>
+            command.Handler = CommandHandler.Create<Settings, ParseResult, CancellationToken>(async (settings, parseResult, token) =>
             {
-                options.Command = parseResult.UnparsedTokens.FirstOrDefault();
-                options.Args = parseResult.UnparsedTokens.Skip(1).ToList();
+                settings.Command = parseResult.UnparsedTokens.FirstOrDefault();
+                settings.Args = parseResult.UnparsedTokens.Skip(1).ToList();
+
+                settings = await MergeSettings(
+                    settings,
+                    parseResult.ValueForOption<FileInfo>("config")
+                );
 
                 Log.Logger = new LoggerConfiguration()
                     .MinimumLevel.Information()
@@ -33,14 +41,42 @@ namespace WebTty
                     .WriteTo.Console()
                     .CreateLogger();
 
-                return new Program(
-                    hostBuilder: WebTtyHost.CreateHostBuilder(options),
-                    options: options,
+                var program = new Program(
+                    hostBuilder: WebTtyHost.CreateHostBuilder(settings),
+                    options: settings,
                     logger: Log.Logger
-                ).RunAsync(token);
-
+                );
+                var result = await program.RunAsync(token);
+                return result;
             });
             return command.InvokeAsync(args);
+        }
+
+        public static async Task<Settings> MergeSettings(Settings options, FileInfo configFile)
+        {
+            Settings config = Settings.Defaults;
+
+            if (configFile != null && configFile.Exists)
+            {
+                using var stream = configFile.OpenRead();
+                config = await JsonSerializer.DeserializeAsync<Settings>(stream, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    IgnoreNullValues = true,
+                });
+            }
+
+            return new Settings
+            {
+                Address = options.Address ?? config.Address ?? Settings.Defaults.Address,
+                UnixSocket = options.UnixSocket ?? config.UnixSocket ?? Settings.Defaults.UnixSocket,
+                Port = options.Port ?? config.Port ?? Settings.Defaults.Port,
+                Path = options.Path ?? config.Path ?? Settings.Defaults.Path,
+                Theme = options.Theme ?? config.Theme ?? Settings.Defaults.Theme,
+                Command = options.Command ?? config.Command ?? Settings.Defaults.Command,
+                Args = options.Args ?? config.Args ?? Settings.Defaults.Args,
+                Themes = options.Themes ?? config.Themes ?? Settings.Defaults.Themes,
+            };
         }
 
         public static Command RootCommand() =>
@@ -62,7 +98,7 @@ namespace WebTty
                     "Use the given Unix domain socket path for the server to listen to"
                 )
                 {
-                    Argument = new Argument<string>(() => string.Empty)
+                    Argument = new Argument<string>
                     {
                         Name = "filepath",
                         Arity = ArgumentArity.ZeroOrOne
@@ -74,7 +110,7 @@ namespace WebTty
                     "Port to use [5000]. Use 0 for a dynamic port."
                 )
                 {
-                    Argument = new Argument<int>(() => 5000)
+                    Argument = new Argument<int>
                     {
                         Name = "port",
                     }.Between(0, 65535),
@@ -85,7 +121,7 @@ namespace WebTty
                     "Path to use, defaults to /pty"
                 )
                 {
-                    Argument = new Argument<string>(() => "/pty")
+                    Argument = new Argument<string>
                     {
                         Arity = ArgumentArity.ZeroOrOne,
                     }.StartsWith('/'),
@@ -96,19 +132,31 @@ namespace WebTty
                     "Theme to use, uses a simple black theme by default"
                 )
                 {
-                    Argument = new Argument<string>(() => "default")
+                    Argument = new Argument<string>
                     {
                         Arity = ArgumentArity.ZeroOrOne,
                     },
                     Required = false
                 },
+                new Option(
+                    new string[] { "-c", "--config"},
+                    "Path to a json config file, cli arguments always take precedence"
+                )
+                {
+                    Argument = new Argument<FileInfo>()
+                    {
+                        Name = "configFile",
+                        Arity = ArgumentArity.ZeroOrOne
+                    },
+                    Required = false
+                }
             };
 
         private readonly IHostBuilder _hostBuilder;
         private readonly ILogger _logger;
-        private readonly WebTtyHostOptions _options;
+        private readonly Settings _options;
 
-        public Program(IHostBuilder hostBuilder, WebTtyHostOptions options, ILogger logger)
+        public Program(IHostBuilder hostBuilder, Settings options, ILogger logger)
         {
             _hostBuilder = hostBuilder;
             _options = options;

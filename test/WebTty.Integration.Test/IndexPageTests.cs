@@ -46,7 +46,7 @@ namespace WebTty.Integration.Test
             // Then
             Assert.Equal("script", configElement.TagName.ToLower());
             Assert.Equal("/pty", config.RootElement.GetProperty("ptyPath").GetString());
-            Assert.Equal("default", config.RootElement.GetProperty("theme").GetString());
+            Assert.Equal("default", config.RootElement.GetProperty("selectedTheme").GetString());
         }
     }
 }

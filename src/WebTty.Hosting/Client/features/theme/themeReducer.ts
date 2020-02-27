@@ -2,20 +2,16 @@ import produce from "immer"
 import { Reducer } from "redux"
 
 import { ThemeActions, THEME_SELECTED } from "./themeActions"
-import themes, { ITheme } from "./themes"
+import { ITheme, defaultTheme } from "./theme"
 
 type State = {
     selected: string
-    themes: {
-        [theme: string]: ITheme
-    }
+    installed: ITheme[]
 }
 
 const initialState: State = {
     selected: "default",
-    themes: {
-        ...themes,
-    },
+    installed: [defaultTheme],
 }
 
 const theme: Reducer<State, ThemeActions> = (state = initialState, action) =>

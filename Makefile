@@ -138,7 +138,7 @@ dev-server:
 	yarn --cwd $(WEBTTY_CLIENT) watch
 
 dev-client:
-	dotnet watch -p $(CLI_PROJECT) run
+	dotnet watch -p $(CLI_PROJECT) run -- --config $(shell pwd)/data/config.json
 
 schema:
 	dotnet build $(shell pwd)/src/WebTty.Api/WebTty.Api.csproj

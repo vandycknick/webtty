@@ -3,15 +3,15 @@ import ConfigBuilder from "common/utils/ConfigBuilder"
 import { ConnectionBuilder } from "common/connection"
 import { AppConfig, configValidator } from "features/config"
 import createTerminalMiddleware from "features/terminal/createTerminalMiddleware"
-import themes from "features/theme/themes"
+import { createThemeState } from "features/theme"
 
 const configureApp = (): ReturnType<typeof configureStore> => {
     const config = new ConfigBuilder<AppConfig>()
-        .addFromDom("config")
         .addVariable("ptyHost", `ws://${window.location.host}`)
+        .addVariable("selectedTheme", "default")
+        .addFromDom("config")
         .addVariableDevelopment("ptyHost", `ws://localhost:5000`)
         .addVariableDevelopment("ptyPath", "/pty")
-        .addVariableDevelopment("theme", "default")
         .build(configValidator)
 
     const connection = new ConnectionBuilder()
@@ -26,10 +26,7 @@ const configureApp = (): ReturnType<typeof configureStore> => {
     const store = configureStore({
         middleware: [terminal],
         state: {
-            theme: {
-                selected: config.theme,
-                themes: { ...themes },
-            },
+            ...createThemeState(config.selectedTheme, config.themes ?? []),
         },
     })
     return store
