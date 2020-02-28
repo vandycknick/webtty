@@ -5,7 +5,7 @@ import {
     SendInputRequest,
     OpenOutputRequest,
 } from "@webtty/messages"
-import uuidv4 from "uuid/v4"
+import { v4 as uuidv4 } from "uuid"
 
 const TERMINAL_SET_STATUS = "@webtty/TERMINAL_SET_STATUS"
 const TERMINAL_SEND_MESSAGE = "@webtty/TERMINAL_SEND_MESSAGE"

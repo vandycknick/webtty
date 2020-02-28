@@ -7,19 +7,21 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using Serilog;
 using WebTty.Api;
+using WebTty.Hosting.Models;
 using WebTty.Hosting.Services;
 
 namespace WebTty.Hosting
 {
     public static class WebTtyHost
     {
-        public static IHostBuilder CreateHostBuilder() => CreateHostBuilder(new WebTtyHostOptions());
+        public static IHostBuilder CreateHostBuilder() => CreateHostBuilder(Settings.Defaults);
 
-        public static IHostBuilder CreateHostBuilder(WebTtyHostOptions options)
+        public static IHostBuilder CreateHostBuilder(Settings options)
         {
             return new HostBuilder()
                 .ConfigureAppConfiguration(appConfig =>
                     appConfig.AddInMemoryCollection(options.ToDictionary()))
+                .ConfigureServices(services => services.AddSingleton(options))
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
@@ -30,7 +32,7 @@ namespace WebTty.Hosting
                         .Configure(Configure)
                         .UseKestrel(kestrel =>
                         {
-                            kestrel.Listen(options.Address, options.Port);
+                            kestrel.Listen(options.Address, options.Port.Value);
 
                             if (!string.IsNullOrEmpty(options.UnixSocket))
                             {

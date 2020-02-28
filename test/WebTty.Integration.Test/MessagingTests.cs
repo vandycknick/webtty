@@ -99,11 +99,7 @@ namespace WebTty.Integration.Test
 
             mockProcess
                 .Setup(process => process.SetWindowSize(request.Rows, request.Cols))
-                .Callback(() =>
-                {
-                    Console.WriteLine("-- SetWindowSize Called (TODO: remove this log when tests are stable again)");
-                    reset.Set();
-                });
+                .Callback(() => reset.Set());
 
             // When
             using var cts = new CancellationTokenSource(timeOut);
@@ -111,7 +107,6 @@ namespace WebTty.Integration.Test
             reset.WaitOne(TimeSpan.FromSeconds(5));
 
             // Then
-            Console.WriteLine("-- Going to verify. (TODO: remove this log)");
             mockProcess.Verify(
                 process => process.SetWindowSize(request.Rows, request.Cols),
                 Times.Once()

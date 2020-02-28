@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Moq;
 using Serilog;
 using WebTty.Hosting;
+using WebTty.Hosting.Models;
 using Xunit;
 
 namespace WebTty.Test
@@ -28,7 +29,7 @@ namespace WebTty.Test
         public async Task Program_RunAsync_PrintsAMesssageWhenTheServerIsUpAndRunning()
         {
             // Given
-            var options = new WebTtyHostOptions();
+            var options = new Settings();
 
             // When
             var program = new Program(MockedHostBuilder.Object, options, MockedLogger.Object);
@@ -46,7 +47,7 @@ namespace WebTty.Test
         public async Task Program_RunAsync_WritesAnErrorMessageWhenTheServerThrowsAnExceptionOnStartup()
         {
             // Given
-            var options = new WebTtyHostOptions();
+            var options = new Settings();
             MockedHost
                 .Setup(host => host.StartAsync(It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("some error"));
@@ -64,7 +65,7 @@ namespace WebTty.Test
         public async Task Program_RunAsync_ReturnsOneWhenTheServerThrowsAnExceptionOnStartup()
         {
             // Given
-            var options = new WebTtyHostOptions();
+            var options = new Settings();
             MockedHost
                 .Setup(host => host.StartAsync(It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("some error"));
@@ -81,7 +82,7 @@ namespace WebTty.Test
         public async Task Program_RunAsync_WritesAnErrorMessageWhenTheServerThrowsAnExceptionWhileShuttingDown()
         {
             // Given
-            var options = new WebTtyHostOptions();
+            var options = new Settings();
             MockedHost
                 .Setup(host => host.StopAsync(It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("some error"));
@@ -101,7 +102,7 @@ namespace WebTty.Test
         public async Task Program_RunAsync_ReturnsOneWhenTheServerThrowsAnExceptionWhileShuttingDown()
         {
             // Given
-            var options = new WebTtyHostOptions();
+            var options = new Settings();
             MockedHost
                 .Setup(host => host.StopAsync(It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("some error"));
