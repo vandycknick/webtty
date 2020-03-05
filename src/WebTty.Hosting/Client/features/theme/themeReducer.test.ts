@@ -4,7 +4,7 @@ import { selectTheme } from "./themeActions"
 describe("themeReducer", () => {
     it("returns an initial state", () => {
         // Given, When
-        const state = themeReducer(undefined, {} as any)
+        const state = themeReducer(undefined, { type: "unknown" })
 
         // Then
         expect(state).toEqual(initialState)

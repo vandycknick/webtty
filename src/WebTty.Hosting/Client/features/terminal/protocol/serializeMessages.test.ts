@@ -31,6 +31,7 @@ describe("serializeMessage", () => {
 
     it("throws an error trying to serialize an unknown message", () => {
         // Given
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const message: any = {}
 
         // When, Then

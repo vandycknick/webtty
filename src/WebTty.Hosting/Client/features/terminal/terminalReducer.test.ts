@@ -4,7 +4,7 @@ import { setStatus, newTab } from "./terminalActions"
 describe("terminalReducer", () => {
     it("should return an initial state", () => {
         // Given, When
-        const state = terminalReducer(undefined, {} as any)
+        const state = terminalReducer(undefined, { type: "unkown" })
 
         // Then
         expect(state).toEqual(initialState)
