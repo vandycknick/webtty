@@ -3,13 +3,13 @@ using System.Runtime.Serialization;
 namespace WebTty.Api.Messages
 {
     [DataContract]
-    public struct OpenNewTabRequest
+    public readonly struct OpenNewTabRequest
     {
         [DataMember]
-        public readonly string Id;
+        public string Id { get; }
 
         [DataMember]
-        public readonly string Title;
+        public string Title { get; }
 
         public OpenNewTabRequest(string id, string title)
         {
@@ -19,13 +19,13 @@ namespace WebTty.Api.Messages
     }
 
     [DataContract]
-    public struct OpenNewTabReply
+    public readonly struct OpenNewTabReply
     {
         [DataMember]
-        public readonly string Id;
+        public string Id { get; }
 
         [DataMember]
-        public readonly string ParentId;
+        public string ParentId { get; }
 
         public OpenNewTabReply(string id, string parentId)
         {

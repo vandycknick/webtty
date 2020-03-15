@@ -3,10 +3,10 @@ using System.Runtime.Serialization;
 namespace WebTty.Api.Messages
 {
     [DataContract]
-    public struct OpenOutputRequest
+    public readonly struct OpenOutputRequest
     {
         [DataMember]
-        public readonly string TabId;
+        public string TabId { get; }
 
         public OpenOutputRequest(string tabId)
         {

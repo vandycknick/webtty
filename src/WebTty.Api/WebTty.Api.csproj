@@ -5,10 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="FluentValidation" Version="8.6.2" />
     <PackageReference Include="MessagePack" Version="2.1.90" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+    <PackageReference Include="System.IO.Pipelines" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsPackaging)' == 'true'">

@@ -1,8 +1,8 @@
 namespace WebTty.Api.Messages
 {
-    public struct UnknownMessageEvent
+    public readonly struct UnknownMessageEvent
     {
-        public readonly string Name;
+        public string Name { get; }
 
         public UnknownMessageEvent(string name)
         {

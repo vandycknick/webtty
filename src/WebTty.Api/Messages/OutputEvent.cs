@@ -5,13 +5,13 @@ namespace WebTty.Api.Messages
 {
 
     [DataContract]
-    public struct OutputEvent
+    public readonly struct OutputEvent
     {
         [DataMember]
-        public readonly string TabId;
+        public string TabId { get; }
 
         [DataMember]
-        public readonly ArraySegment<byte> Data;
+        public ArraySegment<byte> Data { get; }
 
         public OutputEvent(string tabId, ArraySegment<byte> data)
         {

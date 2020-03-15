@@ -3,16 +3,16 @@ using System.Runtime.Serialization;
 namespace WebTty.Api.Messages
 {
     [DataContract]
-    public struct ErrorReply
+    public readonly struct ErrorReply
     {
         [DataMember]
-        public readonly string Id;
+        public string Id { get; }
 
         [DataMember]
-        public readonly string ParentId;
+        public string ParentId { get; }
 
         [DataMember]
-        public readonly string Message;
+        public string Message { get; }
 
         public ErrorReply(string id, string parentId, string message)
         {

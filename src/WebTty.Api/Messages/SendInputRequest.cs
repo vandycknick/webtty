@@ -3,13 +3,13 @@ using System.Runtime.Serialization;
 namespace WebTty.Api.Messages
 {
     [DataContract]
-    public struct SendInputRequest
+    public readonly struct SendInputRequest
     {
         [DataMember]
-        public readonly string TabId;
+        public string TabId { get; }
 
         [DataMember]
-        public readonly string Payload;
+        public string Payload { get; }
 
         public SendInputRequest(string tabId, string payload)
         {
