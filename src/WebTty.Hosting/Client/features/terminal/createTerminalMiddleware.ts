@@ -50,7 +50,7 @@ const createTerminalMiddleware = (
     const read = createMessageReader(connection)
     const write = createMessageWriter(connection)
 
-    return store => {
+    return (store) => {
         connection.start().then(() => {
             store.dispatch(setStatus("connected"))
             store.dispatch(openNewTab())
@@ -62,7 +62,7 @@ const createTerminalMiddleware = (
             )
         })
 
-        return next => (action: TerminalActions) => {
+        return (next) => (action: TerminalActions) => {
             if (action.type == TERMINAL_SEND_MESSAGE) {
                 write(action.payload)
             }

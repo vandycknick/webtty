@@ -2,7 +2,7 @@ import AsyncQueue from "./AsyncQueue"
 
 describe("AsyncQueue", () => {
     const delay = (time?: number): Promise<void> =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
             setTimeout(resolve, time)
         })
 
@@ -144,7 +144,7 @@ describe("AsyncQueue", () => {
         const messages = ["first", "second", "third", "fourth", "fifth"]
 
         // When, Then
-        const iterator = (async function() {
+        const iterator = (async function () {
             let matcher = 0
             for await (const message of queue) {
                 expect(message).toBe(messages[matcher])

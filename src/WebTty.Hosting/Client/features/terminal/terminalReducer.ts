@@ -21,7 +21,7 @@ const terminal: Reducer<State, TerminalActions> = (
     state = initialState,
     action,
 ) =>
-    produce(state, draft => {
+    produce(state, (draft) => {
         switch (action.type) {
             case TERMINAL_SET_STATUS:
                 draft.status = action.payload

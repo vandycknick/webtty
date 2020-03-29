@@ -14,10 +14,7 @@ describe("ConnectionBuilder", () => {
         const url = "/dummy-endpoint"
 
         // When
-        new ConnectionBuilder()
-            .withUrl(url)
-            .useWebSocket()
-            .build()
+        new ConnectionBuilder().withUrl(url).useWebSocket().build()
 
         // Then
         expect(WebSocketConnection).toHaveBeenCalledWith(
@@ -32,10 +29,7 @@ describe("ConnectionBuilder", () => {
         const url = "/dummy-endpoint"
 
         // When
-        new ConnectionBuilder()
-            .withUrl(url)
-            .useWebSocket("arraybuffer")
-            .build()
+        new ConnectionBuilder().withUrl(url).useWebSocket("arraybuffer").build()
 
         // Then
         expect(WebSocketConnection).toHaveBeenCalledWith(

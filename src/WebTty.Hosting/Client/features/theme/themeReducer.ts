@@ -15,7 +15,7 @@ const initialState: State = {
 }
 
 const theme: Reducer<State, ThemeActions> = (state = initialState, action) =>
-    produce(state, draft => {
+    produce(state, (draft) => {
         switch (action.type) {
             case THEME_SELECTED:
                 draft.selected = action.payload

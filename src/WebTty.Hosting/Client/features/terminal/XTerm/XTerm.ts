@@ -31,14 +31,14 @@ class XTerm implements ITerminal {
 
         if (this._isOpen === false) {
             this._terminal.open(this.ref)
-            this._addons.forEach(addon => this._terminal.loadAddon(addon))
+            this._addons.forEach((addon) => this._terminal.loadAddon(addon))
         }
 
         this._isOpen = true
     }
 
     public detach = (): void => {
-        this._disposables.forEach(disposable => disposable.dispose())
+        this._disposables.forEach((disposable) => disposable.dispose())
         const wrapper = this.ref.parentNode
         wrapper?.removeChild(this.ref)
         this._disposables = []
