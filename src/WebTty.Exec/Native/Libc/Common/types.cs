@@ -5,13 +5,12 @@ namespace WebTty.Exec.Native
 
     internal struct size_t : IEquatable<size_t>
     {
-        private ulong __value;
-        internal ulong Value => __value;
+        internal ulong Value { get; }
 
-        internal size_t(ulong arg) { __value = arg; }
-        internal size_t(uint arg) { __value = arg; }
-        unsafe internal size_t(void* arg) { __value = (ulong)arg; }
-        internal size_t(ssize_t arg) { __value = (ulong)arg.Value; }
+        internal size_t(ulong arg) { Value = arg; }
+        internal size_t(uint arg) { Value = arg; }
+        unsafe internal size_t(void* arg) { Value = (ulong)arg; }
+        internal size_t(ssize_t arg) { Value = (ulong)arg.Value; }
 
         internal uint ToUInt32() => (uint)Value;
         internal ulong ToUInt64() => Value;
@@ -69,11 +68,10 @@ namespace WebTty.Exec.Native
 
     internal struct ssize_t : IEquatable<ssize_t>
     {
-        private long __value;
-        internal long Value => __value;
+        internal long Value { get; }
 
-        internal ssize_t(long arg) { __value = arg; }
-        internal ssize_t(int arg) { __value = arg; }
+        internal ssize_t(long arg) { Value = arg; }
+        internal ssize_t(int arg) { Value = arg; }
 
         internal int ToInt32() => (int)Value;
         internal long ToInt64() => Value;
@@ -181,10 +179,9 @@ namespace WebTty.Exec.Native
 
     internal struct pid_t : IEquatable<pid_t>
     {
-        private int __value;
-        internal int Value => __value;
+        internal int Value { get; }
 
-        private pid_t(int value) => __value = value;
+        private pid_t(int value) => Value = value;
 
         public static implicit operator int(pid_t arg) => arg.Value;
         public static implicit operator pid_t(int arg) => new pid_t(arg);

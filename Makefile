@@ -134,11 +134,17 @@ test:
 dev:
 	$(MAKE) -j2 dev-server dev-client --ignore-errors
 
-dev-server:
+dev-client:
 	yarn --cwd $(WEBTTY_CLIENT) watch
 
-dev-client:
+dev-server:
 	dotnet watch -p $(CLI_PROJECT) run -- --config $(shell pwd)/data/config.json
+
+dev-docker:
+	$(MAKE) -j2 dev-server dev-client-docker --ignore-errors
+
+dev-server-docker:
+	dotnet watch -p $(CLI_PROJECT) run -- --config $(shell pwd)/data/config.json -a any
 
 schema:
 	dotnet build $(shell pwd)/src/WebTty.Api/WebTty.Api.csproj
