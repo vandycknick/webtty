@@ -10,6 +10,9 @@ namespace WebTty.Exec
 {
     public sealed partial class Process
     {
+        private const int READ_END_OF_PIPE = 0;
+        private const int WRITE_END_OF_PIPE = 1;
+
         private void StartCore()
         {
             var filename = ResolvePath(_fileName);
@@ -33,13 +36,17 @@ namespace WebTty.Exec
             }
 
             Pid = ForkAndExec(
-                filename,
-                args.ToArray(),
-                GetEnvironmentVariables(_attr.Env),
-                _attr,
-                out var stdin,
-                out var stdout,
-                out var stderr
+                filename: filename,
+                argv: args.ToArray(),
+                envp: GetEnvironmentVariables(_attr.Env),
+                cwd: _attr.Dir,
+                useTty: _attr.Sys != null ? _attr.Sys.UseTty : false,
+                redirectStdin: _attr.RedirectStdin,
+                redirectStdout: _attr.RedirectStdout,
+                redirectStderr: _attr.RedirectStderr,
+                stdin: out var stdin,
+                stdout: out var stdout,
+                stderr: out var stderr
             );
 
             if (_attr.RedirectStdin)
@@ -63,11 +70,16 @@ namespace WebTty.Exec
                 );
             }
 
-            var ret = Libc.waitpid(Pid, out var s, WaitPidOptions.WNOHANG);
+            var ret = Libc.waitpid(Pid, out var status, WaitPidOptions.WNOHANG);
 
             if (ret == 0)
             {
                 IsRunning = true;
+            }
+            else if(ret == Pid)
+            {
+                IsRunning = false;
+                ExitCode = GetUnixExitCode(status);
             }
         }
 
@@ -82,24 +94,12 @@ namespace WebTty.Exec
         private void WaitCore()
         {
             int result;
-            int exitCode;
+            int status;
 
-            while (Error.ShouldRetrySyscall(result = Libc.waitpid(Pid, out exitCode, WaitPidOptions.None))) ;
+            while (Error.ShouldRetrySyscall(result = Libc.waitpid(Pid, out status, WaitPidOptions.None))) ;
             if (result == Pid)
             {
-
-                if (Libc.WIFEXITED(exitCode))
-                {
-                    ExitCode = Libc.WEXITSTATUS(exitCode);
-                }
-                else if (Libc.WIFSIGNALED(exitCode))
-                {
-                    ExitCode = 128 + Libc.WTERMSIG(exitCode);
-                }
-                else
-                {
-                    ExitCode = -1;
-                }
+                ExitCode = GetUnixExitCode(status);
             }
             else
             {
@@ -108,6 +108,22 @@ namespace WebTty.Exec
             }
 
             IsRunning = false;
+        }
+
+        private int GetUnixExitCode(int status)
+        {
+            if (Libc.WIFEXITED(status))
+            {
+                return Libc.WEXITSTATUS(status);
+            }
+            else if (Libc.WIFSIGNALED(status))
+            {
+                return 128 + Libc.WTERMSIG(status);
+            }
+            else
+            {
+                return -1;
+            }
         }
 
         private void SetWindowSizeCore(int height, int width)
@@ -135,22 +151,69 @@ namespace WebTty.Exec
 
         }
 
+        internal static void CreateCloseOnExecPipe(int[] pipeFds)
+        {
+            int result;
+
+            while (Error.ShouldRetrySyscall(result = Libc.pipe(pipeFds)));
+
+            Error.ThrowExceptionForLastErrorIf(result);
+
+            while (Error.ShouldRetrySyscall(result = Libc.fcntl(pipeFds[0], Libc.F_SETFD, Libc.FD_CLOEXEC)));
+
+            if (result == 0)
+            {
+                while (Error.ShouldRetrySyscall(result = Libc.fcntl(pipeFds[1], Libc.F_SETFD, Libc.FD_CLOEXEC)));
+            }
+
+            if (result != 0)
+            {
+                int tmpErrno = Libc.errno;
+                Libc.close(pipeFds[0]);
+                Libc.close(pipeFds[1]);
+
+                Error.ThrowExceptionFor(tmpErrno);
+            }
+        }
+
         private static unsafe int ForkAndExec(
-            string filename, string[] args, string[] env, ProcAttr attr,
+            string filename, string[] argv, string[] envp,
+            string cwd, bool useTty, bool redirectStdin,
+            bool redirectStdout, bool redirectStderr,
             out int stdin, out int stdout, out int stderr
         )
         {
             byte** argvPtr = null;
             byte** envpPtr = null;
 
+            bool success = true;
+
+            ArrayHelpers.AllocNullTerminatedArray(argv, ref argvPtr);
+            ArrayHelpers.AllocNullTerminatedArray(envp, ref envpPtr);
+
+            int[] stdInFds = new[] { -1, -1 };
+            int[] stdOutFds = new[] { -1, -1 };
+            int[] stdErrFds = new[] { -1, -1 };
+            int masterFd = -1;
+            int slaveFd = -1;
+
             try
             {
-                ArrayHelpers.AllocNullTerminatedArray(args, ref argvPtr);
-                ArrayHelpers.AllocNullTerminatedArray(env, ref envpPtr);
-
                 int inFd, outFd, errFd;
-                int masterFd, slaveFd;
-                if (attr.Sys.UseTty)
+
+                if (filename == null || argv == null || envp == null)
+                {
+                    success = false;
+                    throw new ArgumentException("Provide the correct arguments");
+                }
+
+                if (Libc.access(filename, Libc.X_OK) != 0)
+                {
+                    success = false;
+                    throw new Exception("The given file is not accessible");
+                }
+
+                if (useTty)
                 {
                     var size = new winsize
                     {
@@ -160,57 +223,121 @@ namespace WebTty.Exec
 
                     if (Libc.openpty(out masterFd, out slaveFd, IntPtr.Zero, IntPtr.Zero, ref size) == -1)
                     {
+                        success = false;
                         throw new Exception("Could not open a new pty");
                     }
-                    inFd = outFd = errFd = slaveFd;
                 }
                 else
                 {
-                    throw new Exception("Only a new process with controlled tty supported");
+                    try
+                    {
+                        if (redirectStdin) CreateCloseOnExecPipe(stdInFds);
+                        if (redirectStdout) CreateCloseOnExecPipe(stdOutFds);
+                        if (redirectStderr) CreateCloseOnExecPipe(stdErrFds);
+                    }
+                    catch (Exception ex)
+                    {
+                        success = false;
+                        throw ex;
+                    }
                 }
 
                 var pid = Libc.fork();
 
                 if (pid < 0)
                 {
-                    Libc.close(masterFd);
-                    Libc.close(slaveFd);
+                    success = false;
                     Error.ThrowExceptionForLastError();
                 }
 
                 if (pid == 0)
                 {
-                    if (attr.Sys.UseTty)
+                    if (useTty)
                     {
                         Libc.close(masterFd);
                         Libc.setsid();
 
                         if (Libc.ioctl(slaveFd, Libc.TIOCSCTTY) == -1)
                         {
+                            success = false;
                             throw new Exception("Error trying to become controlling tty");
+                        }
+                        inFd = outFd = errFd = slaveFd;
+                    }
+                    else
+                    {
+                        inFd = stdInFds[READ_END_OF_PIPE];
+                        outFd = stdOutFds[WRITE_END_OF_PIPE];
+                        errFd = stdErrFds[WRITE_END_OF_PIPE];
+                    }
+
+                    while (Error.ShouldRetrySyscall(Libc.dup2(inFd, Libc.STDIN_FILENO)) && Libc.errno == Libc.EBUSY);
+                    while (Error.ShouldRetrySyscall(Libc.dup2(outFd, Libc.STDOUT_FILENO)) && Libc.errno == Libc.EBUSY);
+                    while (Error.ShouldRetrySyscall(Libc.dup2(errFd, Libc.STDERR_FILENO)) && Libc.errno == Libc.EBUSY);
+
+                    if (!string.IsNullOrEmpty(cwd))
+                    {
+                        var ret = Libc.chdir(cwd);
+
+                        if (ret == -1)
+                        {
+                            success = false;
+                            Error.ThrowExceptionForLastError();
                         }
                     }
 
-                    while (Libc.dup2(inFd, Libc.STDIN_FILENO) == -1 && Libc.errno == Libc.EBUSY);
-                    while (Libc.dup2(outFd, Libc.STDOUT_FILENO) == -1 && Libc.errno == Libc.EBUSY);
-                    while (Libc.dup2(errFd, Libc.STDERR_FILENO) == -1 && Libc.errno == Libc.EBUSY);
-
                     Libc.execve(filename, argvPtr, envpPtr);
-                    throw new Exception("Execve should not return");
+
+                    // Exec syscall should never return, and thus we should never get here, if we do then exit immediately
+                    Libc._exit(Libc.errno != 0 ? Libc.errno : -1);
                 }
 
                 Libc.close(slaveFd);
 
-                stdin = masterFd;
-                stdout = masterFd;
-                stderr = masterFd;
+                if (useTty)
+                {
+                    stdin = masterFd;
+                    stdout = masterFd;
+                    stderr = masterFd;
+                }
+                else
+                {
+                    stdin = stdInFds[WRITE_END_OF_PIPE];
+                    stdout = stdOutFds[READ_END_OF_PIPE];
+                    stderr = stdErrFds[READ_END_OF_PIPE];
+                }
 
                 return pid;
             }
             finally
             {
-                ArrayHelpers.FreeArray(argvPtr, args.Length);
-                ArrayHelpers.FreeArray(envpPtr, env.Length);
+                // Regardless of success or failure, close the parent's copy of the child's end of
+                // any opened pipes. The parent doesn't need them anymore.
+                CloseIfOpen(stdInFds[READ_END_OF_PIPE]);
+                CloseIfOpen(stdOutFds[WRITE_END_OF_PIPE]);
+                CloseIfOpen(stdErrFds[WRITE_END_OF_PIPE]);
+
+                if (!success)
+                {
+                    // Cleanup all open fd
+                    CloseIfOpen(masterFd);
+                    CloseIfOpen(slaveFd);
+
+                    CloseIfOpen(stdInFds[WRITE_END_OF_PIPE]);
+                    CloseIfOpen(stdOutFds[READ_END_OF_PIPE]);
+                    CloseIfOpen(stdErrFds[READ_END_OF_PIPE]);
+                }
+
+                ArrayHelpers.FreeArray(argvPtr, argv.Length);
+                ArrayHelpers.FreeArray(envpPtr, envp.Length);
+            }
+        }
+
+        private static void CloseIfOpen(int fd)
+        {
+            if (fd >= 0)
+            {
+                Libc.close(fd); // Ignoring errors from close is a deliberate choice
             }
         }
 

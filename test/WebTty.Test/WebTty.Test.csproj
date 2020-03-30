@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WebTty\WebTty.csproj" />
+    <ProjectReference Include="..\..\src\webTty\webTty.csproj" />
   </ItemGroup>
 
 </Project>

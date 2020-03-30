@@ -8,23 +8,29 @@ namespace WebTty
 {
     public static class ArgumentExtensions
     {
-        public static bool TryConvertIPAddress(SymbolResult result, out IPAddress address)
+        public static IPAddress TryConvertIPAddress(ArgumentResult result)
         {
             var token = result.Tokens.FirstOrDefault();
 
+            if (token is null) return IPAddress.Loopback;
+
             if (string.Equals("localhost", token.Value, StringComparison.OrdinalIgnoreCase))
             {
-                address = IPAddress.Loopback;
-                return true;
+                return IPAddress.Loopback;
             }
 
             if (string.Equals("any", token.Value, StringComparison.OrdinalIgnoreCase))
             {
-                address = IPAddress.Any;
-                return true;
+                return IPAddress.Any;
             }
 
-            return IPAddress.TryParse(token.Value, out address);
+            if (IPAddress.TryParse(token.Value, out var address))
+            {
+                return address;
+            }
+
+            result.ErrorMessage = $"Invalid: {token.Value} is not a valid ip address";
+            return null;
         }
 
         public static Argument<string> StartsWith(this Argument<string> arg, char character)

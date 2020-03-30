@@ -27,23 +27,33 @@ namespace WebTty.Exec.Native
 
 
         [DllImport(libc, SetLastError = true)]
-        public static extern int pipe(int* pipefd);
+        internal static extern int pipe(int[] pipefd);
         [DllImport(libc, SetLastError = true)]
-        public static extern int pipe2(int* pipefd, int flags);
+        internal static extern int pipe2(int[] pipefd, int flags);
         [DllImport(libc, SetLastError = true)]
-        public static extern int close(int fd);
+        internal static extern int close(int fd);
         [DllImport(libc, SetLastError = true)]
-        public static extern int dup(int oldfd);
+        internal static extern int dup(int oldfd);
         [DllImport(libc, SetLastError = true)]
-        public static extern int dup2(int oldfd, int newfd);
+        internal static extern int dup2(int oldfd, int newfd);
         [DllImport(libc, SetLastError = true)]
-        public static extern int dup3(int oldfd, int newfd, int flags);
+        internal static extern int dup3(int oldfd, int newfd, int flags);
 
         [DllImport(libc, SetLastError = true)]
         internal static extern long read(int fd, void* buf, uint count);
         [DllImport(libc, SetLastError = true)]
         internal static extern long write(int fd, void* buf, uint count);
 
+        [DllImport(libc, SetLastError = true)]
+        internal static extern int chdir(string path);
+
+        internal const int F_OK = 0;
+        internal const int R_OK = 4;
+        internal const int W_OK = 2;
+        internal const int X_OK = 1;
+
+        [DllImport(libc, SetLastError = true)]
+        internal static extern int access(string pathname, int mode);
 
         [DllImport(libc)]
         internal static extern uid_t getuid();
@@ -67,5 +77,8 @@ namespace WebTty.Exec.Native
 
         [DllImport(libc, SetLastError = true)]
         internal static extern int setpgid(pid_t pid, pid_t pgid);
+
+        [DllImport(libc)]
+        public static extern void _exit(int status);
     }
 }

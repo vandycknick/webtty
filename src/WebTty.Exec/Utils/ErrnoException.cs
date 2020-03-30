@@ -1,31 +1,30 @@
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using WebTty.Exec.Native;
 
 namespace WebTty.Exec.Utils
 {
-    internal class PosixException: Exception
+    internal class ErrnoException : Exception
     {
-        public PosixException(int errno) :
+        public ErrnoException() : this(Libc.errno)
+        { }
+
+        public ErrnoException(int errno) :
             base(GetErrorMessage(errno))
         {
             HResult = errno;
         }
 
-        public PosixException() :
-            this(Libc.errno)
-        { }
-
         private unsafe static string GetErrorMessage(int errno)
         {
-            int bufferLength = 1024;
-            byte* buffer = stackalloc byte[bufferLength];
+            var bufferLength = 1024;
+            var buffer = stackalloc byte[bufferLength];
 
             int rv = Libc.strerror_r(errno, buffer, bufferLength);
 
             return rv == 0 ? Marshal.PtrToStringAnsi((IntPtr)buffer) : $"errno {errno}";
         }
 
-        public static void Throw() => throw new PosixException();
+        public static void Throw() => throw new ErrnoException();
     }
 }

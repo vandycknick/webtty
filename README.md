@@ -11,7 +11,7 @@
 
 
 ## Introduction
-WebTty is a simple command-line tool that's inspired by GoTTY, mostly a learning experience about how terminals work internally. Built with ASP.NET and XTerm.js the tool allows turning any CLI tool into a web application. In short a TeleTYpewriter for the web that runs on any modern browser or platform..
+WebTty is a simple command-line tool that's inspired by GoTTY, mostly a learning experience about how terminals work internally. Built with ASP.NET and XTerm.js the tool allows turning any CLI tool into a web application. In short a TeleTYpewriter for the web that runs on any modern browser or platform.
 
 ## Installation
 
@@ -26,7 +26,7 @@ dotnet tool install -g webtty
 ```sh
 curl -L -o webtty{.exe} https://github.com/nickvdyck/webtty/releases/download/{VERSION}/webtty.{PLATFORM}
 ```
-You can replace the version portion by one of the releases found on github.
+You can replace the version portion by one of the releases found on GitHub.
 The platform can be replaced with a supported [dotnet RID](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog), this represents the platform you want the tool to run on. The following ones are supported:
 - osx-x64
 - linux-x64
@@ -79,8 +79,8 @@ Additional Arguments:
 - [Yarn](https://classic.yarnpkg.com/en/docs/install) >= 1.22.0
 
 ### Setup
-Before you can kick of a build you will need to run the following command. This will restore the projects dependencies and generate the required json schema messages.
-(This is necessary because not everything is fully integrated into msbuild yet.)
+Before you can kick off a build you will need to run the following command. This will restore the project's dependencies and generate the required JSON schema messages.
+(This is necessary because not everything is fully integrated into MSBuild yet.)
 
 #### Unix (Linux/MacOs)
 ```sh
@@ -91,12 +91,12 @@ make setup
 ```sh
 ./setup.ps1
 ```
-> This command/script needs to be ran after any changes to the json schema messages.
+> This command/script needs to run after any change to the schema.
 
 ### Dev
 You should be able to open the project in your favourite editor and use any integrated build flows from within the editor (eg Visual Studio, VS for Mac, Rider, ...)
 
-If you are a cli person the following commands will come in handy. These commands are unix only, on windows you should be able to just use the dotnet cli tool. The `Makefile` in essence is just a wrapper around the `dotnet` cli to save you some keystrokes.
+If you prefer using the CLI then the following commands will come in handy. These commands are Unix only, on windows you should be able to just use the dotnet cli tool. The `Makefile` in essence is just a wrapper around the `dotnet` cli to save you some keystrokes.
 
 #### Start server and watch for changes
 ```sh

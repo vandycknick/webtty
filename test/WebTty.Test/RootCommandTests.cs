@@ -29,7 +29,7 @@ namespace WebTty.Test
             var result = await command.InvokeAsync(args, console);
 
             // Then
-            Assert.Equal($"Invalid: Option: -a {value}", console.Error.ToString().Trim('\n', '\r'));
+            Assert.Equal($"Invalid: {value} is not a valid ip address", console.Error.ToString().Trim('\n', '\r'));
             Assert.Equal(1, result);
         }
 

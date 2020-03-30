@@ -14,7 +14,9 @@ namespace WebTty.Exec.Utils
             return false;
         }
 
-        public static void ThrowExceptionForLastError() => PosixException.Throw();
+        public static void ThrowExceptionFor(int errno) => new ErrnoException(errno);
+
+        public static void ThrowExceptionForLastError() => ErrnoException.Throw();
 
         public static void ThrowExceptionForLastErrorIf(int retval)
         {

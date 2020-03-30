@@ -1,19 +1,25 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 void print_errno();
 void print_ioctl();
+void print_fcntl();
 
-int main() {
+int main()
+{
 
     print_errno();
 
     print_ioctl();
 
+    print_fcntl();
 }
 
-void print_errno() {
+void print_errno()
+{
     printf("=== ERRNO ===\n");
     printf("EPERM is (int) 0x%x\n", EPERM);
     printf("ENOENT is (int) 0x%x\n", ENOENT);
@@ -61,10 +67,20 @@ void print_errno() {
     printf("=== ERRNO ===\n\n");
 }
 
-void print_ioctl() {
+void print_ioctl()
+{
     printf("=== IOCTL ===\n");
     printf("TIOCSWINSZ is (long) 0x%lx\n", TIOCSWINSZ);
     printf("TIOCSCTTY is (int) 0x%x\n", TIOCSCTTY);
     printf("TIOCNOTTY is (int) 0x%x\n", TIOCNOTTY);
     printf("=== IOCTL ===\n\n");
+}
+
+void print_fcntl()
+{
+    printf("=== FCNTL ===\n");
+    printf("F_SETFD is (int) 0x%x\n", F_SETFD);
+    printf("O_CLOEXEC is (int) 0x%x\n", O_CLOEXEC);
+    printf("FD_CLOEXEC is (int) 0x%x\n", FD_CLOEXEC);
+    printf("=== FCNTL ===\n\n");
 }

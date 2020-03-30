@@ -8,7 +8,7 @@ namespace WebTty.Exec
     {
         // If Dir is non-empty, the child changes into the directory before
         // creating the process.
-        public string Dir { get; set; }
+        public string Dir { get; set; } = string.Empty;
 
         // If Env is non-nil, it gives the environment variables for the
         // new process in the form returned by Environ.

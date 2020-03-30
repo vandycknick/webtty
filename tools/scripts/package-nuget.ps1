@@ -1,4 +1,4 @@
-$CLI_PROJECT = "$(Get-Location)\src\WebTty\WebTty.csproj"
+$CLI_PROJECT = "$(Get-Location)\src\webTty\webTty.csproj"
 $WEBTTY_EXEC = "$(Get-Location)\src\WebTty.Exec\WebTty.Exec.csproj"
 $CONFIGURATION = "Release"
 $ARTIFACTS = "$(Get-Location)\artifacts"

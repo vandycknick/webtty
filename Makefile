@@ -7,7 +7,7 @@ TEMP			:= $(shell pwd)/.tmp
 CONFIGURATION	:= Release
 WEBTTY_EXEC		:= src/WebTty.Exec/WebTty.Exec.csproj
 WEBTTY_CLIENT	:= src/WebTty.Hosting/Client
-CLI_PROJECT		:= src/WebTty/WebTty.csproj
+CLI_PROJECT		:= src/webTty/webTty.csproj
 CLI_TOOL		:= webtty
 RUNTIME 		:= linux-x64
 IS_PACKAGING	:= False
@@ -106,6 +106,9 @@ install:
 
 uninstall:
 	dotnet tool uninstall --global $(CLI_TOOL)
+
+update: uninstall install
+	webtty --version
 
 lint: types
 	yarn --cwd $(WEBTTY_CLIENT) lint

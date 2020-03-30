@@ -19,6 +19,16 @@ namespace WebTty.Exec
         /// </summary>
         public static IProcess Start(string filename, IReadOnlyCollection<string> argv, ProcAttr attr)
         {
+            if (filename == null || string.IsNullOrEmpty(filename))
+            {
+                throw new ArgumentNullException(nameof(filename));
+            }
+
+            if (argv == null)
+            {
+                throw new ArgumentNullException(nameof(argv));
+            }
+
             var proc = new Process
             {
                 _fileName = filename,
@@ -82,25 +92,17 @@ namespace WebTty.Exec
             CloseCore();
         }
 
-        private static string[] GetEnvironmentVariables(IDictionary env, string termName = null)
+        private static string[] GetEnvironmentVariables(IDictionary env)
         {
             var l = new List<string>();
-            if (termName == null)
-                termName = "xterm-256color";
 
-            l.Add("TERM=" + termName);
-
-            // Without this, tools like "vi" produce sequences that are not UTF-8 friendly
-            l.Add("LANG=en_US.UTF-8");
-
-            foreach (var x in new[] { "LOGNAME", "USER", "DISPLAY", "LC_TYPE", "USER", "HOME", "PATH" })
+            foreach (var key in env.Keys)
             {
-                if (env.Contains(x)) l.Add($"{x}={env[x]}");
+                l.Add($"{key}={env[key]}");
             }
             return l.ToArray();
         }
 
-        #region Internal Path utils
         private static string ResolvePath(string filename)
         {
             // If path rooted then we have an absolute path to an executable
@@ -131,6 +133,5 @@ namespace WebTty.Exec
             }
             return null;
         }
-        #endregion
     }
 }

@@ -86,7 +86,7 @@ namespace WebTty
                     new string[] { "-a", "--address" },
                     "IP address to use [localhost]. Use any to listen to any available address. Ex (0.0.0.0, any, 192.168.2.3, ...).")
                 {
-                    Argument = new Argument<IPAddress>(ArgumentExtensions.TryConvertIPAddress, () => IPAddress.Loopback)
+                    Argument = new Argument<IPAddress>(ArgumentExtensions.TryConvertIPAddress, true)
                     {
                         Name = "address",
                         Arity = ArgumentArity.ZeroOrOne,
