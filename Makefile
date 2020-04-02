@@ -124,6 +124,11 @@ test:
 		/property:CoverletOutputFormat=lcov \
 		/property:CoverletOutput=$(TEMP)/webtty.test/lcov.info
 
+	dotnet test test/WebTty.Exec.Test/WebTty.Exec.Test.csproj -c Release \
+		/property:CollectCoverage=true \
+		/property:CoverletOutputFormat=lcov \
+		/property:CoverletOutput=$(TEMP)/webtty.exec.test/lcov.info
+
 	dotnet test test/WebTty.Api.Test/WebTty.Api.Test.csproj -c Release \
 		/property:CollectCoverage=true \
 		/property:CoverletOutputFormat=lcov \
