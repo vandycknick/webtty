@@ -96,6 +96,8 @@ namespace WebTty.Exec
             int result;
             int status;
 
+            if (IsRunning == false) return;
+
             while (Error.ShouldRetrySyscall(result = Libc.waitpid(Pid, out status, WaitPidOptions.None))) ;
             if (result == Pid)
             {
