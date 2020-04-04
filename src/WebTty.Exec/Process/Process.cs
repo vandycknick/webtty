@@ -19,7 +19,7 @@ namespace WebTty.Exec
         /// </summary>
         public static IProcess Start(string filename, IReadOnlyCollection<string> argv, ProcAttr attr)
         {
-            if (filename == null || string.IsNullOrEmpty(filename))
+            if (string.IsNullOrEmpty(filename))
             {
                 throw new ArgumentNullException(nameof(filename));
             }
