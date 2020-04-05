@@ -9,6 +9,7 @@ namespace WebTty.Api.Infrastructure.Connection
         internal readonly IMessageReader _reader;
         internal readonly IMessageWriter _writer;
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+
         public CancellationToken Token => _tokenSource.Token;
         public bool IsOpen => !_tokenSource.Token.IsCancellationRequested;
         internal IDuplexPipe Application { get; }

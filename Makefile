@@ -155,9 +155,9 @@ dev-server-docker:
 	dotnet watch -p $(CLI_PROJECT) run -- --config $(shell pwd)/data/config.json -a any
 
 schema:
-	dotnet build $(shell pwd)/src/WebTty.Api/WebTty.Api.csproj
+	dotnet build $(shell pwd)/src/WebTty.Schema/WebTty.Schema.csproj
 	dotnet run -p tools/jsonschema/jsonschema.csproj -- \
-		--assembly $(shell pwd)/.build/bin/WebTty.Api/Debug/netcoreapp3.1/WebTty.Api.dll \
+		--assembly $(shell pwd)/.build/bin/WebTty.Schema/Debug/netstandard2.0/WebTty.Schema.dll \
 		--namespace WebTty.Api.Messages \
 		--output $(shell pwd)/$(WEBTTY_CLIENT)/.tmp/messages
 

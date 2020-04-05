@@ -19,4 +19,8 @@
     <ProjectReference Include="..\WebTty.Exec\WebTty.Exec.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WebTty.Schema\WebTty.Schema.csproj" />
+  </ItemGroup>
+
 </Project>

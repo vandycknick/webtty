@@ -1,9 +1,9 @@
 using System.Runtime.Serialization;
 
-namespace WebTty.Api.Messages
+namespace WebTty.Schema.Messages
 {
     [DataContract]
-    public readonly struct ErrorReply
+    public readonly struct OpenNewTabReply
     {
         [DataMember]
         public string Id { get; }
@@ -11,14 +11,10 @@ namespace WebTty.Api.Messages
         [DataMember]
         public string ParentId { get; }
 
-        [DataMember]
-        public string Message { get; }
-
-        public ErrorReply(string id, string parentId, string message)
+        public OpenNewTabReply(string id, string parentId)
         {
             Id = id;
             ParentId = parentId;
-            Message = message;
         }
     }
 }

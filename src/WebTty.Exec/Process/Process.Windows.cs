@@ -206,14 +206,14 @@ namespace WebTty.Exec
                 lpEnvironment: IntPtr.Zero,
                 lpCurrentDirectory: null,
                 lpStartupInfo: ref sInfoEx,
-                lpProcessInformation: out PROCESS_INFORMATION pInfo
+                lpProcessInformation: out var processInfo
             );
             if (!success)
             {
                 throw new Win32Exception(Marshal.GetLastWin32Error(), $"Could not create process. {commandLine}");
             }
 
-            return pInfo;
+            return processInfo;
         }
 
         public static string GetDefaultShell() => "cmd";

@@ -1,4 +1,4 @@
-namespace WebTty.Api.Messages
+namespace WebTty.Schema.Messages
 {
     public readonly struct UnknownMessageEvent
     {
