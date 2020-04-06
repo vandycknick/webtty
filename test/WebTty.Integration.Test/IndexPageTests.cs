@@ -6,20 +6,20 @@ using Xunit;
 
 namespace WebTty.Integration.Test
 {
-    public class IndexPageTests : IClassFixture<WebTtyHostFactory>
+    public class IndexPageTests : IClassFixture<WebTtyTestHost>
     {
-        private readonly WebTtyHostFactory _factory;
+        private readonly WebTtyTestHost _testHost;
 
-        public IndexPageTests(WebTtyHostFactory factory)
+        public IndexPageTests(WebTtyTestHost testHost)
         {
-            _factory = factory;
+            _testHost = testHost;
         }
 
         [Fact]
         public async Task WebTtyServer_Returns_IndexPage_FromRoot()
         {
             // Given
-            var client = _factory.GetTestClient();
+            var client = _testHost.GetTestClient();
 
             // When
             var response = await client.GetAsync("/");
@@ -34,7 +34,7 @@ namespace WebTty.Integration.Test
         public async Task WebTtyServer_Injects_ClientConfiguration()
         {
             // Given
-            var client = _factory.GetTestClient();
+            var client = _testHost.GetTestClient();
 
             // When
             var response = await client.GetAsync("/");

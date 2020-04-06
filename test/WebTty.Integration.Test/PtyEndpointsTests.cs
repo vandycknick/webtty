@@ -5,20 +5,20 @@ using System.Net;
 
 namespace WebTty.Integration.Test
 {
-    public class PtyEndpointsTests : IClassFixture<WebTtyHostFactory>
+    public class PtyEndpointsTests : IClassFixture<WebTtyTestHost>
     {
-        private readonly WebTtyHostFactory _factory;
+        private readonly WebTtyTestHost _testHost;
 
-        public PtyEndpointsTests(WebTtyHostFactory factory)
+        public PtyEndpointsTests(WebTtyTestHost testHost)
         {
-            _factory = factory;
+            _testHost = testHost;
         }
 
         [Fact]
         public async Task PtyEndpoint_Returns_405WhenNotAGetRequest()
         {
             // Given
-            var client = _factory.GetTestClient();
+            var client = _testHost.GetTestClient();
 
             // When
             var content = new StringContent("Hello");
@@ -33,7 +33,7 @@ namespace WebTty.Integration.Test
         public async Task PtyEndpoint_Returns_426WhenNoUpgrade()
         {
             // Given
-            var client = _factory.GetTestClient();
+            var client = _testHost.GetTestClient();
 
             // When
             var response = await client.GetAsync("/pty");

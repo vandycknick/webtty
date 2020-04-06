@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -18,12 +19,13 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_ReturnsAnErrorWhenGivenAnInvalidIp(string value)
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "-a", value
             };
+            var command = Program.CreateRootCommand(args);
+            command.Handler = CommandHandler.Create(Noop);
+            var console = new TestConsole();
 
             // When
             var result = await command.InvokeAsync(args, console);
@@ -38,17 +40,14 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_CorrectlySetsAddressForValidIP(string value, IPAddress expected)
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "-a", value
             };
+            var command = Program.CreateRootCommand(args);
+            var console = new TestConsole();
             IPAddress address = null;
-            command.Handler = CommandHandler.Create<IPAddress>(a =>
-            {
-                address = a;
-            });
+            command.Handler = CommandHandler.Create<IPAddress>(a => address = a);
 
             // When
             var result = await command.InvokeAsync(args, console);
@@ -65,12 +64,13 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_ReturnsErrorWhenPortHigherThanMaxValue(string arg)
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "-p", arg
             };
+            var command = Program.CreateRootCommand(args);
+            command.Handler = CommandHandler.Create(Noop);
+            var console = new TestConsole();
 
             // When
             var result = await command.InvokeAsync(args, console);
@@ -87,12 +87,13 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_ReturnsErrorWhenPortLowerThanMinValue(string value)
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "-p", value
             };
+            var command = Program.CreateRootCommand(args);
+            command.Handler = CommandHandler.Create(Noop);
+            var console = new TestConsole();
 
             // When
             var result = await command.InvokeAsync(args, console);
@@ -109,12 +110,13 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_ReturnsAReadableErrorMessageWhenNotGivenAnInt(string value)
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "-p", value
             };
+            var command = Program.CreateRootCommand(args);
+            command.Handler = CommandHandler.Create(Noop);
+            var console = new TestConsole();
 
             // When
             var result = await command.InvokeAsync(args, console);
@@ -132,12 +134,12 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_CorrectlySetsPortForValidPortValues(string value, int expected)
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "-p", value
             };
+            var command = Program.CreateRootCommand(args);
+            var console = new TestConsole();
             int port = 0;
             command.Handler = CommandHandler.Create<int>(p =>
             {
@@ -158,12 +160,13 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_ReturnsErrorMessageWhenPathDoesNotStartWithAString(string value)
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "--path", value
             };
+            var command = Program.CreateRootCommand(args);
+            command.Handler = CommandHandler.Create(Noop);
+            var console = new TestConsole();
 
             // When
             var result = await command.InvokeAsync(args, console);
@@ -177,12 +180,12 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_CorrectlySetsPathValue()
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "--path", "/world"
             };
+            var command = Program.CreateRootCommand(args);
+            var console = new TestConsole();
             command.Handler = CommandHandler.Create<string>(Assertion);
 
             // When
@@ -199,12 +202,12 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_CorrectlySetsThemeValue()
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "--theme", "hello"
             };
+            var command = Program.CreateRootCommand(args);
+            var console = new TestConsole();
             command.Handler = CommandHandler.Create<string>(Assertion);
 
             // When
@@ -221,12 +224,12 @@ namespace WebTty.Test
         public async Task RootCommand_Invoke_CorrectlySetsUnixSocketValue()
         {
             // Given
-            var command = Program.RootCommand();
-            var console = new TestConsole();
             var args = new string[]
             {
                 "--unix-socket", "hello"
             };
+            var command = Program.CreateRootCommand(args);
+            var console = new TestConsole();
             command.Handler = CommandHandler.Create<string>(Assertion);
 
             // When
@@ -239,6 +242,7 @@ namespace WebTty.Test
             }
         }
 
+        private static readonly Action Noop = () => {};
 
         public static IEnumerable<object[]> GetValidIPAddressData()
         {

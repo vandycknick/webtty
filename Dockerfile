@@ -2,12 +2,13 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1.101 AS dev
 
 WORKDIR /app
 
-RUN apt update && apt install -y sudo apt-transport-https
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-RUN apt update && apt install -y nodejs make yarn
+RUN apt update && \
+    apt install -y --no-install-recommends nodejs make yarn apt-transport-https && \
+    rm -rf /var/lib/apt/lists/*
 
 # COPY sln, prop files and makefile
 COPY ./*.sln ./Common.props ./Directory.Build.props ./Makefile ./
