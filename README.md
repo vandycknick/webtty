@@ -107,10 +107,9 @@ This will start the webtty host in watch mode. And it will spin up the client wi
 ### Package
 ```sh
 make package # Package as a nuget global tool
-make package-native # Publish self-contained binary tool for current os
 
-make package-osx # Publish self-contained binary tool for osx
-make package-linux # Publish self-contained binary tool for linux
+make package-native # Publish self-contained binary tool for linux
+make package-native RUNTIME=osx-x64 # Publish self-contained binary tool for osx
 ```
 
 ### Installation

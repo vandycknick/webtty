@@ -1,14 +1,7 @@
-using Microsoft.Extensions.Hosting;
-using Serilog;
-using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
-using System.IO;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using WebTty.Hosting.Models;
 
 namespace WebTty
 {
