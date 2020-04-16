@@ -149,7 +149,7 @@ dev-server:
 	dotnet watch -p $(CLI_PROJECT) run -- --config $(shell pwd)/data/config.json
 
 dev-docker:
-	$(MAKE) -j2 dev-server dev-client-docker --ignore-errors
+	$(MAKE) -j2 dev-server-docker dev-client --ignore-errors
 
 dev-server-docker:
 	dotnet watch -p $(CLI_PROJECT) run -- --config $(shell pwd)/data/config.json -a any
