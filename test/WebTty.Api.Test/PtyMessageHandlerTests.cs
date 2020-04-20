@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using WebTty.Api.Common;
-using WebTty.Api.Messages;
 using WebTty.Api.Models;
+using WebTty.Schema.Messages;
 using WebTty.Exec;
 using Xunit;
 

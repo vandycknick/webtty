@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace WebTty.Api.Messages
+namespace WebTty.Schema.Messages
 {
 
     [DataContract]

@@ -20,31 +20,16 @@ namespace WebTty.Integration.Test
         [Fact]
         public async Task Server_Starts_AndConfiguresEndpoints()
         {
-            //Given
-            var mockEngine = new Mock<IEngine>();
+            // Given
+            await using var host = new WebTtyTestHost();
+            await host.InitializeAsync();
 
-            var builder = WebTtyHost.CreateHostBuilder()
-                 .ConfigureWebHost(webHost =>
-                 {
-                     webHost.UseTestServer();
-                     webHost.ConfigureTestServices(services =>
-                     {
-                         services.AddSingleton(mockEngine.Object);
-                     });
-                 });
-
-            var host = await builder.StartAsync();
-            var server = host.GetTestServer();
+            // When
             var client = host.GetTestClient();
-
-            var endpoint = new Uri(server.BaseAddress, "pty");
-            var socketClient = server.CreateWebSocketClient();
-
-            //When
             var response = await client.GetAsync("/");
-            var connection = await socketClient.ConnectAsync(endpoint, CancellationToken.None);
+            var connection = await host.OpenWebSocket("pty");
 
-            //Then
+            // Then
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal(WebSocketState.Open, connection.State);
         }

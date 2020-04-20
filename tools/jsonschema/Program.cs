@@ -82,6 +82,8 @@ namespace jsonschema
                 TypeScriptVersion = 3.7m,
             };
 
+            Directory.CreateDirectory(output);
+
             var mainModule = "";
             foreach (var type in messages)
             {
@@ -91,7 +93,6 @@ namespace jsonschema
                 var codeGenerator = new TypeScriptGenerator(schemaForType, tsSettings);
                 var code = codeGenerator.GenerateFile();
 
-                Directory.CreateDirectory(output);
 
                 using (var sourceFile = File.Open($"{output}/{type.Name}.ts", FileMode.Create))
                 {

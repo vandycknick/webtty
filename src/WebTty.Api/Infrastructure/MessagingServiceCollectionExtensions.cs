@@ -9,18 +9,19 @@ namespace WebTty.Api.Infrastructure
 {
     public static class MessagingServiceCollectionExtensions
     {
-        public static IServiceCollection AddMessaging(this IServiceCollection services)
-        {
-            var options = new MessagingOptions
+        public static IServiceCollection AddMessaging(this IServiceCollection services) =>
+            services.AddMessaging(options =>
             {
-                MessageSource = Assembly.GetExecutingAssembly(),
-            };
+                options.MessageSource = Assembly.GetExecutingAssembly();
+            });
 
-            return services.AddMessaging(options);
-        }
-
-        public static IServiceCollection AddMessaging(this IServiceCollection services, MessagingOptions options)
+        public static IServiceCollection AddMessaging(this IServiceCollection services, Action<MessagingOptions> configureOptions)
         {
+            if (configureOptions == null) throw new ArgumentNullException(nameof(configureOptions));
+
+            var options = new MessagingOptions();
+            configureOptions(options);
+
             services.AddSingleton(options);
             services.AddSingleton<JsonProtocol>();
             services.AddSingleton<BinaryProtocol>();

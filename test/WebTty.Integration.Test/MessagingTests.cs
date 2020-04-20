@@ -1,38 +1,37 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
-using WebTty.Api.Messages;
-using WebTty.Exec;
 using WebTty.Api.Infrastructure.Protocol;
-using WebTty.Integration.Test.Helpers;
-using Xunit;
 using WebTty.Api.Models;
+using WebTty.Exec;
+using WebTty.Integration.Test.Helpers;
+using WebTty.Schema.Messages;
+using Xunit;
 
 namespace WebTty.Integration.Test
 {
-    public class MessagingTests : IClassFixture<WebTtyHostFactory>, IAsyncLifetime
+    public class MessagingTests : IClassFixture<WebTtyTestHost>, IAsyncLifetime
     {
         private readonly TimeSpan timeOut = TimeSpan.FromSeconds(5);
-        private readonly WebTtyHostFactory _factory;
+        private readonly WebTtyTestHost _testHost;
         private WebSocket socket;
         private readonly IMessageWriter writer;
         private readonly IMessageReader reader;
 
-        public MessagingTests(WebTtyHostFactory factory)
+        public MessagingTests(WebTtyTestHost testHost)
         {
-            _factory = factory;
-            writer = _factory.GetRequiredService<IMessageWriter>();
-            reader = _factory.GetRequiredService<IMessageReader>();
+            _testHost = testHost;
+            writer = _testHost.GetRequiredService<IMessageWriter>();
+            reader = _testHost.GetRequiredService<IMessageReader>();
         }
 
         public async Task InitializeAsync()
         {
-            socket = await _factory.OpenWebSocket("pty");
+            socket = await _testHost.OpenWebSocket("pty");
         }
 
         public Task DisposeAsync() => Task.CompletedTask;
@@ -42,7 +41,7 @@ namespace WebTty.Integration.Test
         public async Task PtyEndpoint_Handles_OpenNewTabRequest()
         {
             // Given
-            var mockEngine = _factory.MockEngine;
+            var mockEngine = _testHost.MockEngine;
 
             var terminal = new Terminal
             {
@@ -80,7 +79,7 @@ namespace WebTty.Integration.Test
         public async Task PtyEndpoint_Handles_ResizeTabRequest()
         {
             // Given
-            var mockEngine = _factory.MockEngine;
+            var mockEngine = _testHost.MockEngine;
 
             var terminal = new Terminal
             {
@@ -117,7 +116,7 @@ namespace WebTty.Integration.Test
         public async Task PtyEndpoint_Handles_SendInputRequest()
         {
             // Given
-            var mockEngine = _factory.MockEngine;
+            var mockEngine = _testHost.MockEngine;
 
             var terminal = new Terminal
             {
@@ -149,7 +148,7 @@ namespace WebTty.Integration.Test
         public async Task PtyEndpoint_Handles_OpenOutputRequest()
         {
             // Given
-            var mockEngine = _factory.MockEngine;
+            var mockEngine = _testHost.MockEngine;
 
             var terminal = new Terminal
             {

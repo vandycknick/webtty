@@ -1,31 +1,54 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29926.136
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1AC36FF1-9401-4B21-B12F-03CB3A91F819}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{13B4E4EF-A79B-4D2D-92FC-D1C0CAC1B3F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTty.Test", "test\WebTty.Test\WebTty.Test.csproj", "{87FC964C-5A1C-43E7-B11D-CA6E272DC937}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebTty.Test", "test\WebTty.Test\WebTty.Test.csproj", "{87FC964C-5A1C-43E7-B11D-CA6E272DC937}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{FCC1AE54-B02D-4D67-9EB7-4C098A170B12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jsonschema", "tools\jsonschema\jsonschema.csproj", "{C2239F2F-440B-49E3-B3D9-1D6894375A95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "jsonschema", "tools\jsonschema\jsonschema.csproj", "{C2239F2F-440B-49E3-B3D9-1D6894375A95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTty.Exec", "src\WebTty.Exec\WebTty.Exec.csproj", "{48B6F493-16BB-4CCD-996A-655087322480}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebTty.Exec", "src\WebTty.Exec\WebTty.Exec.csproj", "{48B6F493-16BB-4CCD-996A-655087322480}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTty.Integration.Test", "test\WebTty.Integration.Test\WebTty.Integration.Test.csproj", "{6221F9C9-A695-4269-A130-D00EBB1DD095}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebTty.Integration.Test", "test\WebTty.Integration.Test\WebTty.Integration.Test.csproj", "{6221F9C9-A695-4269-A130-D00EBB1DD095}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTty.Api", "src\WebTty.Api\WebTty.Api.csproj", "{6167B133-77AE-4042-B1E4-302829A1B861}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebTty.Api", "src\WebTty.Api\WebTty.Api.csproj", "{6167B133-77AE-4042-B1E4-302829A1B861}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTty.Hosting", "src\WebTty.Hosting\WebTty.Hosting.csproj", "{C94B577B-E718-4663-95DC-A002668D2A88}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebTty.Hosting", "src\WebTty.Hosting\WebTty.Hosting.csproj", "{C94B577B-E718-4663-95DC-A002668D2A88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTty.Api.Test", "test\WebTty.Api.Test\WebTty.Api.Test.csproj", "{AEF3E325-A790-4A8A-AEF7-9E3C0DF125B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebTty.Api.Test", "test\WebTty.Api.Test\WebTty.Api.Test.csproj", "{AEF3E325-A790-4A8A-AEF7-9E3C0DF125B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webtty", "src\webtty\webtty.csproj", "{41808129-4BA2-48AB-9269-921F08C7DF6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "webtty", "src\webtty\webtty.csproj", "{41808129-4BA2-48AB-9269-921F08C7DF6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTty.Exec.Test", "test\WebTty.Exec.Test\WebTty.Exec.Test.csproj", "{6E403E5E-0588-4221-A893-2AA5D222E297}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebTty.Exec.Test", "test\WebTty.Exec.Test\WebTty.Exec.Test.csproj", "{6E403E5E-0588-4221-A893-2AA5D222E297}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebTty.Schema", "src\WebTty.Schema\WebTty.Schema.csproj", "{C38870CD-D3AA-47C6-9974-CFF1818255F2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AA75F055-A38F-4990-8359-1BFF90C4AED7}"
+	ProjectSection(SolutionItems) = preProject
+		.codecov.yml = .codecov.yml
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		CHANGELOG.md = CHANGELOG.md
+		Common.props = Common.props
+		Directory.Build.props = Directory.Build.props
+		LICENSE = LICENSE
+		Makefile = Makefile
+		README.md = README.md
+		setup.ps1 = setup.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{8B60D0DD-B58A-4AEC-938D-2AC50FD44B4B}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		docker-compose.yml = docker-compose.yml
+		Dockerfile = Dockerfile
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,9 +58,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{87FC964C-5A1C-43E7-B11D-CA6E272DC937}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -148,6 +168,21 @@ Global
 		{6E403E5E-0588-4221-A893-2AA5D222E297}.Release|x64.Build.0 = Release|Any CPU
 		{6E403E5E-0588-4221-A893-2AA5D222E297}.Release|x86.ActiveCfg = Release|Any CPU
 		{6E403E5E-0588-4221-A893-2AA5D222E297}.Release|x86.Build.0 = Release|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Debug|x64.Build.0 = Debug|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Debug|x86.Build.0 = Debug|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Release|x64.ActiveCfg = Release|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Release|x64.Build.0 = Release|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Release|x86.ActiveCfg = Release|Any CPU
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{87FC964C-5A1C-43E7-B11D-CA6E272DC937} = {13B4E4EF-A79B-4D2D-92FC-D1C0CAC1B3F2}
@@ -159,5 +194,9 @@ Global
 		{AEF3E325-A790-4A8A-AEF7-9E3C0DF125B7} = {13B4E4EF-A79B-4D2D-92FC-D1C0CAC1B3F2}
 		{41808129-4BA2-48AB-9269-921F08C7DF6A} = {1AC36FF1-9401-4B21-B12F-03CB3A91F819}
 		{6E403E5E-0588-4221-A893-2AA5D222E297} = {13B4E4EF-A79B-4D2D-92FC-D1C0CAC1B3F2}
+		{C38870CD-D3AA-47C6-9974-CFF1818255F2} = {1AC36FF1-9401-4B21-B12F-03CB3A91F819}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {66E25ABD-3CAE-424A-9F18-2B2847E0F63E}
 	EndGlobalSection
 EndGlobal

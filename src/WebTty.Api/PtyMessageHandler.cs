@@ -5,9 +5,9 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using WebTty.Api.Common;
-using WebTty.Api.Messages;
 using WebTty.Api.Infrastructure;
 using WebTty.Api.Models;
+using WebTty.Schema.Messages;
 using Microsoft.Extensions.Configuration;
 
 namespace WebTty.Api

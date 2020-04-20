@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using WebTty.Api.Common;
 using WebTty.Api.Infrastructure;
+using WebTty.Schema.Messages;
 
 namespace WebTty.Api
 {
@@ -11,7 +12,7 @@ namespace WebTty.Api
     {
         public static IServiceCollection AddPty(this IServiceCollection services)
         {
-            services.AddMessaging();
+            services.AddMessaging(options => options.MessageSource = typeof(OpenNewTabRequest).Assembly );
             services.AddTransient<IEngine, TerminalEngine>();
             services.AddSingleton(typeof(ILoggerAdapter<>), typeof(LoggerAdapter<>));
 

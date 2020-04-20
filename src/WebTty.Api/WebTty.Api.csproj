@@ -6,9 +6,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="FluentValidation" Version="8.6.2" />
     <PackageReference Include="MessagePack" Version="2.1.90" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsPackaging)' == 'true'">
@@ -17,6 +15,10 @@
 
   <ItemGroup Condition="'$(IsPackaging)' == 'false'">
     <ProjectReference Include="..\WebTty.Exec\WebTty.Exec.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WebTty.Schema\WebTty.Schema.csproj" />
   </ItemGroup>
 
 </Project>

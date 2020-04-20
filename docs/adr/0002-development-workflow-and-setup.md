@@ -8,9 +8,7 @@ Accepted
 
 ## Context
 
-This repository could potentially contain multiple solutions that all consists of multiple projects. For this I will need a build system that is capable of creating multiple assemblies or executables. Some of those projects may require more advanced tooling because of the need to target multiple platforms or because to the requirement of a different dev stack (eg front end development). Thus extra tooling to ease development and publishing a single artefact will be needed.
-
-The different tools I considered for this:
+This repository could potentially contain multiple solutions that consist of multiple projects. For this, a build system is needed that is capable of creating multiple assemblies or executables. Some of those projects may require more advanced tooling because of the need to target multiple platforms or because of the requirement of a different dev stack (eg front end development). Thus it could be interesting to look at some build tools. Tools I considered using:
 - Makefile
 - Fake
 - Cake
@@ -21,20 +19,15 @@ The different tools I considered for this:
 
 ## Decision
 
-I will use standard MSBuild and csproj files to create projects that produce .NET assemblies and executables. For front-end development I will use yarn and webpack in order to bundle front-end code into a single artefact.
+The idea is to keep things simple and easy to use by leveraging build tooling provided by dotnet. This means that `csproj` will be leveraged as much as possible. Any TypeScript related tools should be called via MSBuild targets. This makes sure that it's easy to get up and running via a CLI or an IDE.
 
-To abstract away msbuild, dotnet cli, yarn, ... I will use Nuke. This allows me to use the same workflow on different operating systems. It also allows me to have a single command line interface to lint, test, build and package this whole project. And as an added benefit I can leverage C# to write my build scripts and use rich IDE integrations (intellisense, ...).
+For the front-end and TypeScript related projects, the decision is made to use `Yarn` to manage and install packages and `Webpack` to bundle any assets. Yarn installs and Webpack builds should be mainly called from MSBuild.
 
-My main focus will be around tooling geared towards a cli first and VSCode workflow.
+A general Makefile will be provided for Unix environments to ease CLI based development. This way many dotnet CLI commands can be orchestrated together. The plan is to only provide this for Unix based environments no such efforts will be made to add a higher level orchestration for Windows.
 
-The main high level commands provided:
-
-- `nuke setup` Will install all dependencies and generate all code required needed to work on this project.
-- `nuke check` Will run all checks over the code base (linting, unit, e2e, ...).
-- `nuke build` Will produce an executable.
-- `nuke package` Will create a shareable artefact.
+When extra commands are needed to bootstrap certain parts of the application those should then be thoroughly documented in the `README.md` file. We should try to avoid this as much as possible and when needed try to put measures in place to move away from this extra step.
 
 ## Consequences
 
-- It will not be possible to just double click the solution file and get started in Visual Studio. In order to run the solution in Visual Studio some setup process will need to be done first before the project can be opened in Visual Studio. Documentation for this will need to be added to or linked from the readme.
-- Nuke will require some extra knowledge in order to contribute to the build system. But given the low frequency of changes to this I think this is acceptable.
+- No Makefile equivalent for Windows means that CLI development could be more cumbersome because every command will need to be typed separately.
+- Wrapping everything in MSBuild might require more effort, but makes it easy to develop via CLI or IDE's.
