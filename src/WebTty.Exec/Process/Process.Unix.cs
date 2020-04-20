@@ -4,7 +4,6 @@ using System.ComponentModel;
 using WebTty.Exec.Native;
 using WebTty.Exec.Utils;
 using WebTty.Exec.IO;
-using System.Linq;
 
 namespace WebTty.Exec
 {
@@ -178,6 +177,9 @@ namespace WebTty.Exec
             }
         }
 
+        // TODO: restructure this function
+        // For example posix_spawn from chromium seems to have a
+        // maintainable flow: https://chromium.googlesource.com/native_client/nacl-newlib/+/bf66148d14c7fca26b9198dd5dc81e743893bb66/newlib/libc/posix/posix_spawn.c
         private static unsafe int ForkAndExec(
             string filename, string[] argv, string[] envp,
             string cwd, bool useTty, bool redirectStdin,
@@ -262,8 +264,9 @@ namespace WebTty.Exec
                         if (Libc.ioctl(slaveFd, Libc.TIOCSCTTY) == -1)
                         {
                             success = false;
-                            throw new Exception("Error trying to become controlling tty");
+                            Error.ThrowExceptionForLastError();
                         }
+
                         inFd = outFd = errFd = slaveFd;
                     }
                     else
@@ -273,9 +276,23 @@ namespace WebTty.Exec
                         errFd = stdErrFds[WRITE_END_OF_PIPE];
                     }
 
-                    while (Error.ShouldRetrySyscall(Libc.dup2(inFd, Libc.STDIN_FILENO)) && Libc.errno == Libc.EBUSY);
-                    while (Error.ShouldRetrySyscall(Libc.dup2(outFd, Libc.STDOUT_FILENO)) && Libc.errno == Libc.EBUSY);
-                    while (Error.ShouldRetrySyscall(Libc.dup2(errFd, Libc.STDERR_FILENO)) && Libc.errno == Libc.EBUSY);
+                    // TODO: this code is just horrible and the likely hood introducing bugs here is quite high.
+                    // I should refactor this asap. But first I would love to get some more tests in place that
+                    // could catch any regressions..
+                    if (redirectStdin)
+                    {
+                        while (Error.ShouldRetrySyscall(Libc.dup2(inFd, Libc.STDIN_FILENO)) && Libc.errno == Libc.EBUSY);
+                    }
+
+                    if (redirectStdout)
+                    {
+                        while (Error.ShouldRetrySyscall(Libc.dup2(outFd, Libc.STDOUT_FILENO)) && Libc.errno == Libc.EBUSY);
+                    }
+
+                    if (redirectStderr)
+                    {
+                        while (Error.ShouldRetrySyscall(Libc.dup2(errFd, Libc.STDERR_FILENO)) && Libc.errno == Libc.EBUSY);
+                    }
 
                     if (!string.IsNullOrEmpty(cwd))
                     {
