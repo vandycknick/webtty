@@ -36,6 +36,7 @@ namespace WebTty.Api.Common
             {
                 RedirectStdin = true,
                 RedirectStdout = true,
+                RedirectStderr = true,
 
                 Sys = new SysProcAttr
                 {
