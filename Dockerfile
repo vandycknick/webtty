@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1.201 AS dev
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1.202 AS dev
 
 WORKDIR /app
 
@@ -41,7 +41,7 @@ FROM dev as build
 
 RUN make package
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.1-alpine as runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.4-alpine as runtime
 ENV ASPNETCORE_URLS=""
 WORKDIR /webtty
 

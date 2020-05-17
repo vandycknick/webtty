@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="MessagePack" Version="2.1.90" />
+    <PackageReference Include="MessagePack" Version="2.1.115" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsPackaging)' == 'true'">
