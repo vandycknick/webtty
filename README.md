@@ -75,7 +75,7 @@ Additional Arguments:
 
 ### Prerequisites
 - [.NET Core SDK](https://dotnet.microsoft.com/download) >= 3.1.101
-- [Node.js](https://nodejs.org/en/) 12.x
+- [Node.js](https://nodejs.org/en/) 14.x
 - [Yarn](https://classic.yarnpkg.com/en/docs/install) >= 1.22.0
 
 ### Setup
