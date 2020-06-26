@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using WebTty.Api.Common;
 using WebTty.Api.Infrastructure;
 using WebTty.Api.Models;
-using WebTty.Schema.Messages;
+using WebTty.Schema;
 using Microsoft.Extensions.Configuration;
 
 namespace WebTty.Api

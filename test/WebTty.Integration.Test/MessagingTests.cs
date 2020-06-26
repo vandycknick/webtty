@@ -9,7 +9,7 @@ using WebTty.Api.Infrastructure.Protocol;
 using WebTty.Api.Models;
 using WebTty.Exec;
 using WebTty.Integration.Test.Helpers;
-using WebTty.Schema.Messages;
+using WebTty.Schema;
 using Xunit;
 
 namespace WebTty.Integration.Test

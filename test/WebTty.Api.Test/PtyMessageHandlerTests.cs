@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using WebTty.Api.Common;
 using WebTty.Api.Models;
-using WebTty.Schema.Messages;
+using WebTty.Schema;
 using WebTty.Exec;
 using Xunit;
 

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using WebTty.Api.Common;
 using WebTty.Api.Infrastructure;
-using WebTty.Schema.Messages;
+using WebTty.Schema;
 
 namespace WebTty.Api
 {

@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace WebTty.Schema.Messages
+namespace WebTty.Schema
 {
     [DataContract]
     public readonly struct ErrorReply

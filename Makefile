@@ -158,7 +158,7 @@ schema:
 	dotnet build $(shell pwd)/src/WebTty.Schema/WebTty.Schema.csproj
 	dotnet run -p tools/jsonschema/jsonschema.csproj -- \
 		--assembly $(shell pwd)/.build/bin/WebTty.Schema/Debug/netstandard2.0/WebTty.Schema.dll \
-		--namespace WebTty.Schema.Messages \
+		--namespace WebTty.Schema \
 		--output $(shell pwd)/$(WEBTTY_CLIENT)/.tmp/messages
 
 checksum:
