@@ -44,6 +44,7 @@ class Deferred<T> implements Promise<T> {
         this._resolveSelf(val)
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     public reject(reason: any): void {
         this._rejectSelf(reason)
     }

@@ -107,7 +107,7 @@ namespace WebTty.Hosting
                 .UseSerilog((context, configuration) =>
                 {
                     configuration
-                        .MinimumLevel.Is(LogEventLevel.Information)
+                        .MinimumLevel.Is(LogEventLevel.Debug)
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                         .Enrich.FromLogContext()
                         .WriteTo.Console();

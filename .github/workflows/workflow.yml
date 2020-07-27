@@ -48,5 +48,4 @@ jobs:
     - name: Push packages
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       run: |
-        rm artifacts/WebTty.Exec.*.nupkg
         dotnet nuget push artifacts/**/*.nupkg --api-key ${{ secrets.FEEDZ_IO_TOKEN }} --source https://f.feedz.io/nvd/webtty/nuget/index.json --skip-duplicate

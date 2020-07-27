@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Moq;
 using WebTty.Api.Infrastructure.Protocol;
 using WebTty.Api.Models;
-using WebTty.Exec;
+using BtrExec;
 using WebTty.Integration.Test.Helpers;
 using WebTty.Schema;
 using Xunit;

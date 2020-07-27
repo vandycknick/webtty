@@ -17,22 +17,30 @@ namespace WebTty.Api.Infrastructure.Core
         {
             await foreach (var message in context.ReadMessages().WithCancellation(token))
             {
-                var reply = await _handler.Handle(message, context.Token);
-
-                if (reply == null) continue;
-
-                if (ReflectionHelpers.IsIAsyncEnumerable(reply.GetType()))
+                try
                 {
-                    _ = Task.Factory.StartNew(
-                        function: () => ConsumeEnumerable((IAsyncEnumerable<object>)reply, context, token).ConfigureAwait(false),
-                        cancellationToken: context.Token,
-                        creationOptions: TaskCreationOptions.LongRunning,
-                        scheduler: TaskScheduler.Default
-                    );
+                    var reply = await _handler.Handle(message, context.Token);
+
+                    if (reply == null) continue;
+
+                    if (ReflectionHelpers.IsIAsyncEnumerable(reply.GetType()))
+                    {
+                        _ = Task.Factory.StartNew(
+                            function: () => ConsumeEnumerable((IAsyncEnumerable<object>)reply, context, token).ConfigureAwait(false),
+                            cancellationToken: context.Token,
+                            creationOptions: TaskCreationOptions.LongRunning,
+                            scheduler: TaskScheduler.Default
+                        );
+                    }
+                    else
+                    {
+                        await context.WriteMessageAsync(reply);
+                    }
                 }
-                else
+                catch (System.Exception ex)
                 {
-                    await context.WriteMessageAsync(reply);
+                    // TODO: use logger here
+                    System.Console.WriteLine(ex);
                 }
             }
         }

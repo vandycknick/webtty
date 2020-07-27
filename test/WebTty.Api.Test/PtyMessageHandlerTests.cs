@@ -6,7 +6,7 @@ using Moq;
 using WebTty.Api.Common;
 using WebTty.Api.Models;
 using WebTty.Schema;
-using WebTty.Exec;
+using BtrExec;
 using Xunit;
 
 namespace WebTty.Api.Test

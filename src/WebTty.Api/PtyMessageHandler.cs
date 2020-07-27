@@ -42,7 +42,6 @@ namespace WebTty.Api
         {
             var result = await HandleInternal(message, token);
             return result.Success ? result.Message : result.Error;
-
             async Task<MessageResult> HandleInternal(object message, CancellationToken token)
             {
                 _logger.LogDebug("Incoming message {messageName}", message.GetType().Name);

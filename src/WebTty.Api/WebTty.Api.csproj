@@ -7,14 +7,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="MessagePack" Version="2.1.143" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(IsPackaging)' == 'true'">
-    <PackageReference Include="WebTty.Exec" Version="1.0.0-build.*" Pack="true" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(IsPackaging)' == 'false'">
-    <ProjectReference Include="..\WebTty.Exec\WebTty.Exec.csproj" />
+    <PackageReference Include="BtrExec" Version="0.2.0" />
   </ItemGroup>
 
   <ItemGroup>

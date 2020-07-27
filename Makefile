@@ -5,7 +5,6 @@ ARTIFACTS 		:= $(shell pwd)/artifacts
 BUILD			:= $(shell pwd)/.build
 TEMP			:= $(shell pwd)/.tmp
 CONFIGURATION	:= Release
-WEBTTY_EXEC		:= src/WebTty.Exec/WebTty.Exec.csproj
 WEBTTY_CLIENT	:= src/WebTty.Hosting/Client
 CLI_PROJECT		:= src/webtty/webtty.csproj
 CLI_TOOL		:= webtty
@@ -31,7 +30,7 @@ setup: restore schema
 default:
 	$(MAKE) package
 
-package: restore package-exec
+package: restore
 	dotnet restore --force-evaluate
 	dotnet build -c $(CONFIGURATION) /property:IsPackaging=True $(CLI_PROJECT)
 
@@ -42,12 +41,6 @@ package: restore package-exec
 		--no-build \
 		--output $(ARTIFACTS) \
 		--include-symbols
-
-package-exec:
-	dotnet pack $(WEBTTY_EXEC) \
-		--configuration $(CONFIGURATION) \
-		--output $(ARTIFACTS) \
-		--version-suffix build.$(shell date "+%Y%m%d%H%M%S")
 
 package-all: package
 	@echo ""
@@ -124,11 +117,6 @@ test:
 		/property:CoverletOutputFormat=lcov \
 		/property:CoverletOutput=$(TEMP)/webtty.test/lcov.info
 
-	dotnet test test/WebTty.Exec.Test/WebTty.Exec.Test.csproj -c Release \
-		/property:CollectCoverage=true \
-		/property:CoverletOutputFormat=lcov \
-		/property:CoverletOutput=$(TEMP)/webtty.exec.test/lcov.info
-
 	dotnet test test/WebTty.Api.Test/WebTty.Api.Test.csproj -c Release \
 		/property:CollectCoverage=true \
 		/property:CoverletOutputFormat=lcov \
@@ -163,4 +151,4 @@ schema:
 
 checksum:
 	@rm -f $(ARTIFACTS)/SHA256SUMS.txt
-	@cd $(ARTIFACTS) && find . -type f ! -name "WebTty.Exec.*.nupkg" -print0 | xargs -0 sha256sum | tee SHA256SUMS.txt
+	@cd $(ARTIFACTS) && find . -type f -print0 | xargs -0 sha256sum | tee SHA256SUMS.txt

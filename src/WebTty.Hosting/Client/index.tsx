@@ -7,6 +7,7 @@ import configureApp from "app/configureApp"
 const store = configureApp()
 
 const renderApp = (): void => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const App = require("./app/App").default
     render(
         <Provider store={store}>

@@ -12,14 +12,14 @@ export const useDebouncedValue = <T>(value: T, delay: number): T => {
     return debouncedValue
 }
 
-export const useDebounce = <T extends Function>(
+export const useDebounce = <T extends (...args: never[]) => void>(
     handle: T,
     delay: number,
 ): T => {
     const wrappedHandle = useMemo(() => {
         let timeout: number
 
-        const wrapped = (...args: unknown[]): void => {
+        const wrapped = (...args: never[]): void => {
             window.clearTimeout(timeout)
             timeout = window.setTimeout(() => {
                 timeout = -1

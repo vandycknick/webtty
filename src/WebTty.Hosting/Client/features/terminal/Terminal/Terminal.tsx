@@ -27,7 +27,7 @@ const Terminal: FunctionComponent<TerminalProps> = ({
     theme,
 }) => {
     const wrapperRef = useRef<HTMLDivElement>()
-    const onFit = useCallback(terminal.resize, [terminal])
+    const onFit = useCallback(() => terminal.resize(), [terminal])
 
     useEffect(() => {
         const wrapper = wrapperRef.current

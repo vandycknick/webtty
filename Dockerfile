@@ -21,7 +21,6 @@ RUN cd src/WebTty.Hosting/Client && yarn --frozen-lockfile --production=false &&
 
 # Copy the main source project files
 COPY src/*/*.csproj ./
-COPY src/WebTty.Exec/Directory.Build.props src/WebTty.Exec/Sources.targets ./src/WebTty.Exec/
 RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
 
 # Copy the test project files
