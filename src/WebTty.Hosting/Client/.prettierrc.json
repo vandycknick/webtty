@@ -7,11 +7,9 @@
   "semi": false,
   "overrides": [
     {
-      "files": [
-        ".*",
-        "*.json"
-      ],
+      "files": [".*", "*.json"],
       "options": {
+        "tabWidth": 2,
         "parser": "json"
       }
     }
